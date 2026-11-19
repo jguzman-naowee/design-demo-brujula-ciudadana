@@ -429,3 +429,32 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .uso__a b{color:var(--bc-ink)}
 @media (max-width:720px){.pn-tr{grid-template-columns:1fr 1fr}.pn-th{display:none}.pn-tr span[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--bc-mut)}.pn-fila{flex-wrap:wrap}.pn-bt{width:100%}.pn-bt button{flex:1}}
 .pn-fechas .bc-chip{color:var(--bc-ink)}.pn-fechas .bc-chip[aria-pressed=true]{color:#fff}
+
+/* Comunicados y notas (ola 4). */
+.cm-lista{display:flex;flex-direction:column;gap:12px}
+.cm-it{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:20px;background:var(--bc-surface)}
+.cm-it__h{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cm-it__h time{font-size:12px;color:var(--bc-mut)}
+.cm-it h3{margin:4px 0 0;font-size:16px}
+.cm-cuerpo{margin:0;font-size:14px;color:#3E4157}
+.cm-meta{margin:0;font-size:12px;color:var(--bc-mut)}
+.cm-dev{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#FEECEB;font-size:13px;color:#7A271A}
+.cm-dev .nwt-icon{font-size:16px}
+.cm-acc{gap:8px;margin-top:4px}
+.cm-txt{width:100%;min-height:72px;padding:10px 12px;border:1px solid #D5D7E2;border-radius:12px;background:#fff;font:inherit;font-size:14px;color:var(--bc-ink);resize:vertical}
+.cm-form .ez-campo input{min-height:44px;padding:0 12px;border:1px solid #D5D7E2;border-radius:12px;font:inherit;font-size:15px}
+.cm-n{display:flex;align-items:center;gap:8px;font-size:14px}
+.cm-n .nwt-icon{font-size:18px;color:var(--bc-acc)}
+.cm-x{margin:0;font-size:13px}
+.cz-bell{position:relative;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;margin-left:auto;margin-right:8px;border-radius:50%;background:#fff;color:var(--bc-ink);text-decoration:none}
+.cz-bell .nwt-icon{font-size:22px}
+.cz-bell i{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bc-acc);color:#fff;font-size:11px;font-style:normal;font-weight:700;display:grid;place-items:center}
+.cz-avisos{display:flex;flex-direction:column;gap:16px}
+.cz-av{display:flex;flex-direction:column;gap:6px;padding:16px}
+.cz-av--n{box-shadow:inset 4px 0 0 var(--bc-acc)}
+.cz-av__h{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--bc-mut)}
+.cz-av__h b{color:var(--bc-ink)}
+.cz-av__h time{margin-left:auto}
+.cz-av h2{margin:0;font-size:16px}
+.cz-av p{margin:0;font-size:14px;color:#3E4157}
+.nota .nota__t{font-weight:500;white-space:pre-wrap}

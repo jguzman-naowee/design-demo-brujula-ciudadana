@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v6";
+  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v7";
   const qs = new URLSearchParams(location.search);
   const ROL = ["ciudadano", "conector", "entidad"].includes(qs.get("rol")) ? qs.get("rol") : "ciudadano";
   document.body.classList.add("rol-" + ROL);
@@ -191,7 +191,7 @@
     '<div class="cz-cuerpo">' + (o.eyebrow ? '<div class="cz-hd"><div class="cz-hd__t"><h1>' + esc(o.titulo) + '</h1><span class="cz-qk">' + esc(o.eyebrow) + "</span></div>" + (o.icono ? '<div class="cz-ico">' + ic(o.icono) + "</div>" : "") + "</div>" : (o.icono ? '<div class="cz-ico">' + ic(o.icono) + "</div>" : "")) +
     (o.ejemplo ? '<div class="bc-ejemplo">' + btn("Completar con datos de ejemplo", { v: "quiet", size: "small", icon: "sparkles", act: "ejemplo", a: { "data-k": o.ejemplo } }) + "</div>" : "") + o.cuerpo + "</div>" +
     '<div class="cz-pie">' + (o.pie || "") + btn(o.sig || "Continuar", { act: o.act, iconEnd: o.sigIcon || "arrow-right", a: { id: "btn-sig" } }) + "</div></div>";
-  const CZ_PERM = { privacidad: ["Política de privacidad", "Necesario"], tratamiento: ["Tratar mis datos", "Necesario"], entidades: ["Compartir mi itinerario", "Para que tus entidades vean tus recursos"], comunicaciones: ["Recibir avisos", "Por tu canal preferido"] };
+  const CZ_PERM = { privacidad: ["Política de privacidad", "Necesario"], tratamiento: ["Tratar mis datos", "Necesario"], entidades: ["Compartir mi itinerario", "Para que tus entidades vean tus recursos"], comunicaciones: ["Recibir comunicados", "Los avisos de tus recursos llegan siempre"] };
   const czConsent = () => '<div class="cz-card cz-perm">' + CAT.consentimientos.map((c) => { const t = CZ_PERM[c.id] || [c.txt, c.obligatorio ? "Necesario" : ""]; return checkbox(c.id, !!D.consent[c.id], '<span class="cz-pt">' + esc(t[0]) + '</span><span class="cz-ps' + (c.obligatorio ? " req" : "") + '">' + esc(t[1]) + "</span>", "", "data-c"); }).join("") + "</div>" +
     (D.err.consent ? alerta(esc(D.err.consent), "negative") : "");
   /* Opciones únicas (documento, canal, idioma): botones que escriben en D.datos igual que el select. */
@@ -274,6 +274,17 @@
     czPedir = null; guardar(); czFiltro = "todos"; ir("#/recursos");
     toast(lleno ? (acomp.length ? "Quedáis" : "Quedas") + " en lista de espera de " + r.nombre + "." : r.modo === "Solicitud" ? ent(r.entidad).nombre + " revisará tu solicitud" + quien + "." : "Te apuntamos a " + r.nombre + quien + (proxTxt(r) ? ". Primera fecha: " + proxTxt(r) + "." : "."));
   }
+  const avisosDe = (pid) => (S.comunicados || []).filter((c) => c.estado === "Enviado" && c.destinatarios.includes(pid)).sort((a, b) => b.enviado.localeCompare(a.enviado));
+  function cAvisos() {
+    const p = yoP(); if (!p) return cBienvenida();
+    const ls = avisosDe(p.id), nuevos = ls.filter((c) => !(c.leidos || []).includes(p.id)).map((c) => c.id);
+    const html = '<div class="bc-page cz-pg cz-avisos"><a class="bc-back" href="#/inicio">← Inicio</a><div><h1>Avisos</h1><p class="cz-mp-sub">Lo que te comunican tus entidades. Los avisos de tus recursos te llegan siempre.</p></div>' +
+      (ls.length ? '<div class="cz-lista">' + ls.map((c) => { const r = c.recurso && rec(c.recurso), sl = r && S.solicitudes.find((x) => x.persona === p.id && x.recurso === r.id && x.estado === "Aprobada");
+        return '<article class="cz-card cz-av' + (nuevos.includes(c.id) ? " cz-av--n" : "") + '"><div class="cz-av__h"><b>' + esc(firmaTxt(c)) + "</b>" + (c.porRed ? "<span>vía la red</span>" : "") + "<time>" + cuando(c.enviado) + "</time></div><h2>" + esc(c.asunto) + "</h2><p>" + esc(c.cuerpo) + "</p>" + (c.clase === "aviso" && sl && c.fechaEvento ? czConf({ r, f: c.fechaEvento, s: sl }) : "") + "</article>"; }).join("") + "</div>"
+        : '<p class="cz-vacio">Todavía no tienes avisos.</p>') + "</div>";
+    if (nuevos.length) { ls.forEach((c) => { c.leidos = c.leidos || []; if (!c.leidos.includes(p.id)) c.leidos.push(p.id); }); guardar(); }
+    return html;
+  }
   function cAgenda() {
     const p = yoP(); if (!p) return cBienvenida();
     const ev = agendaDe(p.id, 14), dias = [...new Set(ev.map((o) => o.f))];
@@ -298,7 +309,7 @@
     const hdr = c ? '<div class="cz-cn">' + avatar(ini(c.nombre), "blue", "large") + '<div class="grow"><span class="cz-k">Tu conector</span><b>' + esc(c.nombre) + '</b></div><button type="button" class="cz-rb" data-act="c-contacto" aria-label="Escribir a ' + esc(c.nombre) + '">' + ic("message-circle") + '</button><button type="button" class="cz-rb acc" data-act="c-contacto" aria-label="Llamar a ' + esc(c.nombre) + '">' + ic("phone") + "</button></div>"
       : '<div class="cz-cn">' + avatar("?", "amber", "large") + '<div class="grow"><span class="cz-k">Tu conector</span><b>Te estamos asignando uno</b></div></div>';
     return '<div class="bc-page cz-pg cz-inicio">' + (S.recienCreado === p.id ? alerta("<b>Tu expediente está creado.</b> Número " + esc(p.id) + ".", "positive") : "") +
-      '<div class="cz-hola"><div><span>Hola,</span><h1>' + esc(p.nombre) + '</h1></div><a class="cz-me" href="#/privacidad" aria-label="Mi privacidad">' + avatar(ini(nom(p)), "orange", "large") + "</a></div>" +
+      '<div class="cz-hola"><div><span>Hola,</span><h1>' + esc(p.nombre) + '</h1></div>' + (() => { const n = avisosDe(p.id).filter((c) => !(c.leidos || []).includes(p.id)).length; return '<a class="cz-bell" href="#/avisos" id="mis-avisos" aria-label="Avisos' + (n ? ", " + n + " sin leer" : "") + '">' + ic("bell") + (n ? "<i>" + n + "</i>" : "") + "</a>"; })() + '<a class="cz-me" href="#/privacidad" aria-label="Mi privacidad">' + avatar(ini(nom(p)), "orange", "large") + "</a></div>" +
       '<div class="cz-dark" id="mi-conector">' + hdr + pasos.slice(0, 2).map(([i, t, d]) => '<div class="cz-pr"><span class="cz-pi">' + ic(i) + '</span><div class="grow"><b>' + esc(t) + "</b><span>" + esc(d) + "</span></div></div>").join("") + "</div>" +
       '<a class="cz-ring" href="#/mapa"><svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Mapa de Vida: ' + cn.r + " necesitan apoyo, " + cn.a + " en proceso, " + cn.v + ' estables"><circle class="cz-pista" cx="32" cy="32" r="26"/>' + arcos + '</svg><div class="grow"><b>Mi Mapa de Vida</b><div class="cz-cuentas"><span><b class="r">' + cn.r + "</b> apoyo</span><span><b class=\"a\">" + cn.a + "</b> proceso</span><span><b class=\"v\">" + cn.v + "</b> bien</span></div></div>" + ic("chevron-right") + "</a>" +
       (() => { const fs = famDe(p.id), pv = fs.filter((f) => f.verificacion === "Por verificar").length;
@@ -380,7 +391,7 @@
     const COL = { e1: "blue", e2: "teal", e3: "orange" };
     return '<div class="bc-page cz-pg cz-priv"><h1>Privacidad</h1><div class="cz-stack" id="consentimientos"><div class="cz-dark"><div class="cz-cn"><div class="grow"><b class="cz-g">Compartir mi itinerario</b><span class="cz-sub' + (on ? " on" : "") + '">' + (on ? ents.length + (ents.length > 1 ? " entidades ven" : " entidad ve") + " recurso y estado" : "Sin esto, cada entidad solo ve lo que tienes con ella") + "</span></div>" + sw("entidades", "Compartir mi itinerario con otras entidades", on) + "</div>" +
       '<div class="cz-cadena" aria-hidden="true">' + avatar(ini(nom(p)), "orange", "medium") + ents.map((e, i) => '<span class="cz-lin' + (i && !on ? " off" : "") + '"></span><span class="cz-nodo' + (i && !on ? " off" : "") + '">' + avatar(sig(ent(e).nombre), COL[e] || "blue", "medium") + "</span>").join("") + "</div></div>" +
-      '<div class="cz-card cz-aviso"><div class="grow"><b>Recibir avisos</b><span>Por tu canal preferido</span></div>' + sw("comunicaciones", "Recibir avisos sobre mi expediente", !!p.consent.comunicaciones) + "</div></div>" +
+      '<div class="cz-card cz-aviso"><div class="grow"><b>Recibir comunicados</b><span>Los avisos de tus recursos (cambios, cancelaciones) te llegan siempre</span></div>' + sw("comunicaciones", "Recibir comunicados de mis entidades", !!p.consent.comunicaciones) + "</div></div>" +
       '<div class="cz-card cz-accesos" id="accesos"><h2>' + ic("eye") + "Quién vio tus datos</h2>" + acc.map((a) => '<div class="cz-ac">' + avatar(a.quien === "Sistema" ? "SI" : sig(a.quien), a.quien === "Sistema" ? "purple" : COL[a.entidad] || "blue", "medium") + '<div class="grow"><b>' + esc(a.quien) + "</b><span>" + esc(a.para) + "</span></div><time>" + corta(a.cuando) + "</time></div>").join("") + "</div></div>";
   }
 
@@ -517,7 +528,7 @@
     const recs = S.recursos.filter((r) => r.entidad === ENT), activos = recs.filter((r) => !r.pausado);
     const hoyTxt = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" }), h = new Date().getHours();
     const cola = porAsignar.map((p) => ({ ico: ezIco(null, "user", 0), t: nom(p), s: "Autorregistro · " + fecha(p.alta), cta: "Revisar", v: "asignar", id: p.id }))
-      .concat(entrantes.map((s) => { const r = rec(s.recurso); return { ico: ezIco(r.cat), t: r.nombre, s: s.por === ENT ? "Postulada por tu entidad" : s.por === "persona" ? "Pedida por la persona" : "Derivación de " + ent(s.por).nombre, cta: "Revisar", v: "solicitudes", id: s.id }; })).concat(porVerificar().map((f) => ({ ico: ezIco(null, "users-group", 1), t: f.nombre + " " + f.apellidos, s: "Familiar de " + nom(per(f.titular)) + " · por verificar", cta: "Verificar", v: "verificar", id: f.id }))).slice(0, 5);
+      .concat(entrantes.map((s) => { const r = rec(s.recurso); return { ico: ezIco(r.cat), t: r.nombre, s: s.por === ENT ? "Postulada por tu entidad" : s.por === "persona" ? "Pedida por la persona" : "Derivación de " + ent(s.por).nombre, cta: "Revisar", v: "solicitudes", id: s.id }; })).concat(porVerificar().map((f) => ({ ico: ezIco(null, "users-group", 1), t: f.nombre + " " + f.apellidos, s: "Familiar de " + nom(per(f.titular)) + " · por verificar", cta: "Verificar", v: "verificar", id: f.id }))).concat((S.comunicados || []).filter((c) => c.estado === "Por aprobar" && c.firma.id === ENT).map((c) => ({ ico: ezIco(null, "megaphone", 2), t: c.asunto, s: "Comunicado de " + c.autorNombre + " · por aprobar", cta: "Revisar", v: "comunicados", id: c.id }))).slice(0, 5);
     const ocup = activos.filter((r) => r.cupo).slice(0, 3);
     return '<div class="bc-page stack"><div class="ez-head"><div><p class="ez-fecha">' + esc(hoyTxt[0].toUpperCase() + hoyTxt.slice(1)) + "</p><h1>" + (h < 13 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches") + '</h1></div><span class="ez-solo">' + ic("lock") + "Solo lo ve tu entidad</span></div>" +
       '<div class="kpis"><a class="ez-kpi" href="#/personas/solicitudes"><span class="ez-kpi__t">Por decidir<span class="ez-kpi__go" aria-hidden="true">' + ic("arrow-right") + '</span></span><span class="ez-kpi__n">' + (porAsignar.length + entrantes.length) + "</span></a>" +
@@ -898,6 +909,79 @@
       '<div class="pn-head">' + ezIco(r.cat) + '<div class="grow"><h1>' + esc(r.nombre) + '</h1><p class="mut">' + esc(cuandoTxt(r)) + (proxTxt(r) ? " · próxima " + esc(proxTxt(r)) : "") + "</p></div>" + (ROL === "entidad" ? btn("Editar", { v: "quiet", size: "small", icon: "edit", href: "#/recurso/" + r.id }) : "") + "</div>" +
       '<div class="nwt-tabs bc-subtabs pn-tabs"><div class="nwt-tabs__list" role="tablist" aria-label="Panel del recurso">' + tabs.map(([k, t]) => '<a class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" href="' + base + "/" + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + "</span></span></a>").join("") + "</div></div>" + cuerpo + "</div>";
   }
+  /* ── Comunicados (spec 05): aviso atado a una fecha o comunicado general, con registro ── */
+  let cm = null, cmDev = null;
+  const PLANT = {
+    recordatorio: ["Recordatorio", (r, f) => "Te recordamos " + r.nombre + " el " + fCorta(f) + (r.tiempo.hora ? " a las " + r.tiempo.hora : "") + ". Si no puedes venir, avísanos para dar tu plaza a otra persona."],
+    hora: ["Cambio de hora", (r, f) => r.nombre + " del " + fCorta(f) + " cambia de hora: empieza a las 18:00."],
+    cancelacion: ["Cancelación", (r, f) => r.nombre + " del " + fCorta(f) + " se cancela. Te avisamos de la próxima fecha."]
+  };
+  const CM_EST = { "Enviado": "positive", "Por aprobar": "warning", "Devuelto": "negative" };
+  const firmaTxt = (c) => c.firma.tipo === "red" ? ((S.redes || []).find((x) => x.id === c.firma.id) || { nombre: "La red" }).nombre : ent(c.firma.id).nombre;
+  /* A quién llega: los casos protegidos y quien no autorizó comunicaciones no reciben comunicados generales. */
+  function destinatarios(o) {
+    let ids = [];
+    if (o.filtro === "inscritos") ids = S.solicitudes.filter((x) => x.recurso === o.recurso && x.estado === "Aprobada").map((x) => x.persona);
+    else if (o.filtro === "espera") ids = S.solicitudes.filter((x) => x.recurso === o.recurso && x.estado === "En lista de espera").map((x) => x.persona);
+    else if (o.filtro === "noasistieron") ids = (S.usos || []).filter((u) => u.recurso === o.recurso && u.estado === "No vino").map((u) => u.persona);
+    else { const es = o.entidades || []; ids = S.personas.filter((p) => es.includes(p.entidad)).map((p) => p.id).concat(S.solicitudes.filter((x) => es.includes(rec(x.recurso).entidad) && ACTIVAS.includes(x.estado)).map((x) => x.persona)); }
+    let ps = [...new Set(ids)].map((id) => S.personas.find((p) => p.id === id)).filter(Boolean);
+    if (o.clase === "comunicado") ps = ps.filter((p) => !p.protegido && p.consent && p.consent.comunicaciones);
+    return ps;
+  }
+  function cmAuto(force) { const r = cm.base.recurso && rec(cm.base.recurso); if (!r || cm.clase !== "aviso" || !cm.fecha || (!cm.auto && !force)) return; cm.asunto = PLANT[cm.plantilla][0] + " · " + r.nombre; cm.cuerpo = PLANT[cm.plantilla][1](r, cm.fecha); cm.auto = true; }
+  /* Editor común: panel del recurso, comunicados de la entidad y de la red. */
+  function cmForm(base) {
+    if (!cm || cm.key !== base.key) { cm = { key: base.key, base, clase: base.recurso ? "aviso" : "comunicado", plantilla: "recordatorio", fecha: base.recurso ? proximas(rec(base.recurso), 1)[0] : null, asunto: "", cuerpo: "", canales: ["app", "correo"], filtro: base.filtros[0][0], firma: base.firmas ? base.firmas[0][0] : "entidad:" + ENT, auto: true }; cmAuto(true); }
+    cm.base = base;
+    const r = base.recurso && rec(base.recurso), aviso = cm.clase === "aviso";
+    const dest = destinatarios({ filtro: aviso ? "inscritos" : cm.filtro, recurso: base.recurso, entidades: base.entidades, clase: cm.clase });
+    const chip = (act, v, t, on) => '<button type="button" class="bc-chip" aria-pressed="' + on + '" data-act="' + act + '" data-v="' + esc(v) + '">' + esc(t) + "</button>";
+    const grupo = (t, html) => '<div class="fam-g"><span class="fam-l">' + t + '</span><div class="fam-chips">' + html + "</div></div>";
+    const aprob = ROL === "conector" && !aviso;
+    return card('<div class="stack cm-form"><h2 class="pn-h">Nuevo mensaje</h2>' +
+      (r ? grupo("Qué envías", chip("cm-clase", "aviso", "Aviso de una fecha", aviso) + chip("cm-clase", "comunicado", "Comunicado", !aviso)) : "") +
+      (aviso ? grupo("Qué avisas", Object.entries(PLANT).map(([k, [t]]) => chip("cm-plant", k, t, cm.plantilla === k)).join("")) + grupo("Qué fecha", proximas(r, 4).map((f) => chip("cm-fecha", f, fCorta(f), cm.fecha === f)).join(""))
+        : grupo("A quién", base.filtros.map(([k, t]) => chip("cm-filtro", k, t, cm.filtro === k)).join(""))) +
+      (base.firmas ? grupo("Firma", base.firmas.map(([k, t]) => chip("cm-firma", k, t, cm.firma === k)).join("")) : "") +
+      '<label class="ez-campo"><span>Asunto</span><input data-cm="asunto" value="' + esc(cm.asunto) + '"></label><label class="ez-campo"><span>Mensaje</span><textarea class="cm-txt" data-cm="cuerpo" rows="3">' + esc(cm.cuerpo) + "</textarea></label>" +
+      grupo("Canales", [["app", "App"], ["correo", "Correo"]].map(([k, t]) => chip("cm-canal", k, t, cm.canales.includes(k))).join("")) +
+      '<div class="cm-n">' + ic("users") + "<span>Llegará a <b>" + dest.length + (dest.length === 1 ? " persona" : " personas") + "</b>" + (aviso ? " inscritas" : " · sin casos protegidos ni quien no autorizó comunicados") + "</span></div>" +
+      (aprob ? '<p class="mut cm-x">Los comunicados del conector los aprueba la coordinación antes de salir. Los avisos de una fecha salen directo.</p>' : "") +
+      '<div class="row fam-pie">' + btn(aprob ? "Enviar a aprobación" : "Enviar", { icon: "megaphone", act: "cm-enviar", a: { id: "btn-cm" } }) + "</div></div>", { id: "cm-nuevo" });
+  }
+  function cmLista(lista, conAprob) {
+    if (!lista.length) return "";
+    return '<div class="cm-lista">' + lista.slice().sort((a, b) => (b.enviado || b.creado).localeCompare(a.enviado || a.creado)).map((c) => '<article class="cm-it" data-cm-id="' + c.id + '"><div class="cm-it__h">' + tag(c.clase === "aviso" ? "Aviso" : "Comunicado", c.clase === "aviso" ? "informative" : "neutral", "small") + tag(c.estado, CM_EST[c.estado], "small") + '<span class="grow"></span><time>' + cuando(c.enviado || c.creado) + "</time></div>" +
+      "<h3>" + esc(c.asunto) + '</h3><p class="cm-cuerpo">' + esc(c.cuerpo) + '</p><p class="cm-meta">Firma ' + esc(firmaTxt(c)) + (c.porRed ? " · enviado por la red" : "") + " · escribió " + esc(c.autorNombre || "—") + (c.aprobadoPor ? " · aprobó " + esc(c.aprobadoPor) : "") + (c.recurso ? " · " + esc(rec(c.recurso).nombre) : "") + (c.estado === "Enviado" ? " · " + c.destinatarios.length + " destinatarios por " + c.canales.join(" y ") + " · leído por " + (c.leidos || []).length : "") + "</p>" +
+      (c.comentario ? '<div class="cm-dev">' + ic("message-circle") + "<span><b>Devuelto:</b> " + esc(c.comentario) + "</span></div>" : "") +
+      (conAprob && c.estado === "Por aprobar" ? (cmDev === c.id ? '<div class="stack-s"><label class="ez-campo"><span>Qué tiene que cambiar</span><textarea id="dev-' + c.id + '" class="cm-txt" rows="2"></textarea></label><div class="row fam-pie">' + btn("Cancelar", { v: "quiet", size: "small", act: "cm-dev-no" }) + btn("Devolver", { size: "small", theme: "negative", act: "cm-devolver", a: { "data-id": c.id } }) + "</div></div>"
+        : '<div class="row cm-acc">' + btn("Aprobar y enviar", { size: "small", icon: "check", act: "cm-aprobar", a: { "data-id": c.id } }) + btn("Devolver", { size: "small", v: "quiet", act: "cm-dev-ab", a: { "data-id": c.id } }) + "</div>") : "") + "</article>").join("") + "</div>";
+  }
+  /* Pestaña Comunicados del panel: su historial y el editor de avisos. */
+  function pnComunicados(r) {
+    return cmLista((S.comunicados || []).filter((c) => c.recurso === r.id), ROL === "entidad") +
+      cmForm({ key: "r:" + r.id, recurso: r.id, entidades: [ENT], filtros: [["inscritos", "Inscritos"], ["espera", "Lista de espera"], ["noasistieron", "No vinieron"]] });
+  }
+  function eComunicados(tab) {
+    const mios = (S.comunicados || []).filter((c) => c.firma.tipo === "entidad" && c.firma.id === ENT), pend = mios.filter((c) => c.estado === "Por aprobar");
+    const T = tab || (pend.length ? "aprobar" : "enviados");
+    const tabs = [["aprobar", "Por aprobar", pend.length], ["enviados", "Enviados", mios.filter((c) => c.estado !== "Por aprobar").length], ["nuevo", "Redactar"]];
+    const cuerpo = T === "aprobar" ? cmLista(pend, true) || card('<p class="mut">Nada por aprobar.</p>') : T === "nuevo" ? cmForm({ key: "ent", entidades: [ENT], filtros: [["todas", "Todas mis personas"]] }) : cmLista(mios.filter((c) => c.estado !== "Por aprobar")) || card('<p class="mut">Todavía no enviaste nada.</p>');
+    return '<div class="bc-page stack"><div class="ez-head"><h1>Comunicados</h1></div><div class="nwt-tabs bc-subtabs pn-tabs"><div class="nwt-tabs__list" role="tablist" aria-label="Comunicados">' + tabs.map(([k, t, n]) => '<a class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" href="#/comunicados/' + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + (n ? " · " + n : "") + "</span></span></a>").join("") + "</div></div>" + cuerpo + "</div>";
+  }
+  /* ── Perfil (spec 06): notas internas con autor y fecha; solo las ve la entidad que las escribió ── */
+  const notasDe = (p) => Array.isArray(p.notas) ? p.notas : p.notas ? [{ texto: p.notas, autor: p.conector || "entidad", entidad: p.entidad, fecha: (p.alta || hoy()) + " 00:00" }] : [];
+  const autorTxt = (a) => a === "entidad" ? "Coordinación" : (con(a) || { nombre: a }).nombre;
+  function notasCard(p) {
+    const ns = notasDe(p).filter((n) => n.entidad === ENT).slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+    return card('<div class="kz-card-h"><h2>Notas internas</h2>' + tag("Solo tu entidad", "neutral", "small") + "</div>" + (ns.length ? ns.map((n) => '<div class="kz-it nota"><div class="grow"><b class="nota__t">' + esc(n.texto) + "</b><span>" + esc(autorTxt(n.autor)) + " · " + cuando(n.fecha) + "</span></div></div>").join("") : '<p class="kz-vacio">Sin notas. Lo que el formulario no pide va aquí.</p>') +
+      '<label class="sr" for="f-nota-' + esc(p.id) + '">Nueva nota</label><textarea id="f-nota-' + esc(p.id) + '" class="cm-txt" rows="2" placeholder="Escribe una nota interna…"></textarea><div class="kz-post">' + btn("Agregar nota", { v: "quiet", size: "small", icon: "plus", act: "nota-add", a: { "data-p": p.id } }) + "</div>", { id: "notas", cls: "kz-card" });
+  }
+  function comCard(p) {
+    const ls = (S.comunicados || []).filter((c) => c.estado === "Enviado" && c.destinatarios.includes(p.id)).sort((a, b) => b.enviado.localeCompare(a.enviado)).slice(0, 4);
+    return card('<div class="kz-card-h"><h2>Comunicados recibidos</h2><span class="kz-mut">' + ls.length + "</span></div>" + (ls.length ? ls.map((c) => '<div class="kz-it"><div class="grow"><b>' + esc(c.asunto) + "</b><span>" + esc(firmaTxt(c)) + " · " + cuando(c.enviado) + ((c.leidos || []).includes(p.id) ? " · leído" : " · sin leer") + "</span></div></div>").join("") : '<p class="kz-vacio">No ha recibido comunicados.</p>'), { id: "comunicados", cls: "kz-card" });
+  }
   function kMisRecursos() {
     const rs = S.recursos.filter((r) => r.entidad === ENT && !r.pausado).sort((a, b) => (proximas(a, 1)[0] || "9").localeCompare(proximas(b, 1)[0] || "9"));
     return '<div class="bc-page kz-page stack"><div class="kz-head"><div><span class="kz-eyebrow">' + esc(ent(ENT).nombre) + "</span><h1>Recursos de mi entidad</h1></div></div>" +
@@ -1030,7 +1114,7 @@
     const perfil = '<details class="kz-card kz-perfil" open><summary><h2>Perfil y consentimientos</h2>' + ic("chevron-down") + '</summary><div class="bc-kv">' + [["Fecha de nacimiento", fecha(p.nac)], ["Documento nacional", p.docTipo + (p.doc ? " · " + p.doc : "")], ["Teléfono", p.tel], ["Email", p.email || "—"], ["Ubicación", p.municipio + " · " + p.cp], ["Idioma", p.idioma], ["Canal preferido", p.canal], ["Alta", fecha(p.alta) + " · " + ent(p.entidad).nombre]].map(([k, v]) => "<div><span>" + k + "</span><b>" + esc(v) + "</b></div>").join("") + "</div>" +
       CAT.consentimientos.map((c) => '<div class="kz-it">' + ic(p.consent[c.id] ? "check-circle" : "close-circle") + '<span class="grow">' + esc(c.txt) + "</span>" + tag(p.consent[c.id] ? "Sí" : "No", p.consent[c.id] ? "positive" : "neutral") + "</div>").join("") + "</details>";
     const gS = ROL === "entidad" ? spGrupo(p) : null, sols = gS && (gS.ab.length || gS.de.length) ? '<article class="sp-card' + (solCol.has(p.id) ? "" : " sp-card--abierta") + '" id="solicitudes" aria-label="Solicitudes a tu entidad"><div class="sp-row sp-row--fija"><button type="button" class="sp-row__tg" data-act="sol-plegar" data-p="' + esc(p.id) + '" aria-expanded="' + !solCol.has(p.id) + '" aria-controls="b-' + esc(p.id) + '"><span class="sp-row__n"><b>Solicitudes a tu entidad</b><small>' + (gS.ab.length ? gS.ab.length + " por decidir" : "Todo decidido") + '</small></span></button><button type="button" class="sp-row__ch" data-act="sol-plegar" data-p="' + esc(p.id) + '" aria-expanded="' + !solCol.has(p.id) + '" aria-label="' + (solCol.has(p.id) ? "Desplegar" : "Plegar") + '">' + ic("chevron-down") + '</button></div><div class="sp-card__b" id="b-' + esc(p.id) + '">' + spLinea(gS) + spSols(gS) + "</div></article>" : "";
-    return '<div class="kz-ficha">' + hero + asig + sols + '<h2 class="kz-sec">Expediente</h2><div class="kz-body"><div class="kz-col"><div style="order:1">' + mapa + '</div><div style="order:5">' + perfil + '</div></div><div class="kz-col"><div style="order:2">' + itin + '</div><div style="order:2">' + famCard(p) + '</div><div style="order:3">' + otras + '</div><div style="order:4">' + accesos + "</div></div></div></div>";
+    return '<div class="kz-ficha">' + hero + asig + sols + '<h2 class="kz-sec">Expediente</h2><div class="kz-body"><div class="kz-col"><div style="order:1">' + mapa + '</div><div style="order:5">' + perfil + '</div></div><div class="kz-col"><div style="order:2">' + itin + '</div><div style="order:2">' + famCard(p) + '</div><div style="order:2">' + notasCard(p) + comCard(p) + '</div><div style="order:3">' + otras + '</div><div style="order:4">' + accesos + "</div></div></div></div>";
   }
 
   /* Postular es una pantalla propia (no un modal): elegir el recurso y confirmar en la barra inferior. */
@@ -1088,7 +1172,7 @@
     ciudadano: () => yoP() ? [["inicio", "Mi expediente", "home", "#/inicio"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["agenda", "Agenda", "calendar", "#/agenda"], ["buscar", "Buscar ayuda", "search", "#/buscar"], ["mapa", "Mi Mapa de Vida", "clipboard-list", "#/mapa"], ["privacidad", "Privacidad", "shield-check", "#/privacidad"]]
       : [["inicio", "Inicio", "home", "#/inicio"], ["registro", "Registrarme", "user-plus", "#/registro/1"]],
     conector: () => [["personas", "Mis personas", "users", "#/personas"], ["registrar", "Registrar persona", "user-plus", "#/registrar/1"], ["mis-recursos", "Recursos de mi entidad", "calendar", "#/mis-recursos"], ["red", "Recursos de entidades", "building", "#/red"]],
-    entidad: () => { const mis = S.personas.filter((p) => p.entidad === ENT).length, asig = S.personas.filter((p) => p.entidad === ENT && !p.conector).length, sol = entrantesDe().length; return [["resumen", "Resumen", "home", "#/resumen"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["conectores", "Conectores", "handshake", "#/conectores"], ["personas", "Personas", "users", "#/personas", 0, [["personas", "Mis personas", "#/personas", mis, true], ["solicitudes", "Recursos solicitados", "#/personas/solicitudes", sol], ["asignar", "Asignar conector", "#/personas/asignar", asig], ["verificar", "Por verificar", "#/personas/verificar", porVerificar().length]]]]; }
+    entidad: () => { const mis = S.personas.filter((p) => p.entidad === ENT).length, asig = S.personas.filter((p) => p.entidad === ENT && !p.conector).length, sol = entrantesDe().length; return [["resumen", "Resumen", "home", "#/resumen"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["conectores", "Conectores", "handshake", "#/conectores"], ["comunicados", "Comunicados", "megaphone", "#/comunicados", (S.comunicados || []).filter((c) => c.estado === "Por aprobar" && c.firma.tipo === "entidad" && c.firma.id === ENT).length], ["personas", "Personas", "users", "#/personas", 0, [["personas", "Mis personas", "#/personas", mis, true], ["solicitudes", "Recursos solicitados", "#/personas/solicitudes", sol], ["asignar", "Asignar conector", "#/personas/asignar", asig], ["verificar", "Por verificar", "#/personas/verificar", porVerificar().length]]]]; }
   };
   const CORTO = { "Recursos de mi entidad": "Mi entidad", "Agenda": "Agenda", "Mi expediente": "Inicio", "Mis recursos": "Recursos", "Mi Mapa de Vida": "Mapa", "Mis personas": "Personas", "Registrar persona": "Registrar", "Recursos de entidades": "Recursos", "Buscar ayuda": "Buscar" };
   const QUIEN = {
@@ -1127,6 +1211,8 @@
   };
   RUTAS.ciudadano.unshift([/^#\/familia$/, () => ["inicio", cFamilia()]], [/^#\/familia\/nuevo$/, () => ["inicio", famNuevo(S.ciudadano, "#/familia")]]);
   ["conector", "entidad"].forEach((r) => RUTAS[r].unshift([/^#\/persona\/([^/]+)\/familiar$/, (m) => ["personas", famNuevo(decodeURIComponent(m[1]), "#/persona/" + m[1])]]));
+  RUTAS.ciudadano.unshift([/^#\/avisos$/, () => ["inicio", cAvisos()]]);
+  RUTAS.entidad.unshift([/^#\/comunicados(?:\/([a-z]+))?$/, (m) => ["comunicados", eComunicados(m[1])]]);
   const PANEL = [/^#\/panel\/([^/]+)(?:\/([a-z]+))?(?:\/(\d{4}-\d{2}-\d{2}))?$/, (m) => [ROL === "entidad" ? "recursos" : "mis-recursos", pRecurso(m[1], m[2], m[3])]];
   RUTAS.conector.unshift(PANEL, [/^#\/mis-recursos$/, () => ["mis-recursos", kMisRecursos()]]);
   RUTAS.entidad.unshift(PANEL);
@@ -1208,7 +1294,7 @@
 
   /* ── acciones ── */
   function crearPersona(extra) {
-    const p = Object.assign({ id: nuevoId(), alta: hoy(), consent: {}, mapa: Object.assign({}, D.mapa), notas: D.notas || "", email: "", doc: "" }, D.datos, extra);
+    const p = Object.assign({ id: nuevoId(), alta: hoy(), consent: {}, mapa: Object.assign({}, D.mapa), notas: D.notas ? [{ texto: D.notas, autor: ROL === "conector" ? YO : "entidad", entidad: ENT, fecha: ahora() }] : [], email: "", doc: "" }, D.datos, extra);
     if (Array.isArray(p.idioma)) p.idioma = p.idioma.join(", ");
     CAT.consentimientos.forEach((c) => { p.consent[c.id] = !!D.consent[c.id]; });
     S.personas.push(p); return p;
@@ -1275,7 +1361,7 @@
       S.accesos.push({ persona: p.id, quien: "Sistema", entidad: p.entidad, cuando: ahora(), para: "Alta por autorregistro" });
       S.ciudadano = p.id; S.recienCreado = p.id; guardar(); D = null; ir("#/inicio");
     },
-    consent: (b) => { const p = yoP(), c = b.dataset.c; p.consent[c] = !p.consent[c]; guardar(); toast(p.consent[c] ? "Autorizado. Puedes retirarlo cuando quieras." : "Retirado. Las otras entidades ya no ven tu itinerario."); render(); },
+    consent: (b) => { const p = yoP(), c = b.dataset.c; p.consent[c] = !p.consent[c]; guardar(); toast(c === "comunicaciones" ? (p.consent[c] ? "Recibirás los comunicados de tus entidades." : "Ya no recibirás comunicados. Los avisos de tus recursos te siguen llegando.") : p.consent[c] ? "Autorizado. Puedes retirarlo cuando quieras." : "Retirado. Las otras entidades ya no ven tu itinerario."); render(); },
     "c-set": (b) => {
       const k = b.dataset.k, g = b.closest('[role="radiogroup"]'); D.datos[k] = b.dataset.v; delete D.err[k];
       g.querySelectorAll("[data-k]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
@@ -1355,7 +1441,7 @@
     "e-prev": () => { const o = REC_TABS.map((x) => x[0]), k = o.indexOf(D.tab || "catalogo"); D.tab = o[Math.max(k - 1, 0)]; ezRe("#btn-sig"); },
     "e-tab": (b) => { D.tab = b.dataset.v; ezRe('[data-act="e-tab"][data-v="' + b.dataset.v + '"]'); },
     "e-sel": (b) => { ezSel = b.dataset.id; ezRe('[data-act="e-sel"][data-id="' + b.dataset.id + '"]'); },
-    "e-ir": (b) => { ezSel = b.dataset.id; ir({ solicitudes: "#/personas/solicitudes", verificar: "#/personas/verificar" }[b.dataset.v] || "#/personas/asignar"); },
+    "e-ir": (b) => { ezSel = b.dataset.id; ir({ solicitudes: "#/personas/solicitudes", verificar: "#/personas/verificar", comunicados: "#/comunicados/aprobar" }[b.dataset.v] || "#/personas/asignar"); },
     "e-cat": (b) => { const x = D.datos, k = KAT(x.catalogo); x.cat = b.dataset.v; if (k && k.cat !== x.cat) x.catalogo = ""; delete D.err.cat; ezRe('[data-act="e-cat"][data-v="' + b.dataset.v + '"]'); },
     "e-kat": (b) => { const x = D.datos, k = KAT(b.dataset.v), previo = KAT(x.catalogo); x.catalogo = b.dataset.v; if (k) { if (!x.nombre || (previo && x.nombre === previo.n)) x.nombre = k.n; aplicarFmt(x, k.f); } delete D.err.catalogo; delete D.err.nombre; ezRe('[data-act="e-kat"][data-v="' + b.dataset.v + '"]'); },
     "e-fmt": (b) => { aplicarFmt(D.datos, b.dataset.v); delete D.err.formato; ezRe('[data-act="e-fmt"][data-v="' + b.dataset.v + '"]'); },
@@ -1415,6 +1501,31 @@
       proximas(r, 4, s.desde && s.desde > hoy() ? s.desde : undefined).forEach((f) => { if (asisDe(p.id, r.id, f) || new Date() > limiteConf(r, f)) return; S.asistencias.push({ id: "a" + Date.now() + f, recurso: r.id, fecha: f, persona: p.id, estado: "Confirmada", acompanantes: (s.acompanantes || []).slice(), cuando: ahora() }); n++; });
       guardar(); toast(n ? "Confirmaste " + n + (n === 1 ? " fecha" : " fechas") + " de " + r.nombre + "." : "Ya tenías confirmadas las próximas fechas."); render();
     },
+    "cm-clase": (b) => { cm.clase = b.dataset.v; if (cm.clase === "aviso") cmAuto(true); else if (cm.auto) { cm.asunto = ""; cm.cuerpo = ""; } render(); },
+    "cm-plant": (b) => { cm.plantilla = b.dataset.v; cmAuto(true); render(); },
+    "cm-fecha": (b) => { cm.fecha = b.dataset.v; cmAuto(); render(); },
+    "cm-filtro": (b) => { cm.filtro = b.dataset.v; render(); },
+    "cm-firma": (b) => { cm.firma = b.dataset.v; render(); },
+    "cm-canal": (b) => { const k = b.dataset.v; cm.canales = cm.canales.includes(k) ? cm.canales.filter((x) => x !== k) : cm.canales.concat(k); render(); },
+    "cm-enviar": () => {
+      const bs = cm.base, aviso = cm.clase === "aviso";
+      if (!cm.asunto.trim() || !cm.cuerpo.trim()) return toast("Escribe el asunto y el mensaje.");
+      if (!cm.canales.length) return toast("Elige al menos un canal.");
+      const dest = destinatarios({ filtro: aviso ? "inscritos" : cm.filtro, recurso: bs.recurso, entidades: bs.entidades, clase: cm.clase }), [ft, fid] = cm.firma.split(":");
+      const c = { id: "m" + Date.now(), clase: cm.clase, recurso: bs.recurso || null, fechaEvento: aviso ? cm.fecha : null, filtro: aviso ? "inscritos" : cm.filtro, autor: ROL === "conector" ? YO : ROL, autorNombre: QUIEN[ROL]()[0], firma: { tipo: ft, id: fid }, porRed: ROL === "red", destinatarios: dest.map((p) => p.id), canales: cm.canales.slice(), asunto: cm.asunto.trim(), cuerpo: cm.cuerpo.trim(), creado: ahora(), leidos: [] };
+      if (ROL === "conector" && !aviso) c.estado = "Por aprobar"; else { c.estado = "Enviado"; c.enviado = ahora(); }
+      S.comunicados.push(c); cm = null; guardar(); render();
+      toast(c.estado === "Enviado" ? "Enviado a " + dest.length + (dest.length === 1 ? " persona" : " personas") + " por " + c.canales.join(" y ") + "." : "Queda por aprobar: la coordinación lo revisa antes de enviarlo.");
+    },
+    "cm-aprobar": (b) => {
+      const c = S.comunicados.find((x) => x.id === b.dataset.id);
+      if (!c.destinatarios.length) c.destinatarios = destinatarios({ filtro: c.filtro || "inscritos", recurso: c.recurso, entidades: [ENT], clase: c.clase }).map((p) => p.id);
+      c.estado = "Enviado"; c.enviado = ahora(); c.aprobadoPor = "Coordinación"; guardar(); toast("Aprobado y enviado a " + c.destinatarios.length + (c.destinatarios.length === 1 ? " persona." : " personas.")); render();
+    },
+    "cm-dev-ab": (b) => { cmDev = b.dataset.id; render(); },
+    "cm-dev-no": () => { cmDev = null; render(); },
+    "cm-devolver": (b) => { const c = S.comunicados.find((x) => x.id === b.dataset.id), t = (document.getElementById("dev-" + c.id) || {}).value || ""; if (!t.trim()) return toast("Dile qué tiene que cambiar."); c.estado = "Devuelto"; c.comentario = t.trim(); cmDev = null; guardar(); toast("Devuelto a " + c.autorNombre + " con tu comentario."); render(); },
+    "nota-add": (b) => { const p = per(b.dataset.p), t = (document.getElementById("f-nota-" + p.id) || {}).value || ""; if (!t.trim()) return toast("Escribe la nota."); p.notas = notasDe(p).concat({ texto: t.trim(), autor: ROL === "conector" ? YO : "entidad", entidad: ENT, fecha: ahora() }); guardar(); toast("Nota guardada. Solo la ve tu entidad."); render(); },
     "aprobar-ab": (b) => { popOp = false; aprobando = b.dataset.s; render(); },
     "aprobar-no": () => { aprobando = null; render(); },
     "aprobar-ok": (b, e) => {
@@ -1498,6 +1609,7 @@
     }
     if (t.hasAttribute("data-notas")) D.notas = t.value;
     if (t.hasAttribute("data-busca2")) { qL = t.value; const pos = t.selectionStart; render(); const n = $("#f-busca2"); n.focus(); n.setSelectionRange(pos, pos); return; }
+    if (t.hasAttribute("data-cm") && cm) { cm[t.dataset.cm] = t.value; cm.auto = false; return; }
     if (t.hasAttribute("data-pos-desde")) { postDesde = t.value; return; }
     if (t.hasAttribute("data-czq")) { czQ = t.value; const pos = t.selectionStart; render(); const n = $("#f-czq"); n.focus(); n.setSelectionRange(pos, pos); return; }
     if (t.hasAttribute("data-busca")) { busca = t.value; const pos = t.selectionStart; render(); const n = $("#f-busca"); n.focus(); n.setSelectionRange(pos, pos); }

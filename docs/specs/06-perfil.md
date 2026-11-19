@@ -36,3 +36,8 @@ notas: [{ texto, autor: "c1", entidad: "e1", fecha: "2026-11-19 10:30" }]
 | Ciudadano | Perfil: Mi familia y avisos recibidos. No ve las notas |
 | Conector | Ficha: notas internas (agregar y ver), familia, comunicados |
 | Entidad | Ficha mínima: notas de su propia entidad |
+
+## En la demo (ola 4)
+
+Notas internas y comunicados recibidos en la ficha completa (conector y coordinación). La nota del
+registro del conector entra como primera nota, con su autor.

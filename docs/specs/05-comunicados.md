@@ -65,3 +65,11 @@ comunicados: [{
 
 - ¿El gestor de red necesita aprobación del responsable para escribir a nombre de una entidad?
   Propuesta: no, pero la entidad lo ve en su historial con «enviado por la red».
+
+## En la demo (ola 4)
+
+- El editor es uno solo: pestaña Comunicados del panel del recurso (aviso de una fecha o
+  comunicado a inscritos, lista de espera o quienes no vinieron) y Comunicados de la entidad
+  (comunicado a todas sus personas). La red lo usa con selector de firma (ola 5).
+- El ciudadano los ve en Avisos (campana del inicio, con los no leídos); abrirlos los marca como
+  leídos, y un aviso de fecha trae «Voy / No voy».

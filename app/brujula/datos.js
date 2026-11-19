@@ -224,7 +224,7 @@ window.BC_SEMILLA = () => {
   const B1 = (s) => window.BC_DERIVAR(Object.fromEntries(window.BC_CATALOGO.autoevaluacion.map((q, i) => [q.id, "var"[+s[i]]])));
   const C = (e, c) => ({ privacidad: true, tratamiento: true, entidades: e, comunicaciones: c });
   const F = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
-  const P = (o) => Object.assign({ email: "", docTipo: "En trámite", doc: "", idioma: "Español", canal: "WhatsApp", municipio: "Madrid", estado: "En seguimiento", mapaTipo: "completo", notas: "" }, o);
+  const P = (o) => Object.assign({ email: "", docTipo: "En trámite", doc: "", idioma: "Español", canal: "WhatsApp", municipio: "Madrid", estado: "En seguimiento", mapaTipo: "completo", notas: [] }, o);
   const S0 = {
     entidades: [
       { id: "e1", cp: "28026", nombre: "Asociación Puentes", zona: "Usera · Madrid", tipo: "Asociación" },
@@ -260,7 +260,7 @@ window.BC_SEMILLA = () => {
       { id: "r19", entidad: "e1", nombre: "Feria de empleo", catalogo: "propio", formato: "evento", cat: "Empleo", modo: "Inscripción", urg: "Normal", cupo: 40, base: 38, tiempo: { forma: "unico", inicio: F(9), hora: "10:00", duracion: 240 } }
     ],
     personas: [
-      P({ id: "BC-2026-0141", nombre: "Yasmina", apellidos: "Haddad", nac: "1991-04-12", tel: "+34 611 204 118", cp: "28026", idioma: "Árabe", origen: "conector", entidad: "e1", conector: "c1", alta: "2026-10-02", consent: C(true, true), mapa: M("2101120010110011") }),
+      P({ id: "BC-2026-0141", notas: [{ texto: "Prefiere que la llamen por la tarde: por las mañanas trabaja limpiando casas, sin contrato.", autor: "c1", entidad: "e1", fecha: "2026-11-10 16:25" }], nombre: "Yasmina", apellidos: "Haddad", nac: "1991-04-12", tel: "+34 611 204 118", cp: "28026", idioma: "Árabe", origen: "conector", entidad: "e1", conector: "c1", alta: "2026-10-02", consent: C(true, true), mapa: M("2101120010110011") }),
       P({ id: "BC-2026-0152", nombre: "Carlos", apellidos: "Mendoza Ríos", nac: "1987-09-30", tel: "+34 622 918 330", cp: "28041", origen: "conector", entidad: "e1", conector: "c1", alta: "2026-10-09", consent: C(false, true), mapa: M("1210100021101000") }),
       P({ id: "BC-2026-0167", nombre: "Fatou", apellidos: "Diallo", nac: "1996-01-21", tel: "+34 633 552 907", cp: "28026", idioma: "Francés", canal: "Teléfono", origen: "conector", entidad: "e1", conector: "c2", alta: "2026-10-15", consent: C(true, false), mapa: M("1121011100120001") }),
       P({ id: "BC-2026-0170", nombre: "Andrés", apellidos: "Villalba", nac: "1979-06-03", tel: "+34 644 801 225", cp: "28019", docTipo: "Sí", origen: "conector", entidad: "e1", conector: "c3", alta: "2026-08-28", estado: "Cerrado", consent: C(true, true), mapa: M("0000000000000000") }),
@@ -301,6 +301,12 @@ window.BC_SEMILLA = () => {
     familias: [
       { id: "f1", nombre: "Mis hijos", titular: "BC-2026-0141", miembros: ["BC-2026-0142", "BC-2026-0143"] },
       { id: "f2", nombre: "Familia Diallo", titular: "BC-2026-0167", miembros: ["BC-2026-0168"] }
+    ],
+    /* Avisos y comunicados (spec 05): quién escribió, quién aprobó, a nombre de quién y a quién llegó. */
+    comunicados: [
+      { id: "m1", clase: "aviso", recurso: "r3", fechaEvento: F(1), autor: "c1", autorNombre: "Lucía Romero", firma: { tipo: "entidad", id: "e1" }, destinatarios: ["BC-2026-0141", "BC-2026-0167"], canales: ["app", "correo"], asunto: "Cambio de hora · Banco de alimentos", cuerpo: "Mañana el banco de alimentos abre a las 12:00 en lugar de las 11:00.", estado: "Enviado", creado: F(-1) + " 09:10", enviado: F(-1) + " 09:10", leidos: ["BC-2026-0167"] },
+      { id: "m2", clase: "comunicado", recurso: null, autor: "entidad", autorNombre: "Coordinación", firma: { tipo: "entidad", id: "e1" }, destinatarios: ["BC-2026-0141", "BC-2026-0152", "BC-2026-0188"], canales: ["app", "correo"], asunto: "Cerramos el 8 de diciembre", cuerpo: "Por el festivo, Asociación Puentes no abre el lunes 8. Los recursos de ese día pasan al martes 9.", estado: "Enviado", creado: F(-3) + " 12:00", enviado: F(-3) + " 12:00", leidos: ["BC-2026-0152"] },
+      { id: "m3", clase: "comunicado", recurso: "r14", autor: "c2", autorNombre: "Samir El Idrissi", firma: { tipo: "entidad", id: "e1" }, destinatarios: [], canales: ["app"], asunto: "Traed delantal al taller de cocina", cuerpo: "Para la primera sesión del taller de cocina intercultural, cada persona trae un delantal. Las especias las ponemos nosotros.", estado: "Por aprobar", creado: F(0) + " 08:40", leidos: [], filtro: "inscritos" }
     ],
     accesos: [
       { persona: "BC-2026-0141", quien: "Lucía Romero", entidad: "e1", cuando: "2026-11-10 16:20", para: "Seguimiento del caso" },
