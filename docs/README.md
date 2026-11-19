@@ -10,15 +10,15 @@
 
 | # | Spec | Estado | Depende de |
 |---|---|---|---|
-| 01 | [Red de entidades](specs/01-red-de-entidades.md) | Base | — |
-| 02 | [Recurso como evento](specs/02-recurso-como-evento.md) | Base | — |
-| 03 | [Familia](specs/03-familia.md) | Base | 02 |
-| 04 | [Panel del recurso](specs/04-panel-del-recurso.md) | Base | 02, 03 |
-| 05 | [Comunicados](specs/05-comunicados.md) | Base | 01, 04 |
-| 06 | [Perfil](specs/06-perfil.md) | Base | 03, 05 |
-| 07 | [Catálogo estándar](specs/07-catalogo.md) | Base · datos en `datos.js` | 02 |
+| 01 | [Red de entidades](specs/01-red-de-entidades.md) | En la demo | — |
+| 02 | [Recurso como evento](specs/02-recurso-como-evento.md) | En la demo | — |
+| 03 | [Familia](specs/03-familia.md) | En la demo | 02 |
+| 04 | [Panel del recurso](specs/04-panel-del-recurso.md) | En la demo | 02, 03 |
+| 05 | [Comunicados](specs/05-comunicados.md) | En la demo | 01, 04 |
+| 06 | [Perfil](specs/06-perfil.md) | En la demo | 03, 05 |
+| 07 | [Catálogo estándar](specs/07-catalogo.md) | En la demo | 02 |
 
-**Base** = decisiones tomadas con Jorge el 19-nov-2026, sin validar con el cliente.
+**En la demo** = implementada en las olas 1–5 (19-nov-2026); las decisiones siguen sin validar con el cliente. Cada spec cierra con «En la demo» cuando la implementación simplificó algo.
 Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
 
 ## Planes

@@ -1,11 +1,13 @@
 (() => {
   "use strict";
-  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v7";
+  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v8";
   const qs = new URLSearchParams(location.search);
-  const ROL = ["ciudadano", "conector", "entidad"].includes(qs.get("rol")) ? qs.get("rol") : "ciudadano";
+  const ROL = ["ciudadano", "conector", "entidad", "red"].includes(qs.get("rol")) ? qs.get("rol") : "ciudadano";
   document.body.classList.add("rol-" + ROL);
+  if (ROL === "red") document.body.classList.add("rol-entidad");
   /* Sesión simulada por rol: no hay cambio de usuario dentro de la app. */
-  const ENT = "e1", YO = "c1";
+  /* Entidad activa: quien trabaja en varias elige en cuál (spec 01); la red no tiene entidad propia. */
+  let ENT = "e1"; const YO = "c1";
 
   let S, D = null;
   const guardar = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sin almacenamiento */ } };
@@ -17,6 +19,8 @@
   /* Recursos y solicitudes que la semilla ganó después: se añaden por id sin tocar lo ya decidido. */
   if (S) { const sem = window.BC_SEMILLA(); ["recursos", "solicitudes", "familiares", "familias", "usos", "asistencias", "comunicados", "redes", "gestoresRed"].forEach((k) => (sem[k] || []).forEach((x) => { if (!S[k]) S[k] = []; if (!x.id || !S[k].some((y) => y.id === x.id)) S[k].push(x); })); }
   if (qs.has("sinsesion") && S.ciudadano) { S.ciudadano = null; guardar(); }
+  const MIS_ENT = ROL === "conector" ? ((S.conectores.find((c) => c.id === YO) || {}).entidades || ["e1"]) : ROL === "entidad" ? ["e1", "e2"] : [];
+  try { const g = localStorage.getItem("brujula.ent." + ROL); if (MIS_ENT.includes(g)) ENT = g; } catch (e) { /* sin almacenamiento */ }
   window.DEMO = { restablecer() { sembrar(); D = null; } };
 
   /* ── utilidades ── */
@@ -423,7 +427,7 @@
       '<span class="kz-row__t"><b>' + esc(nom(p)) + '</b><span class="kz-sub' + (corto || pend ? " kz-hot" : "") + '">' + esc(sub) + "</span></span>" + kzBarra(p.mapa) + "</a>";
   };
   function kPersonas() {
-    const mias = S.personas.filter((p) => p.conector === YO), ids = new Set(mias.map((p) => p.id));
+    const mias = S.personas.filter((p) => p.conector === YO && p.entidad === ENT), ids = new Set(mias.map((p) => p.id));
     const porAsignar = S.personas.filter((p) => p.entidad === ENT && !p.conector).length;
     const pend = S.solicitudes.filter((s) => s.estado === "Pendiente" && ids.has(s.persona)).length;
     const apoyo = mias.filter((p) => Object.values(p.mapa || {}).includes("r")).length;
@@ -560,11 +564,11 @@
       '<span data-l="Conector">' + (p.conector ? esc(con(p.conector).nombre) : '<span class="bc-pend">Por asignar</span>') + "</span><span>" + mini(p.mapa) + '</span><span class="ez-redc" data-l="En la red">' + red(p) + "</span><span class=\"ez-est\">" + tag(p.estado, EST[p.estado] || "neutral") + sAb(p) + "</span></a>";
     return '<div class="bc-page stack"><div class="ez-head"><h1>Mis personas <span class="ez-n">' + mias.length + "</span></h1></div>" + ptabs("mis") +
       '<div class="row ez-filtros" role="group" aria-label="Filtro">' + '<div class="ez-popw"><button type="button" class="bc-chip" id="btn-fcon" data-act="pop-con" aria-haspopup="true" aria-expanded="' + conOp + '" aria-pressed="' + (fCons.length > 0) + '">' + ic("user") + "<span>Conector" + (fCons.length ? " · " + fCons.length : "") + ' ▾</span></button>' +
-        (conOp ? '<div class="ez-pop ez-pop--f" role="group" aria-label="Filtrar por conector">' + S.conectores.filter((c) => c.entidad === ENT).map((c, ci) => '<label class="ez-pop__ck"><input type="checkbox" data-fcon="' + c.id + '"' + (fCons.includes(c.id) ? " checked" : "") + ">" + (c.foto ? '<img class="ez-foto ez-foto--xs" src="' + esc(c.foto) + '" alt="" width="28" height="28">' : '<span class="ez-ini ez-t' + (ci % 4) + '" aria-hidden="true">' + esc(ini(c.nombre)) + "</span>") + "<span>" + esc(c.nombre) + "</span><em>" + mias.filter((p) => p.conector === c.id).length + "</em></label>").join("") + (fCons.length ? '<button type="button" class="ez-pop__i" data-act="quitar-con">Quitar filtro</button>' : "") + "</div>" : "") + "</div>" + [["todas", "Todas"], ["asignar", "Sin conector"], ["apoyo", "Necesitan apoyo"], ["otras", "En otras entidades"]].map(([k, t]) => '<button type="button" class="bc-chip" data-act="filtro" data-v="' + k + '" aria-pressed="' + (filtro === k) + '">' + t + (k === "todas" ? "" : " · " + mias.filter(F[k]).length) + "</button>").join("") + '<div class="nwt-searchbox ez-busca" nwt-size="medium"><div class="nwt-input-box"><div class="nwt-input-box__content"><div class="nwt-input-box__control"><div class="nwt-searchbox__container">' + ic("search") + '<label class="sr" for="f-busca">Buscar persona</label><input id="f-busca" type="text" class="nwt-searchbox__input" data-busca placeholder="Nombre o número" value="' + esc(busca) + '"></div></div></div></div></div>' + "</div>" +
+        (conOp ? '<div class="ez-pop ez-pop--f" role="group" aria-label="Filtrar por conector">' + S.conectores.filter((c) => (c.entidades || [c.entidad]).includes(ENT)).map((c, ci) => '<label class="ez-pop__ck"><input type="checkbox" data-fcon="' + c.id + '"' + (fCons.includes(c.id) ? " checked" : "") + ">" + (c.foto ? '<img class="ez-foto ez-foto--xs" src="' + esc(c.foto) + '" alt="" width="28" height="28">' : '<span class="ez-ini ez-t' + (ci % 4) + '" aria-hidden="true">' + esc(ini(c.nombre)) + "</span>") + "<span>" + esc(c.nombre) + "</span><em>" + mias.filter((p) => p.conector === c.id).length + "</em></label>").join("") + (fCons.length ? '<button type="button" class="ez-pop__i" data-act="quitar-con">Quitar filtro</button>' : "") + "</div>" : "") + "</div>" + [["todas", "Todas"], ["asignar", "Sin conector"], ["apoyo", "Necesitan apoyo"], ["otras", "En otras entidades"]].map(([k, t]) => '<button type="button" class="bc-chip" data-act="filtro" data-v="' + k + '" aria-pressed="' + (filtro === k) + '">' + t + (k === "todas" ? "" : " · " + mias.filter(F[k]).length) + "</button>").join("") + '<div class="nwt-searchbox ez-busca" nwt-size="medium"><div class="nwt-input-box"><div class="nwt-input-box__content"><div class="nwt-input-box__control"><div class="nwt-searchbox__container">' + ic("search") + '<label class="sr" for="f-busca">Buscar persona</label><input id="f-busca" type="text" class="nwt-searchbox__input" data-busca placeholder="Nombre o número" value="' + esc(busca) + '"></div></div></div></div></div>' + "</div>" +
       '<div class="bc-tbl"><div class="bc-tr bc-th ez-tr"><span>Persona</span><span>Conector</span><span>Mapa de Vida</span><span>En la red</span><span>Estado</span></div>' + (lista.length ? lista.map(ezFila).join("") : '<div class="bc-tr ez-tr"><span class="mut">Sin resultados.</span></div>') + "</div></div>";
   }
   function eConectores() {
-    const cs = S.conectores.filter((c) => c.entidad === ENT);
+    const cs = S.conectores.filter((c) => (c.entidades || [c.entidad]).includes(ENT));
     const CAP = 12; /* La semilla no trae capacidad por conector: se fija una de referencia para el anillo. */
     const dat = (c) => { const ps = S.personas.filter((p) => p.conector === c.id), act = ps.filter((p) => p.estado !== "Cerrado"); return { ps, act, pend: ps.reduce((n, p) => n + solsDe(p.id).filter((x) => x.estado === "Pendiente").length, 0), hoyOn: /^hoy/i.test(c.ultima) }; };
     const foto = (c, i, tam) => c.foto ? '<img class="ez-foto' + (tam === "s" ? " ez-foto--s" : "") + '" src="' + esc(c.foto) + '" alt="Foto de ' + esc(c.nombre) + '" width="64" height="64">' : avatar(ini(c.nombre), EZ_AV[i % 4], tam === "s" ? "medium" : "large");
@@ -591,7 +595,7 @@
     }
     return '<div class="bc-page stack"><div class="ez-head"><h1>Conectores <span class="ez-n">' + cs.length + "</span></h1>" + vista + "</div>" + cuerpo + "</div>";
   }
-  const selConector = (pid) => '<label class="sr" for="sel-' + esc(pid) + '">Conector</label>' + selNative("sel-" + esc(pid), S.conectores.filter((c) => c.entidad === ENT).map((c) => '<option value="' + c.id + '">' + esc(c.nombre) + "</option>").join(""));
+  const selConector = (pid) => '<label class="sr" for="sel-' + esc(pid) + '">Conector</label>' + selNative("sel-" + esc(pid), S.conectores.filter((c) => (c.entidades || [c.entidad]).includes(ENT)).map((c) => '<option value="' + c.id + '">' + esc(c.nombre) + "</option>").join(""));
   function fichaMinima(p, r) {
     const rel = CAT.dimensiones.filter((d) => d.cat === r.cat && p.mapa[d.id]), TX = { r: "apoyo", a: "en proceso", v: "estable" };
     const peor = rel.some((d) => p.mapa[d.id] === "r") ? "r" : rel.some((d) => p.mapa[d.id] === "a") ? "a" : "";
@@ -619,7 +623,7 @@
       const p = per(cur.id), rojas = rojasDe(p);
       det = card('<div class="ez-det"><div class="ez-det__h">' + avatar(ini(nom(p)), "amber", "large") + '<div class="grow"><p class="ez-sub">' + esc(p.id) + " · " + fecha(p.alta) + '</p><h2><a class="bc-plain" href="#/persona/' + esc(p.id) + '">' + esc(nom(p)) + "</a></h2>" + mini(p.mapa) + "</div>" + btn("Ver perfil completo", { v: "quiet", href: "#/persona/" + encodeURIComponent(p.id) }) + "</div>" +
         '<div class="ez-cells"><div class="ez-cel"><span>Zona</span><b>' + esc(p.municipio + " · " + p.cp) + '</b></div><div class="ez-cel"><span>Contacto</span><b>' + esc(p.canal + " · " + p.idioma) + '</b></div><div class="ez-cel' + (rojas.length ? " ez-cel--r" : "") + '"><span>Necesita apoyo</span><b>' + (rojas.length ? esc(rojas.join(", ")) : "Nada urgente") + "</b></div></div>" +
-        '<div class="ez-con"><h3>Conectores recomendados</h3><ul class="ez-conl">' + S.conectores.filter((c) => c.entidad === ENT).sort((x, y) => S.personas.filter((q) => q.conector === x.id).length - S.personas.filter((q) => q.conector === y.id).length).map((c, ci) => '<li class="ez-conr"><span class="ez-cr">' + (c.foto ? '<img class="ez-foto ez-foto--m" src="' + esc(c.foto) + '" alt="" width="44" height="44">' : '<span class="ez-ini ez-ini--m ez-t' + (ci % 4) + '" aria-hidden="true">' + esc(ini(c.nombre)) + "</span>") + '<span class="ez-cr__t"><b>' + esc(c.nombre) + (ci === 0 ? ' <span class="ez-menos">Menos carga</span>' : "") + "</b><span>" + esc(c.rol) + " · " + (n1 => n1 + (n1 === 1 ? " persona" : " personas"))(S.personas.filter((x) => x.conector === c.id).length) + "</span></span></span>" + btn("Asignar", { size: "small", act: "asignar-a", a: { "data-p": p.id, "data-c": c.id, id: "btn-asignar-" + c.id } }) + "</li>").join("") + "</ul></div>" +
+        '<div class="ez-con"><h3>Conectores recomendados</h3><ul class="ez-conl">' + S.conectores.filter((c) => (c.entidades || [c.entidad]).includes(ENT)).sort((x, y) => S.personas.filter((q) => q.conector === x.id).length - S.personas.filter((q) => q.conector === y.id).length).map((c, ci) => '<li class="ez-conr"><span class="ez-cr">' + (c.foto ? '<img class="ez-foto ez-foto--m" src="' + esc(c.foto) + '" alt="" width="44" height="44">' : '<span class="ez-ini ez-ini--m ez-t' + (ci % 4) + '" aria-hidden="true">' + esc(ini(c.nombre)) + "</span>") + '<span class="ez-cr__t"><b>' + esc(c.nombre) + (ci === 0 ? ' <span class="ez-menos">Menos carga</span>' : "") + "</b><span>" + esc(c.rol) + " · " + (n1 => n1 + (n1 === 1 ? " persona" : " personas"))(S.personas.filter((x) => x.conector === c.id).length) + "</span></span></span>" + btn("Asignar", { size: "small", act: "asignar-a", a: { "data-p": p.id, "data-c": c.id, id: "btn-asignar-" + c.id } }) + "</li>").join("") + "</ul></div>" +
         "</div>", { cls: "ez-detcard", a: { "data-asignar": p.id } });
     }
     return '<div class="bc-page stack"><h1>Asignar conector</h1>' + ptabs(vista) + barra + '<div class="ez-band"><div class="ez-izq"><h2 class="ez-lh">Personas</h2><div class="ez-lista">' + lista + '</div></div><div class="ez-der">' + det + "</div></div></div>";
@@ -910,7 +914,7 @@
       '<div class="nwt-tabs bc-subtabs pn-tabs"><div class="nwt-tabs__list" role="tablist" aria-label="Panel del recurso">' + tabs.map(([k, t]) => '<a class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" href="' + base + "/" + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + "</span></span></a>").join("") + "</div></div>" + cuerpo + "</div>";
   }
   /* ── Comunicados (spec 05): aviso atado a una fecha o comunicado general, con registro ── */
-  let cm = null, cmDev = null;
+  let cm = null, cmDev = null, cmFirma0 = null;
   const PLANT = {
     recordatorio: ["Recordatorio", (r, f) => "Te recordamos " + r.nombre + " el " + fCorta(f) + (r.tiempo.hora ? " a las " + r.tiempo.hora : "") + ". Si no puedes venir, avísanos para dar tu plaza a otra persona."],
     hora: ["Cambio de hora", (r, f) => r.nombre + " del " + fCorta(f) + " cambia de hora: empieza a las 18:00."],
@@ -924,7 +928,7 @@
     if (o.filtro === "inscritos") ids = S.solicitudes.filter((x) => x.recurso === o.recurso && x.estado === "Aprobada").map((x) => x.persona);
     else if (o.filtro === "espera") ids = S.solicitudes.filter((x) => x.recurso === o.recurso && x.estado === "En lista de espera").map((x) => x.persona);
     else if (o.filtro === "noasistieron") ids = (S.usos || []).filter((u) => u.recurso === o.recurso && u.estado === "No vino").map((u) => u.persona);
-    else { const es = o.entidades || []; ids = S.personas.filter((p) => es.includes(p.entidad)).map((p) => p.id).concat(S.solicitudes.filter((x) => es.includes(rec(x.recurso).entidad) && ACTIVAS.includes(x.estado)).map((x) => x.persona)); }
+    else { const es = o.filtro && o.filtro.indexOf("ent:") === 0 ? [o.filtro.slice(4)] : o.entidades || []; ids = S.personas.filter((p) => es.includes(p.entidad)).map((p) => p.id).concat(S.solicitudes.filter((x) => es.includes(rec(x.recurso).entidad) && ACTIVAS.includes(x.estado)).map((x) => x.persona)); }
     let ps = [...new Set(ids)].map((id) => S.personas.find((p) => p.id === id)).filter(Boolean);
     if (o.clase === "comunicado") ps = ps.filter((p) => !p.protegido && p.consent && p.consent.comunicaciones);
     return ps;
@@ -932,14 +936,15 @@
   function cmAuto(force) { const r = cm.base.recurso && rec(cm.base.recurso); if (!r || cm.clase !== "aviso" || !cm.fecha || (!cm.auto && !force)) return; cm.asunto = PLANT[cm.plantilla][0] + " · " + r.nombre; cm.cuerpo = PLANT[cm.plantilla][1](r, cm.fecha); cm.auto = true; }
   /* Editor común: panel del recurso, comunicados de la entidad y de la red. */
   function cmForm(base) {
-    if (!cm || cm.key !== base.key) { cm = { key: base.key, base, clase: base.recurso ? "aviso" : "comunicado", plantilla: "recordatorio", fecha: base.recurso ? proximas(rec(base.recurso), 1)[0] : null, asunto: "", cuerpo: "", canales: ["app", "correo"], filtro: base.filtros[0][0], firma: base.firmas ? base.firmas[0][0] : "entidad:" + ENT, auto: true }; cmAuto(true); }
+    if (!cm || cm.key !== base.key) { cm = { key: base.key, base, clase: base.recurso ? "aviso" : "comunicado", plantilla: "recordatorio", fecha: base.recurso ? proximas(rec(base.recurso), 1)[0] : null, asunto: "", cuerpo: "", canales: ["app", "correo"], filtro: base.filtros[0][0], firma: base.firmas ? base.firmas[0][0] : "entidad:" + ENT, auto: true };
+      if (cmFirma0 && base.firmas && base.firmas.some((f) => f[0] === cmFirma0)) { cm.firma = cmFirma0; cm.filtro = "ent:" + cmFirma0.split(":")[1]; } cmFirma0 = null; cmAuto(true); }
     cm.base = base;
     const r = base.recurso && rec(base.recurso), aviso = cm.clase === "aviso";
     const dest = destinatarios({ filtro: aviso ? "inscritos" : cm.filtro, recurso: base.recurso, entidades: base.entidades, clase: cm.clase });
     const chip = (act, v, t, on) => '<button type="button" class="bc-chip" aria-pressed="' + on + '" data-act="' + act + '" data-v="' + esc(v) + '">' + esc(t) + "</button>";
     const grupo = (t, html) => '<div class="fam-g"><span class="fam-l">' + t + '</span><div class="fam-chips">' + html + "</div></div>";
     const aprob = ROL === "conector" && !aviso;
-    return card('<div class="stack cm-form"><h2 class="pn-h">Nuevo mensaje</h2>' +
+    return card('<div class="stack cm-form"><h2 class="pn-h">Nuevo mensaje</h2>' + (!aviso && !cm.asunto ? '<div class="bc-ejemplo">' + btn("Completar con un ejemplo", { v: "quiet", size: "small", icon: "sparkles", act: "cm-ej", a: { id: "btn-cm-ej" } }) + "</div>" : "") +
       (r ? grupo("Qué envías", chip("cm-clase", "aviso", "Aviso de una fecha", aviso) + chip("cm-clase", "comunicado", "Comunicado", !aviso)) : "") +
       (aviso ? grupo("Qué avisas", Object.entries(PLANT).map(([k, [t]]) => chip("cm-plant", k, t, cm.plantilla === k)).join("")) + grupo("Qué fecha", proximas(r, 4).map((f) => chip("cm-fecha", f, fCorta(f), cm.fecha === f)).join(""))
         : grupo("A quién", base.filtros.map(([k, t]) => chip("cm-filtro", k, t, cm.filtro === k)).join(""))) +
@@ -981,6 +986,38 @@
   function comCard(p) {
     const ls = (S.comunicados || []).filter((c) => c.estado === "Enviado" && c.destinatarios.includes(p.id)).sort((a, b) => b.enviado.localeCompare(a.enviado)).slice(0, 4);
     return card('<div class="kz-card-h"><h2>Comunicados recibidos</h2><span class="kz-mut">' + ls.length + "</span></div>" + (ls.length ? ls.map((c) => '<div class="kz-it"><div class="grow"><b>' + esc(c.asunto) + "</b><span>" + esc(firmaTxt(c)) + " · " + cuando(c.enviado) + ((c.leidos || []).includes(p.id) ? " · leído" : " · sin leer") + "</span></div></div>").join("") : '<p class="kz-vacio">No ha recibido comunicados.</p>'), { id: "comunicados", cls: "kz-card" });
+  }
+  /* ── Red (spec 01): agregados por entidad, sin datos de personas ── */
+  const miRed = () => (S.redes || [])[0] || { id: "red1", nombre: "La red", entidades: S.entidades.map((e) => e.id) };
+  const gestor = () => (S.gestoresRed || [])[0] || { nombre: "Gestión de la red" };
+  function aggEnt(eid) {
+    const rs = S.recursos.filter((r) => r.entidad === eid && !r.pausado), lim = new Date(); lim.setDate(lim.getDate() + 7); const tope = isoDe(lim);
+    return { rs, personas: S.personas.filter((p) => p.entidad === eid).length, recursos: rs.length, ocup: rs.filter((r) => r.cupo).reduce((n, r) => n + usoRec(r).activas, 0), plazas: rs.reduce((n, r) => n + (r.cupo || 0), 0),
+      semana: rs.reduce((n, r) => n + proximas(r, 14).filter((f) => f <= tope).length, 0), pend: S.solicitudes.filter((x) => rec(x.recurso).entidad === eid && abierta(x)).length };
+  }
+  function rResumen() {
+    const red = miRed(), es = red.entidades.map((id) => S.entidades.find((e) => e.id === id)).filter(Boolean), ag = es.map((e) => [e, aggEnt(e.id)]), sum = (k) => ag.reduce((n, [, a]) => n + a[k], 0);
+    return '<div class="bc-page stack"><div class="ez-head"><div><p class="ez-fecha">' + esc(red.tipo || "Red") + "</p><h1>" + esc(red.nombre) + '</h1></div><span class="ez-solo">' + ic("lock") + "Solo agregados: sin datos de personas</span></div>" +
+      '<div class="pn-kpis">' + pnKpi("Entidades", es.length) + pnKpi("Personas atendidas", sum("personas")) + pnKpi("Recursos activos", sum("recursos")) + pnKpi("Fechas esta semana", sum("semana")) + pnKpi("Solicitudes por decidir", sum("pend")) + "</div>" +
+      '<div class="rd-grid">' + ag.map(([e, a]) => '<a class="rd-ent" href="#/red/' + e.id + '" data-entidad="' + e.id + '"><span class="rd-ent__h">' + ic("building") + '<span class="grow"><b>' + esc(e.nombre) + "</b><span>" + esc(e.tipo + " · " + e.zona) + "</span></span>" + ic("chevron-right") + '</span><span class="rd-ent__n"><span><b>' + a.personas + "</b>" + (a.personas === 1 ? " persona" : " personas") + "</span><span><b>" + a.recursos + "</b>" + (a.recursos === 1 ? " recurso" : " recursos") + "</span><span><b>" + a.semana + "</b>" + (a.semana === 1 ? " fecha" : " fechas") + " esta semana</span></span>" +
+        (a.plazas ? '<span class="ez-kv"><span class="mut">Ocupación de plazas</span><b>' + a.ocup + " / " + a.plazas + '</b></span><span class="bc-bar" aria-hidden="true"><i style="width:' + Math.min(100, Math.round(a.ocup / a.plazas * 100)) + '%"></i></span>' : "") + "</a>").join("") + "</div></div>";
+  }
+  function rEntidad(id) {
+    const e = S.entidades.find((x) => x.id === id); if (!e || !miRed().entidades.includes(id)) return rResumen();
+    const a = aggEnt(id);
+    return '<div class="bc-page stack"><a class="bc-back" href="#/red">← ' + esc(miRed().nombre) + '</a><div class="ez-head"><div><p class="ez-fecha">' + esc(e.tipo + " · " + e.zona) + "</p><h1>" + esc(e.nombre) + '</h1></div><span class="ez-solo">' + ic("lock") + "Solo agregados</span></div>" +
+      '<div class="pn-kpis">' + pnKpi("Personas atendidas", a.personas) + pnKpi("Recursos activos", a.recursos) + pnKpi("Ocupación de plazas", a.ocup + (a.plazas ? " / " + a.plazas : "")) + pnKpi("Por decidir", a.pend) + "</div>" +
+      pnTabla(["Recurso", "Cuándo", "Próxima", "Ocupación"], a.rs.map((r) => { const u = usoRec(r); return [esc(r.nombre), esc(cuandoTxt(r)), proxTxt(r) ? esc(proxTxt(r)) : "—", u.activas + (r.cupo ? " / " + r.cupo : "")]; }), "Sin recursos activos.") +
+      '<div class="row">' + btn("Escribir a nombre de " + e.nombre, { v: "quiet", icon: "megaphone", act: "r-firma", a: { "data-v": "entidad:" + e.id, id: "btn-r-firma" } }) + "</div></div>";
+  }
+  function rComunicados(tab) {
+    const red = miRed(), mios = (S.comunicados || []).filter((c) => c.porRed || (c.firma.tipo === "red" && c.firma.id === red.id)), T = tab || "nuevo";
+    const tabs = [["nuevo", "Redactar"], ["enviados", "Enviados", mios.length]];
+    const firmas = [["red:" + red.id, red.nombre]].concat(red.entidades.map((id) => ["entidad:" + id, ent(id).nombre]));
+    const filtros = [["todas", "Toda la red"]].concat(red.entidades.map((id) => ["ent:" + id, "Personas de " + ent(id).nombre]));
+    const cuerpo = T === "nuevo" ? cmForm({ key: "red", entidades: red.entidades, filtros, firmas }) : cmLista(mios) || card('<p class="mut">La red todavía no envió nada.</p>');
+    return '<div class="bc-page stack"><div class="ez-head"><h1>Comunicados de la red</h1></div><p class="mut">Escribe a nombre de la red o de una de sus entidades. La entidad lo ve en su historial como «enviado por la red».</p>' +
+      '<div class="nwt-tabs bc-subtabs pn-tabs"><div class="nwt-tabs__list" role="tablist" aria-label="Comunicados">' + tabs.map(([k, t, n]) => '<a class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" href="#/comunicados/' + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + (n ? " · " + n : "") + "</span></span></a>").join("") + "</div></div>" + cuerpo + "</div>";
   }
   function kMisRecursos() {
     const rs = S.recursos.filter((r) => r.entidad === ENT && !r.pausado).sort((a, b) => (proximas(a, 1)[0] || "9").localeCompare(proximas(b, 1)[0] || "9"));
@@ -1174,12 +1211,13 @@
     conector: () => [["personas", "Mis personas", "users", "#/personas"], ["registrar", "Registrar persona", "user-plus", "#/registrar/1"], ["mis-recursos", "Recursos de mi entidad", "calendar", "#/mis-recursos"], ["red", "Recursos de entidades", "building", "#/red"]],
     entidad: () => { const mis = S.personas.filter((p) => p.entidad === ENT).length, asig = S.personas.filter((p) => p.entidad === ENT && !p.conector).length, sol = entrantesDe().length; return [["resumen", "Resumen", "home", "#/resumen"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["conectores", "Conectores", "handshake", "#/conectores"], ["comunicados", "Comunicados", "megaphone", "#/comunicados", (S.comunicados || []).filter((c) => c.estado === "Por aprobar" && c.firma.tipo === "entidad" && c.firma.id === ENT).length], ["personas", "Personas", "users", "#/personas", 0, [["personas", "Mis personas", "#/personas", mis, true], ["solicitudes", "Recursos solicitados", "#/personas/solicitudes", sol], ["asignar", "Asignar conector", "#/personas/asignar", asig], ["verificar", "Por verificar", "#/personas/verificar", porVerificar().length]]]]; }
   };
-  const CORTO = { "Recursos de mi entidad": "Mi entidad", "Agenda": "Agenda", "Mi expediente": "Inicio", "Mis recursos": "Recursos", "Mi Mapa de Vida": "Mapa", "Mis personas": "Personas", "Registrar persona": "Registrar", "Recursos de entidades": "Recursos", "Buscar ayuda": "Buscar" };
+  const CORTO = { "Resumen de la red": "Red", "Recursos de mi entidad": "Mi entidad", "Agenda": "Agenda", "Mi expediente": "Inicio", "Mis recursos": "Recursos", "Mi Mapa de Vida": "Mapa", "Mis personas": "Personas", "Registrar persona": "Registrar", "Recursos de entidades": "Recursos", "Buscar ayuda": "Buscar" };
   const QUIEN = {
     ciudadano: () => { const p = yoP(); return p ? [nom(p), "Ciudadano", ini(nom(p)), "orange"] : ["Invitado", "Ciudadano", "?", "orange"]; },
     conector: () => [con(YO).nombre, "Conector · " + ent(ENT).nombre, "LR", "blue"],
     entidad: () => ["Coordinación", ent(ENT).nombre, "AP", "teal"]
   };
+  const selEnt = (corto) => MIS_ENT.length < 2 ? "" : '<label class="bc-ent' + (corto ? " bc-ent--c" : "") + '"><span>' + (corto ? "Entidad" : "Trabajas en") + '</span><select data-ent aria-label="Entidad en la que trabajas">' + MIS_ENT.map((id) => '<option value="' + id + '"' + (id === ENT ? " selected" : "") + ">" + esc(ent(id).nombre) + "</option>").join("") + "</select></label>";
   function shell(activo, body) {
     const m = MENU[ROL](), [n, sub, i, col] = QUIEN[ROL]();
     const badge = (c, neutro) => c ? '<span class="bc-badge' + (neutro ? " bc-badge--n" : "") + '" aria-label="' + c + (neutro ? " en total" : " pendientes") + '">' + c + "</span>" : "";
@@ -1191,7 +1229,7 @@
         const li = '<li class="nwt-sidebar__menu__item' + (k === activo && !subs ? " nwt-sidebar__menu__item--active" : "") + (enGrupo ? " bc-grupo--on" : "") + '"><a class="nwt-sidebar__menu__link" href="' + h + '"' + (subs ? "" : ' data-nav="' + k + '"') + (k === activo && !subs ? ' aria-current="page"' : "") + '><div class="nwt-sidebar__menu__content">' + ic(icn, "nwt-sidebar__menu__icon") + '<span class="nwt-sidebar__menu__label">' + t + "</span>" + badge(c) + "</div></a>";
         return li + (subs ? '<ul class="bc-sub">' + subs.map(([sk, st2, sh, sc, sn]) => '<li><a class="bc-sub__a' + (sk === activo ? " bc-sub__a--on" : "") + '" href="' + sh + '" data-nav="' + sk + '"' + (sk === activo ? ' aria-current="page"' : "") + ">" + ({ personas: ic("users", "bc-sub__i"), asignar: '<i class="ti ti-arrows-exchange bc-sub__i"></i>', solicitudes: '<i class="ti ti-inbox bc-sub__i"></i>', verificar: ic("users-group", "bc-sub__i") }[sk] || "") + "<span>" + st2 + "</span>" + badge(sc, true) + "</a></li>").join("") + "</ul>" : "") + "</li>";
       }).join("") +
-      '</ul></nav><div class="nwt-sidebar__footer"><div class="bc-yo">' + avatar(i, col, "small") + '<span class="grow"><b>' + esc(n) + "</b>" + esc(sub) + '</span></div><button class="nwt-sidebar__footer__logout" type="button" data-act="salir">' + ic("logout", "nwt-sidebar__menu__icon") + '<span class="nwt-sidebar__footer__logout__label">Salir de la demo</span></button></div></div></aside>';
+      '</ul></nav><div class="nwt-sidebar__footer"><div class="bc-yo">' + avatar(i, col, "small") + '<span class="grow"><b>' + esc(n) + "</b>" + esc(sub) + '</span></div>' + selEnt() + '<button class="nwt-sidebar__footer__logout" type="button" data-act="salir">' + ic("logout", "nwt-sidebar__menu__icon") + '<span class="nwt-sidebar__footer__logout__label">Salir de la demo</span></button></div></div></aside>';
     /* En móvil la navegación es una barra inferior, como en una app nativa. */
     let tabs = '<nav class="bc-tabbar" aria-label="Menú">' + m.map(([k, t, icn, h, c, subs]) => {
       /* En móvil el grupo Personas es un solo ítem; sus tres vistas son pestañas dentro de la pantalla. */
@@ -1199,7 +1237,7 @@
       return '<a href="' + h + '" data-nav="' + k + '"' + (on ? ' aria-current="page"' : "") + ">" + ic(icn) + "<span>" + esc(CORTO[t] || t) + "</span>" + badge(n) + "</a>";
     }).join("") + "</nav>";
     if (solo) { side = ""; tabs = ""; }
-    const top = '<header class="bc-top"><a class="bc-brand" href="' + m[0][3] + '">' + MARCA + PALABRA + '</a>' + avatar(i, col, "small") + "</header>";
+    const top = '<header class="bc-top"><a class="bc-brand" href="' + m[0][3] + '">' + MARCA + PALABRA + '</a>' + selEnt(true) + avatar(i, col, "small") + "</header>";
     return '<div class="bc-shell' + (solo ? ' bc-shell--solo' : '') + '">' + side + '<div class="bc-main">' + top + "<main>" + body + "</main>" + tabs + "</div></div>";
   }
 
@@ -1217,7 +1255,10 @@
   RUTAS.conector.unshift(PANEL, [/^#\/mis-recursos$/, () => ["mis-recursos", kMisRecursos()]]);
   RUTAS.entidad.unshift(PANEL);
   RUTAS.entidad.unshift([/^#\/personas\/verificar$/, () => ["verificar", eVerificar()]]);
-  const INICIO = { ciudadano: "#/inicio", conector: "#/personas", entidad: "#/resumen" };
+  const INICIO = { ciudadano: "#/inicio", conector: "#/personas", entidad: "#/resumen", red: "#/red" };
+  MENU.red = () => [["red", "Resumen de la red", "building", "#/red"], ["comunicados", "Comunicados", "megaphone", "#/comunicados"]];
+  QUIEN.red = () => { const g = gestor(); return [g.nombre, "Red · " + miRed().nombre, ini(g.nombre), "purple"]; };
+  RUTAS.red = [[/^#\/red$/, () => ["red", rResumen()]], [/^#\/red\/(e\d+)$/, (m) => ["red", rEntidad(m[1])]], [/^#\/comunicados(?:\/([a-z]+))?$/, (m) => ["comunicados", rComunicados(m[1])]]];
   /* Las franjas bajo la barra de estado y la de gesto toman el color de la pantalla que queda justo detrás. */
   const colorEn = (y) => {
     for (let el = document.elementFromPoint(6, y); el; el = el.parentElement) {
@@ -1453,7 +1494,7 @@
     "e-cada": ezCampo("cada"), "e-modo": ezCampo("modo"), "e-urg": ezCampo("urg"),
     "e-cupo": (b) => { const n = +D.datos.cupo || 0, d = +b.dataset.d; D.datos.cupo = d > 0 ? String(n ? n + 1 : 10) : n > 1 ? String(n - 1) : ""; delete D.err.cupo; ezRe('[data-act="e-cupo"][data-d="' + b.dataset.d + '"]'); },
     "asignar-a": (b) => { const p = per(b.dataset.p); p.conector = b.dataset.c; guardar(); toast(p.nombre + " queda asignada a " + con(p.conector).nombre + "."); render(); },
-    "asignar-ab": (b) => { asignando = b.dataset.p; conSel = (S.conectores.find((c) => c.entidad === ENT) || {}).id; ezRe("#ez-mt"); },
+    "asignar-ab": (b) => { asignando = b.dataset.p; conSel = (S.conectores.find((c) => (c.entidades || [c.entidad]).includes(ENT)) || {}).id; ezRe("#ez-mt"); },
     "asignar-sel": (b) => { conSel = b.dataset.c; ezRe('[data-act="asignar-sel"][data-c="' + b.dataset.c + '"]'); },
     "asignar-cancel": () => { asignando = null; ezRe("#btn-asignar-ab"); },
     asignar: (b) => { const p = per(b.dataset.p), sel = document.getElementById("sel-" + p.id); p.conector = sel ? sel.value : conSel; asignando = null; guardar(); toast(p.nombre + " queda asignada a " + con(p.conector).nombre + "."); render(); },
@@ -1502,6 +1543,7 @@
       guardar(); toast(n ? "Confirmaste " + n + (n === 1 ? " fecha" : " fechas") + " de " + r.nombre + "." : "Ya tenías confirmadas las próximas fechas."); render();
     },
     "cm-clase": (b) => { cm.clase = b.dataset.v; if (cm.clase === "aviso") cmAuto(true); else if (cm.auto) { cm.asunto = ""; cm.cuerpo = ""; } render(); },
+    "cm-ej": () => { const f = cm.firma.split(":"), quien = f[0] === "red" ? miRed().nombre : ent(f[1]).nombre; cm.asunto = "Cierre por festivo el 8 de diciembre"; cm.cuerpo = quien + " no abre el lunes 8. Los recursos de ese día pasan al martes 9 a la misma hora."; cm.auto = false; render(); },
     "cm-plant": (b) => { cm.plantilla = b.dataset.v; cmAuto(true); render(); },
     "cm-fecha": (b) => { cm.fecha = b.dataset.v; cmAuto(); render(); },
     "cm-filtro": (b) => { cm.filtro = b.dataset.v; render(); },
@@ -1526,6 +1568,7 @@
     "cm-dev-no": () => { cmDev = null; render(); },
     "cm-devolver": (b) => { const c = S.comunicados.find((x) => x.id === b.dataset.id), t = (document.getElementById("dev-" + c.id) || {}).value || ""; if (!t.trim()) return toast("Dile qué tiene que cambiar."); c.estado = "Devuelto"; c.comentario = t.trim(); cmDev = null; guardar(); toast("Devuelto a " + c.autorNombre + " con tu comentario."); render(); },
     "nota-add": (b) => { const p = per(b.dataset.p), t = (document.getElementById("f-nota-" + p.id) || {}).value || ""; if (!t.trim()) return toast("Escribe la nota."); p.notas = notasDe(p).concat({ texto: t.trim(), autor: ROL === "conector" ? YO : "entidad", entidad: ENT, fecha: ahora() }); guardar(); toast("Nota guardada. Solo la ve tu entidad."); render(); },
+    "r-firma": (b) => { cm = null; cmFirma0 = b.dataset.v; ir("#/comunicados/nuevo"); },
     "aprobar-ab": (b) => { popOp = false; aprobando = b.dataset.s; render(); },
     "aprobar-no": () => { aprobando = null; render(); },
     "aprobar-ok": (b, e) => {
@@ -1614,7 +1657,9 @@
     if (t.hasAttribute("data-czq")) { czQ = t.value; const pos = t.selectionStart; render(); const n = $("#f-czq"); n.focus(); n.setSelectionRange(pos, pos); return; }
     if (t.hasAttribute("data-busca")) { busca = t.value; const pos = t.selectionStart; render(); const n = $("#f-busca"); n.focus(); n.setSelectionRange(pos, pos); }
   });
-  document.addEventListener("change", (e) => { if (e.target.dataset.f) D.datos[e.target.dataset.f] = e.target.value; if (e.target.hasAttribute("data-ez-r")) ezRe("#" + e.target.id); });
+  document.addEventListener("change", (e) => {
+    if (e.target.hasAttribute("data-ent")) { ENT = e.target.value; try { localStorage.setItem("brujula.ent." + ROL, ENT); } catch (x) { /* sin almacenamiento */ } D = null; cm = null; toast("Ahora trabajas en " + ent(ENT).nombre + "."); if (location.hash === INICIO[ROL]) render(); else location.hash = INICIO[ROL]; return; }
+    if (e.target.dataset.f) D.datos[e.target.dataset.f] = e.target.value; if (e.target.hasAttribute("data-ez-r")) ezRe("#" + e.target.id); });
   /* El rechazo no se confirma sin motivo: el botón se habilita al elegirlo. */
   document.addEventListener("change", (e) => { const id = e.target.dataset && e.target.dataset.mot; if (!id) return; const b = document.querySelector('[data-act="rechazar"][data-s="' + id + '"]'); if (b) b.disabled = !e.target.value; });
 

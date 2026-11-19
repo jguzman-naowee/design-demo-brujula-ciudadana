@@ -47,5 +47,34 @@ window.CASOS = [
       SI(NAV("red"), "Recursos de entidades: el catálogo de todas las entidades.")
     ]
   }
+,
+  {
+    id: "2.3", titulo: "Pasar lista",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=conector#/mis-recursos", body: "Los recursos de su entidad, con lo de hoy primero." },
+      SI('[data-recurso="r3"]', "El banco de alimentos de hoy: abre directo la lista."),
+      VE(".pn-lista", "Cada persona y cada acompañante, con lo que confirmaron."),
+      SI('[data-act="p-uso"][data-e="Usó"]', "Marca quién vino: suma a su consumo «usó N de M»."),
+      VE(".pn-cuenta", "Y la cuenta del día.")
+    ]
+  },
+  {
+    id: "2.4", titulo: "Avisar un cambio",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=conector#/panel/r4/comunicados", body: "El taller cambia de hora." },
+      SI('[data-act="cm-plant"][data-v="hora"]', "Elige «Cambio de hora»: el mensaje se escribe solo para la fecha elegida."),
+      SI("#btn-cm", "Los avisos salen directo a los inscritos, por app y correo."),
+      SI('[data-act="cm-clase"][data-v="comunicado"]', "Un comunicado, en cambio, lo aprueba la coordinación antes de salir.")
+    ]
+  },
+  {
+    id: "2.5", titulo: "La familia en la ficha",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=conector#/persona/BC-2026-0141", body: "La ficha de Yasmina." },
+      VE("#familia", "Su familia y el estado de cada ficha."),
+      SI('#familia [data-act="fam-ver"]', "Como su entidad la atiende, el conector verifica a Omar."),
+      VE("#notas", "Notas internas con autor y fecha: solo las ve su entidad.")
+    ]
+  }
 ];
 })();

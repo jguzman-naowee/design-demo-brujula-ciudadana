@@ -35,3 +35,9 @@ apoyan en ella. La red va al final porque es un rol nuevo que reutiliza el panel
 - [Conector](02-conector.md)
 - [Entidad](03-entidad.md)
 - [Red](04-red.md)
+
+## Estado (19-nov-2026)
+
+Las cinco olas están en la demo, un commit por ola (más tres de la ola 1: datos, entidad,
+ciudadano y conector). Lo que se simplificó respecto del plan está en la sección «En la demo» de
+cada spec. Falta la revisión de uso de Jorge.

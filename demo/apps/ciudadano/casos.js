@@ -58,6 +58,30 @@ window.CASOS = [
       SI(NAV("recursos"), "Y cada recurso dice cuándo ocurre y cuál es la próxima fecha."),
       SI(NAV("buscar"), "Al buscar ayuda también ve cuándo ocurre cada recurso y cuántas plazas quedan para la próxima fecha.")
     ]
+  },
+  {
+    id: "1.4", titulo: "Ir con mi familia",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=ciudadano&sinsesion=1#/inicio", body: "Yasmina quiere llevar a sus hijos al apoyo escolar." },
+      SI("#btn-ejemplo", "Entra con su expediente."),
+      SI("#mi-familia", "Su familia: cada hijo tiene su propia ficha."),
+      VE(".cz-fms", "Amira ya está verificada; Omar, por verificar: lo revisa la entidad que la atiende."),
+      SI('[data-act="c-fam-ver"]', "En la demo simulamos que la entidad lo verifica."),
+      { t: "goto", url: APP + "index.html?rol=ciudadano#/buscar/Infancia%20y%20Menores", body: "Busca el apoyo escolar." },
+      SI('[data-act="c-pedir"][data-r="r16"]', "Al apuntarse le pregunta quién va con ella."),
+      SI('[data-act="c-pedir-fam"]', "Elige a quién lleva: cada uno ocupa una plaza y lleva su propio consumo."),
+      SI("#btn-pedir-ok", "Y se apunta."),
+      VE("#mis-recursos", "En Mis recursos dice con quién va.")
+    ]
+  },
+  {
+    id: "1.5", titulo: "Mis avisos",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=ciudadano&sinsesion=1#/inicio", body: "Las entidades le avisan de cambios y novedades." },
+      SI("#btn-ejemplo", "Entra con su expediente."),
+      SI("#mis-avisos", "La campana dice cuántos avisos no leyó."),
+      VE(".cz-avisos", "Cada aviso con quién lo firma. Los de sus recursos le llegan siempre; los comunicados, solo si los autorizó.")
+    ]
   }
 ];
 })();

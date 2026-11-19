@@ -27,5 +27,12 @@ window.APPS = [
     "subtitulo": "Brújula Ciudadana",
     "inicio": "../../../app/brujula/index.html?rol=entidad",
     "superficie": "escritorio"
+  },
+  {
+    "id": "red",
+    "nombre": "Red",
+    "subtitulo": "Brújula Ciudadana",
+    "inicio": "../../../app/brujula/index.html?rol=red",
+    "superficie": "escritorio"
   }
 ];

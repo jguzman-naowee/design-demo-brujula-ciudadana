@@ -6,9 +6,10 @@ La portada (`index.html`) pide el **rol**. Cada rol abre su propia demo, con su 
 
 | Rol | Puede | Casos | Superficie por defecto |
 |---|---|---|---|
-| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Agenda, Buscar ayuda, Mi Mapa de Vida, Privacidad | 1.1 · 1.2 · 1.3 | Móvil |
-| Conector | Mis personas, Registrar persona, ficha y derivación, Recursos de la red | 2.1 · 2.2 | Escritorio |
-| Entidad | Resumen, Personas, Conectores, Bandeja | 3.1 · 3.2 | Escritorio |
+| Red | Resumen de la red (solo agregados), entidad por entidad, Comunicados con firma de la red o de una entidad | 5.1 · 5.2 | Escritorio |
+| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Agenda, Buscar ayuda, Mi familia, Avisos, Mi Mapa de Vida, Privacidad | 1.1 – 1.5 | Móvil |
+| Conector | Mis personas, Registrar persona, ficha (familia, notas, comunicados) y derivación, Recursos de mi entidad (panel y pasar lista), Recursos de la red | 2.1 – 2.5 | Móvil |
+| Entidad | Resumen, Mis recursos (editor por catálogo y panel), Comunicados, Personas (solicitudes, asignar, por verificar), Conectores | 3.1 – 3.7 | Escritorio |
 | Registro de entidad | Formulario de alta con diseño mínimo | 4.1 | Escritorio |
 
 Los datos se comparten entre roles (mismo `localStorage`): lo que registra el Ciudadano o el Conector aparece en la bandeja de la Entidad. «Restablecer datos», en el panel de casos, vuelve a la semilla.

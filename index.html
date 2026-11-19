@@ -13,7 +13,7 @@ main{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:clamp(24
 .marca{margin:0 0 6px;text-align:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FF7500}
 h1{text-align:center;font-size:clamp(26px,4vw,38px);margin:0 0 8px;text-shadow:0 0 14px #F4F4F9,0 0 6px #F4F4F9}
 p.lead{text-align:center;color:var(--mut);margin:0 auto 32px;max-width:52ch;text-shadow:0 0 12px #F4F4F9,0 0 6px #F4F4F9}
-.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:14px}
 .opt{display:flex;flex-direction:column;gap:10px;padding:22px;border:1.5px solid var(--line);border-radius:var(--r);background:#fff;color:inherit;text-decoration:none;min-height:230px}
 .opt:hover{border-color:var(--v);box-shadow:0 8px 28px rgba(74,42,128,.14)}
 .opt svg{width:40px;height:40px;color:var(--v)}
@@ -43,6 +43,12 @@ p.lead{text-align:center;color:var(--mut);margin:0 auto 32px;max-width:52ch;text
   <h1>¿En qué programa estoy?</h1>
   <p class="lead"><b>Brújula Ciudadana</b> reúne los programas de distintas entidades para que cada persona sepa qué ayuda le corresponde.</p>
   <div class="opts">
+    <a class="opt" href="demo/?app=red" id="rol-red">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.8 7.2 6.3 15.8M13.2 7.2l4.5 8.6M7.5 18h9"/></svg>
+      <h2>Red de entidades</h2>
+      <p>Ve cómo trabajan las entidades de la red y comunica a nombre de la red o de una entidad.</p>
+      <span class="tag">Solo agregados</span>
+    </a>
     <a class="opt" href="demo/?app=alta-entidad" id="rol-alta">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15h6"/></svg>
       <h2>Registro de entidad</h2>

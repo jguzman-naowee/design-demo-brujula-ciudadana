@@ -55,3 +55,12 @@ nombre no engañe.
 ## Abierto
 
 - ¿El gestor de red puede crear entidades o solo agruparlas?
+
+## En la demo (ola 5)
+
+- Rol **Red** (Marina Sáez, Red Sur Madrid, con las tres entidades): resumen con agregados,
+  detalle por entidad y comunicados con firma de la red o de una entidad.
+- Selector «Trabajas en»: Lucía (conector) está en Asociación Puentes y Fundación Raíces; la
+  coordinación gestiona esas dos. La entidad activa se recuerda por rol en el navegador.
+- `personas[].entidad` no se renombró a `atiende` en el código: hace ese papel (spec 03).
+- La red escribe a ciudadanos; escribir a los equipos de las entidades queda pendiente.

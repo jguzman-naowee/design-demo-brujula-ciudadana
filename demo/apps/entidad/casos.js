@@ -71,5 +71,31 @@ window.CASOS = [
       VE(".cols", "El nuevo recurso aparece en la lista, activo.")
     ]
   }
+,
+  {
+    id: "3.5", titulo: "Verificar a una familia",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=entidad#/personas/verificar", body: "Familiares que agregaron las personas que atiende la entidad." },
+      VE(".ez-vf", "Hasta verificarlos no pueden acompañar a nadie a un recurso."),
+      SI('[data-act="fam-ver"]', "Verifica la ficha; también puede rechazarla con un motivo.")
+    ]
+  },
+  {
+    id: "3.6", titulo: "Panel de un recurso",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=entidad#/panel/r4", body: "El panel del taller de competencias digitales." },
+      VE(".pn-kpis", "Plazas, inscritos, lista de espera y confirmados de la próxima fecha."),
+      SI('a[href="#/panel/r4/fechas"]', "Cada fecha: quién confirmó, quién no va y quién no respondió."),
+      SI('a[href="#/panel/r4/lista"]', "Y la lista del día para marcar quién vino.")
+    ]
+  },
+  {
+    id: "3.7", titulo: "Aprobar un comunicado",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=entidad#/comunicados/aprobar", body: "Un conector escribió a los inscritos del taller de cocina." },
+      SI('[data-act="cm-aprobar"]', "La coordinación lo aprueba y sale por app y correo."),
+      SI('a[href="#/comunicados/enviados"]', "Queda registrado quién lo escribió, quién lo aprobó, a quién llegó y quién lo leyó.")
+    ]
+  }
 ];
 })();

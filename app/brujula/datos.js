@@ -227,12 +227,15 @@ window.BC_SEMILLA = () => {
   const P = (o) => Object.assign({ email: "", docTipo: "En trámite", doc: "", idioma: "Español", canal: "WhatsApp", municipio: "Madrid", estado: "En seguimiento", mapaTipo: "completo", notas: [] }, o);
   const S0 = {
     entidades: [
-      { id: "e1", cp: "28026", nombre: "Asociación Puentes", zona: "Usera · Madrid", tipo: "Asociación" },
-      { id: "e2", cp: "28025", nombre: "Fundación Raíces", zona: "Carabanchel · Madrid", tipo: "Fundación" },
-      { id: "e3", cp: "28901", nombre: "Red Vecinal Sur", zona: "Getafe", tipo: "Asociación vecinal" }
+      { id: "e1", cp: "28026", nombre: "Asociación Puentes", zona: "Usera · Madrid", tipo: "Asociación", red: "red1" },
+      { id: "e2", cp: "28025", nombre: "Fundación Raíces", zona: "Carabanchel · Madrid", tipo: "Fundación", red: "red1" },
+      { id: "e3", cp: "28901", nombre: "Red Vecinal Sur", zona: "Getafe", tipo: "Asociación vecinal", red: "red1" }
     ],
+    /* La capa de arriba (spec 01): agrupa entidades; su gestor ve agregados y comunica. */
+    redes: [{ id: "red1", nombre: "Red Sur Madrid", tipo: "Ayuntamiento", entidades: ["e1", "e2", "e3"] }],
+    gestoresRed: [{ id: "g1", nombre: "Marina Sáez", cargo: "Coordinación de la red", red: "red1" }],
     conectores: [
-      { id: "c1", nombre: "Lucía Romero", entidad: "e1", rol: "Trabajadora social", ultima: "Hoy, 10:42", foto: "../../shared/img/conectores/lucia.jpg", doc: "DNI 12345678Z", tel: "+34 600 111 201", email: "lucia.romero@puentes.example" },
+      { id: "c1", nombre: "Lucía Romero", entidad: "e1", entidades: ["e1", "e2"], rol: "Trabajadora social", ultima: "Hoy, 10:42", foto: "../../shared/img/conectores/lucia.jpg", doc: "DNI 12345678Z", tel: "+34 600 111 201", email: "lucia.romero@puentes.example" },
       { id: "c2", nombre: "Samir El Idrissi", entidad: "e1", rol: "Mediador intercultural", ultima: "Hoy, 09:15", foto: "../../shared/img/conectores/samir.jpg", doc: "NIE X1234567L", tel: "+34 600 111 202", email: "samir.elidrissi@puentes.example" },
       { id: "c3", nombre: "Marta Gil", entidad: "e1", rol: "Voluntaria", ultima: "Ayer, 18:03", doc: "DNI 87654321X", tel: "+34 600 111 203", email: "marta.gil@puentes.example" },
       { id: "c4", nombre: "Daniel Ortega", entidad: "e2", rol: "Educador social", ultima: "Hoy, 11:20" },
