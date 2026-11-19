@@ -54,3 +54,12 @@ Cada acompañante también genera su propio registro de uso (`usos`) en el recur
 
 - «La entidad que atiende al titular» es la entidad activa del conector asignado a la persona.
   Si no tiene conector (autorregistro), la entidad donde se registró.
+
+## En la demo (ola 2)
+
+- Los familiares viven en `S.familiares` (no en `personas`), para no mezclarse con las listas de
+  personas atendidas; `per(id)` busca en las dos. Los grupos, en `S.familias`.
+- `persona.entidad` hace de «entidad que atiende» (spec 01). Verifica su equipo: el conector desde
+  la ficha (sección Familia) y la coordinación desde Personas → Por verificar.
+- Si el familiar lo agrega el equipo que atiende, nace **Verificada**; si lo agrega la persona,
+  **Por verificar**. En el rol Ciudadano hay un botón de demo «Simular que … la verifica».

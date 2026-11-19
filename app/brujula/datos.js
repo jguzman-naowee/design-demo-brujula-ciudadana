@@ -225,7 +225,7 @@ window.BC_SEMILLA = () => {
   const C = (e, c) => ({ privacidad: true, tratamiento: true, entidades: e, comunicaciones: c });
   const F = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const P = (o) => Object.assign({ email: "", docTipo: "En trámite", doc: "", idioma: "Español", canal: "WhatsApp", municipio: "Madrid", estado: "En seguimiento", mapaTipo: "completo", notas: "" }, o);
-  return {
+  const S0 = {
     entidades: [
       { id: "e1", cp: "28026", nombre: "Asociación Puentes", zona: "Usera · Madrid", tipo: "Asociación" },
       { id: "e2", cp: "28025", nombre: "Fundación Raíces", zona: "Carabanchel · Madrid", tipo: "Fundación" },
@@ -289,8 +289,18 @@ window.BC_SEMILLA = () => {
       { id: "s14", persona: "BC-2026-0125", recurso: "r13", por: "e3", estado: "Pendiente", fecha: "2026-11-10" },
       { id: "s15", persona: "BC-2026-0167", recurso: "r13", por: "e1", estado: "Pendiente", fecha: "2026-11-11" },
       { id: "s16", persona: "BC-2026-0188", recurso: "r8", por: "e3", estado: "Aprobada", fecha: "2026-11-02", usos: ["2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-09", "2026-11-10", "2026-11-11"] },
-      { id: "s18", persona: "BC-2026-0141", recurso: "r3", por: "e1", estado: "Aprobada", fecha: "2026-10-26", usos: ["2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-09", "2026-11-10", "2026-11-11"] },
+      { id: "s18", persona: "BC-2026-0141", recurso: "r3", por: "e1", estado: "Aprobada", fecha: "2026-10-26", acompanantes: ["BC-2026-0142"], usos: ["2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-09", "2026-11-10", "2026-11-11"] },
       { id: "s17", persona: "BC-2026-0152", recurso: "r18", por: "e1", estado: "Aprobada", fecha: "2026-10-20", usos: ["2026-10-22", "2026-10-29", "2026-11-05"] }
+    ],
+    /* Familiares (spec 03): ficha propia, verificada por la entidad que atiende al titular. */
+    familiares: [
+      { id: "BC-2026-0142", nombre: "Amira", apellidos: "Haddad", nac: "2015-03-08", vinculo: "Hija", titular: "BC-2026-0141", verificacion: "Verificada", creada: "2026-10-05", creadaPor: "c1" },
+      { id: "BC-2026-0143", nombre: "Omar", apellidos: "Haddad", nac: "2018-09-21", vinculo: "Hijo", titular: "BC-2026-0141", verificacion: "Por verificar", creada: F(-1), creadaPor: "persona" },
+      { id: "BC-2026-0168", nombre: "Awa", apellidos: "Diallo", nac: "2020-06-02", vinculo: "Hija", titular: "BC-2026-0167", verificacion: "Por verificar", creada: F(-2), creadaPor: "persona" }
+    ],
+    familias: [
+      { id: "f1", nombre: "Mis hijos", titular: "BC-2026-0141", miembros: ["BC-2026-0142", "BC-2026-0143"] },
+      { id: "f2", nombre: "Familia Diallo", titular: "BC-2026-0167", miembros: ["BC-2026-0168"] }
     ],
     accesos: [
       { persona: "BC-2026-0141", quien: "Lucía Romero", entidad: "e1", cuando: "2026-11-10 16:20", para: "Seguimiento del caso" },
@@ -298,4 +308,7 @@ window.BC_SEMILLA = () => {
       { persona: "BC-2026-0152", quien: "Lucía Romero", entidad: "e1", cuando: "2026-11-07 09:40", para: "Seguimiento del caso" }
     ]
   };
+  /* Cada recurso hereda de su formato si admite acompañantes (spec 07); la entidad lo cambia en el editor. */
+  S0.recursos.forEach((r) => { const f = window.BC_CATALOGO.formatos.find((x) => x.id === r.formato) || {}; if (!r.config) r.config = { acompanantes: !!f.acompanantes, maxAcompanantes: f.maxAcompanantes || (f.acompanantes ? 3 : undefined) }; });
+  return S0;
 };

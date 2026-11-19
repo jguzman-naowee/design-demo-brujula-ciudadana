@@ -353,3 +353,34 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .bc-shell > .nwt-sidebar .nwt-sidebar__toolbar{align-items:center;height:auto;min-height:0;padding:22px 16px}
 .bc-shell > .nwt-sidebar .nwt-sidebar__toolbar__logo{align-items:center;height:auto;margin:0;padding:0}
 .bc-shell > .nwt-sidebar .bc-brand{margin:0;align-items:center}
+
+/* Familia (ola 2): tarjeta en inicio, miembros, alta, hoja «¿Quién viene contigo?» y verificación. */
+.cz-fam__av{display:flex;flex:none}
+.cz-fam__av .nwt-avatar+.nwt-avatar{margin-left:-10px;box-shadow:0 0 0 2px #fff}
+.cz-fms{display:flex;flex-direction:column;padding:4px 16px}
+.cz-fm{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #EEF0F4}
+.cz-fm:first-child{border-top:0}
+.cz-fm .grow b{display:block;font-size:15px}
+.cz-fm .grow span{display:block;font-size:13px;color:var(--bc-mut)}
+.cz-fm .grow .cz-fm__n{color:#93370D;font-weight:600}
+.cz-fm__demo{padding:0 0 12px 60px}
+.fam-nuevo .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.fam-g{display:flex;flex-direction:column;gap:8px}
+.fam-l{font-size:13px;font-weight:600;color:var(--bc-mut)}
+.fam-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fam-err{margin:0;font-size:13px;color:#B42318}
+.fam-pie{justify-content:flex-end;gap:12px}
+.cz-hoja{max-width:460px}
+.cz-qv .nwt-checkbox__label b{font-weight:600}
+.cz-qv__m{display:block;font-size:12px;color:#93370D}
+.cz-qv--off{opacity:.6;cursor:not-allowed}
+.cz-qv__res{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:14px}
+.cz-qv__res .nwt-icon,.sp-conf__x .nwt-icon{font-size:18px;color:var(--bc-acc)}
+.fam-it{align-items:center}
+.fam-acc,.fam-rech{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 0 12px}
+.fam-rech .bc-sel{min-width:220px}
+.ez-vf{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto}
+.ez-vf__acc .fam-acc,.ez-vf__acc .fam-rech{padding:0;justify-content:flex-end}
+.sp-conf__x{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:14px;color:var(--bc-ink)}
+.kz-fam-l{margin:12px 0 0;text-align:center}
+.cz-hoja h2{margin:0 0 6px;font-size:22px;line-height:1.2}
