@@ -344,3 +344,20 @@ body.rol-ciudadano .cz-mp-con .nwt-icon{font-size:18px;color:#C9CBD9}
 .cz-cm-h p{margin:2px 0 0}
 .cz-cm-u{display:flex;align-items:center;gap:6px;margin:0;font-size:13px;color:var(--bc-mut)}
 .cz-cm-u .nwt-icon{font-size:16px}
+
+/* Buscar ayuda: reusa las tarjetas de Mis recursos y los bloques del Mapa. */
+body.rol-ciudadano .cz-buscar{display:flex;flex-direction:column;gap:18px}
+body.rol-ciudadano .cz-busca{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border-radius:16px;background:var(--bc-surface);color:var(--bc-mut);box-shadow:inset 0 0 0 1px rgba(22,23,43,.08)}
+body.rol-ciudadano .cz-busca:focus-within{box-shadow:inset 0 0 0 2px var(--bc-acc)}
+body.rol-ciudadano .cz-busca input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:16px;color:var(--bc-ink);outline:none}
+body.rol-ciudadano .cz-chips{display:flex;flex-wrap:nowrap!important;gap:8px;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none}
+body.rol-ciudadano .cz-chips .bc-chip{flex:none;white-space:nowrap}
+body.rol-ciudadano .cz-hall{gap:14px}
+body.rol-ciudadano .cz-hall__p{display:flex;flex-wrap:wrap;gap:6px}
+body.rol-ciudadano .cz-hall__p span{padding:4px 10px;border-radius:999px;background:#F1F2F6;font-size:13px;color:#4A4D63}
+body.rol-ciudadano .cz-hall .nwt-button{align-self:stretch;justify-content:center}
+body.rol-ciudadano .cz-ya{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:22px;background:#E7F6EE;color:#05603A;text-decoration:none}
+body.rol-ciudadano .cz-ya .grow b{display:block;font-size:15px;color:#05603A}
+body.rol-ciudadano .cz-ya .grow span{font-size:13px;color:#2B6B4F}
+body.rol-ciudadano .cz-ya .nwt-icon{color:#067647}
+@media (min-width:900px){body.rol-ciudadano .cz-chips{flex-wrap:wrap!important;overflow:visible;margin:0;padding:0}}
