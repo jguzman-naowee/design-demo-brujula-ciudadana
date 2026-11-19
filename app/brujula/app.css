@@ -487,3 +487,24 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .bc-ent--c{flex:0 1 auto;min-width:0;max-width:140px;margin:0 8px 0 auto}
 .bc-ent--c .bc-ent__b{min-height:38px;padding:0 10px;border-radius:999px;font-size:13px}
 .bc-ent--c .bc-ent__m{top:calc(100% + 6px);bottom:auto;left:auto;right:0;width:250px}
+
+/* Código postal por ubicación o por mapa (registro del ciudadano). */
+.cz-cpacc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
+.cz-cpacc>span{grid-column:1/-1;font-size:13px;color:var(--bc-mut)}
+.cz-cpacc .nwt-button{width:100%;justify-content:center}
+.cz-cpok{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#E7F6EE;font-size:14px;color:#05603A}
+.cz-cpok .nwt-icon{font-size:18px;color:#067647}
+.cz-cpm{max-width:480px}
+.cz-cpm__map{margin:12px 0;border-radius:18px;background:#EEF1F6;overflow:hidden}
+.cz-cpm__map svg{display:block;width:100%;height:auto}
+.cz-cpm__rio{fill:none;stroke:#BFD7EA;stroke-width:10;stroke-linecap:round}
+.cz-cpm__via{fill:none;stroke:#fff;stroke-width:6;stroke-linecap:round}
+.cz-cpm__z{cursor:pointer;outline:none}
+.cz-cpm__hit{fill:transparent}
+.cz-cpm__p{fill:#fff;stroke:var(--bc-ink);stroke-width:3;transition:r .15s}
+.cz-cpm__z text{font-size:12px;font-weight:700;fill:var(--bc-ink);text-anchor:middle;paint-order:stroke;stroke:#EEF1F6;stroke-width:4px}
+.cz-cpm__z:hover .cz-cpm__p,.cz-cpm__z:focus-visible .cz-cpm__p{fill:var(--bc-acc-soft);stroke:var(--bc-acc)}
+.cz-cpm__z:focus-visible .cz-cpm__hit{stroke:var(--bc-acc);stroke-width:2;stroke-dasharray:4 3}
+.cz-cpm__z.on .cz-cpm__p{fill:var(--bc-acc);stroke:var(--bc-acc)}
+.cz-cpm__z.on text{fill:var(--bc-acc)}
+.cz-cpm__x{margin:0;font-size:12px;color:var(--bc-mut)}

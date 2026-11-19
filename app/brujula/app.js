@@ -89,22 +89,23 @@
   /* ── borrador de registro ── */
   const nuevo = (tipo) => ({ tipo, consent: {}, datos: {}, mapa: {}, auto: {}, recursos: [], entidad: ENT, err: {}, busqueda: null, q: "", notas: "" });
   const EJEMPLO = {
-    yo: { nombre: "Amina", apellidos: "Belkadi", nac: "1994-05-19", docTipo: "En trámite", doc: "", tel: "+34 612 448 901", email: "", municipio: "Madrid", cp: "28026", idioma: ["Árabe", "Español"], canal: "WhatsApp" },
+    yo: { nombre: "Amina", apellidos: "Belkadi", nac: "1994-05-19", docTipo: "En trámite", doc: "", tel: "+34 612 448 901", email: "amina.belkadi@correo.es", municipio: "Madrid", cp: "28026", idioma: ["Árabe", "Español"], canal: "WhatsApp" },
     con: { nombre: "Jorge Luis", apellidos: "Paredes", nac: "1990-08-07", docTipo: "No", doc: "", tel: "+34 600 123 456", email: "jl.paredes@correo.es", municipio: "Madrid", cp: "28041", idioma: "Español", canal: "Teléfono" }
   };
   const MAPA_EJ = { vivienda: "r", ingresos: "a", alimentacion: "a", salud: "v", documentacion: "r", red: "a", familia: "v", menores: "v", cuidados: "v", empleo: "r", formacion: "a", movilidad: "v", digital: "a", autonomia: "v", direccion: "a", comunidad: "a" };
-  const REQ = ["nombre", "apellidos", "nac", "docTipo", "tel", "municipio", "cp", "idioma", "canal"];
+  const REQ = ["nombre", "apellidos", "nac", "docTipo", "tel", "email", "municipio", "cp", "idioma", "canal"];
   const validarDatos = () => {
     D.err = {};
     REQ.forEach((k) => { if (!String(D.datos[k] || "").trim()) D.err[k] = "Este dato es obligatorio."; });
     if (D.datos.cp && !/^\d{5}$/.test(D.datos.cp)) D.err.cp = "Escribe los 5 dígitos del código postal.";
+    if (D.datos.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(D.datos.email.trim())) D.err.email = "Escribe un email válido, como nombre@correo.es.";
     return !Object.keys(D.err).length;
   };
 
   const vDatos = (yo) =>
     '<div class="stack">' +
     '<fieldset class="bc-fs"><legend>Datos personales</legend><div class="grid2">' + fld("nombre", "Nombre") + fld("apellidos", "Apellidos") + fld("nac", "Fecha de nacimiento", { type: "date" }) + fld("docTipo", yo ? "¿Tienes documento nacional?" : "¿Tiene documento nacional?", { opts: CAT.documento }) + fld("doc", "DNI / NIE / Pasaporte", { opc: true, h: "No es necesario para empezar." }) + "</div></fieldset>" +
-    '<fieldset class="bc-fs"><legend>Contacto</legend><div class="grid2">' + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000", h: "Es el canal principal de contacto." }) + fld("email", "Email", { type: "email", opc: true }) + "</div></fieldset>" +
+    '<fieldset class="bc-fs"><legend>Contacto</legend><div class="grid2">' + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000", h: "Es el canal principal de contacto." }) + fld("email", "Email", { type: "email", ph: "nombre@correo.es" }) + "</div></fieldset>" +
     '<fieldset class="bc-fs"><legend>Ubicación</legend><div class="grid2">' + fld("municipio", "Municipio") + fld("cp", "Código postal", { mode: "numeric", ph: "28000", h: (yo ? "No pedimos tu" : "No se pide la") + " dirección exacta." }) + "</div></fieldset>" +
     '<fieldset class="bc-fs"><legend>Idioma y canal</legend><div class="grid2">' + fld("idioma", "Idioma preferente", { opts: CAT.idiomas }) + fld("canal", "Canal preferido", { opts: CAT.canales }) + "</div></fieldset></div>";
 
@@ -164,7 +165,7 @@
   const CZ_ST = { "Pendiente": ["Revisando", 2, "a"], "Aprobada": ["Aprobado", 3, "v"], "En lista de espera": ["En lista", 2, "b"], "Falta información": ["Falta info", 2, "a"], "Rechazada": ["Rechazado", 3, "r"] };
   const czSt = (e) => tag((CZ_ST[e] || [e])[0], ST[e] || "neutral");
   const czCuenta = (m) => { const c = { r: 0, a: 0, v: 0 }; Object.values(m || {}).forEach((v) => { if (c[v] != null) c[v]++; }); return c; };
-  let czFiltro = "todos", czQ = "", czNec = "", czPedir = null, famRech = null;
+  let czFiltro = "todos", czQ = "", czNec = "", czPedir = null, famRech = null, czCpMapa = false, czCpSel = null, czGeo = false;
   function cBienvenida() {
     return '<div class="cz-bienv"><div class="bc-hero cz-hero" data-tint="#272a55"><div class="cz-marca">' + MARCA + PALABRA + "</div>" + BRUJULA_SVG + "<h1>¿En qué programa<br><span>estás?</span></h1><p class='cz-sub'>Regístrate una vez y descubre qué ayuda te corresponde.</p></div>" +
       '<h2 class="cz-pasos-t" id="cz-como">Cómo funciona</h2><ul class="cz-pasos" aria-labelledby="cz-como">' + [["user-plus", "Cuéntanos tu situación", "5 min"], ["phone", "Un conector te orienta", "24–72 h"], ["map-pin", "Ves tus programas", "En tu zona"]].map(([i, t, n]) => '<li><span class="cz-pi">' + ic(i) + "</span><b>" + t + "</b>" + tag(n, "neutral", "small") + "</li>").join("") + "</ul>" +
@@ -206,7 +207,9 @@
   const czMulti = (k, label, cls, opts) => '<div class="cz-grupo"><span class="cz-gl" id="g-' + k + '">' + label + '</span><div class="' + cls + '" role="group" aria-labelledby="g-' + k + '">' + opts.map((v) => '<button type="button" role="checkbox" class="' + cls + '-o" aria-checked="' + czLista(D.datos[k]).includes(v) + '" data-act="c-multi" data-k="' + k + '" data-v="' + esc(v) + '">' + esc(v) + "</button>").join("") + "</div>" + (D.err[k] ? '<p class="cz-err" id="e-' + k + '">' + esc(D.err[k]) + "</p>" : "") + "</div>";
   const CZ_CANAL = { "WhatsApp": "message-circle", "Teléfono": "phone", "Email": "mail" };
   const czDatos = () => '<div class="cz-card cz-datos"><div class="cz-g2">' + fld("nombre", "Nombre") + fld("apellidos", "Apellidos") + "</div>" + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000" }) +
-    '<div class="cz-g2">' + fld("nac", "Nacimiento", { type: "date" }) + fld("cp", "Código postal", { mode: "numeric", ph: "28000" }) + "</div>" + fld("municipio", "Municipio") + fld("email", "Email", { type: "email", opc: true }) + "</div>" +
+    '<div class="cz-g2">' + fld("nac", "Nacimiento", { type: "date" }) + fld("cp", "Código postal", { mode: "numeric", ph: "28000" }) + "</div>" +
+    '<div class="cz-cpacc"><span>¿No lo sabes?</span>' + btn(czGeo ? "Buscando…" : "Usar mi ubicación", { v: "quiet", size: "small", icon: "target", act: "c-geo", a: { id: "btn-geo" } }) + btn("Elegir en el mapa", { v: "quiet", size: "small", icon: "map-pin", act: "c-cpmapa", a: { id: "btn-cpmapa" } }) + "</div>" +
+    (D.datos.barrio && /^\d{5}$/.test(D.datos.cp || "") ? '<div class="cz-cpok">' + ic("map-pin") + "<span>" + esc(D.datos.barrio + " · " + D.datos.municipio + " · " + D.datos.cp) + "</span></div>" : "") + fld("municipio", "Municipio") + fld("email", "Email", { type: "email", ph: "nombre@correo.es" }) + "</div>" +
     czGrupo("docTipo", "¿Documento nacional?", "cz-seg", ["Sí", "En trámite", "No"].filter((x) => CAT.documento.includes(x))) +
     czGrupo("canal", "¿Cómo te contactamos?", "cz-fichas", CAT.canales, (v) => ic(CZ_CANAL[v] || "message-text") + "<span>" + esc(v) + "</span>") +
     czMulti("idioma", "Idiomas que hablas", "cz-chips", CAT.idiomas);
@@ -288,6 +291,18 @@
         : '<p class="cz-vacio">Todavía no tienes avisos.</p>') + "</div>";
     if (nuevos.length) { ls.forEach((c) => { c.leidos = c.leidos || []; if (!c.leidos.includes(p.id)) c.leidos.push(p.id); }); guardar(); }
     return html;
+  }
+  /* Elegir la zona en un mapa ilustrativo: completa código postal y municipio. */
+  const ZONAS = () => window.BC_ZONAS || [];
+  function ponZona(z) { Object.assign(D.datos, { cp: z.cp, municipio: z.municipio, barrio: z.barrio }); delete D.err.cp; delete D.err.municipio; }
+  function modalCpMapa() {
+    const Z = ZONAS(), sel = Z.find((z) => z.id === czCpSel);
+    const rio = '<path class="cz-cpm__rio" d="M150 0 C 140 60, 210 90, 180 150 S 240 230, 230 320"/><path class="cz-cpm__via" d="M0 210 C 90 200, 260 215, 360 196"/><path class="cz-cpm__via" d="M60 0 C 90 120, 60 220, 110 320"/>';
+    return '<div class="ez-mb" data-act="c-cpmapa-no"></div><div class="ez-modal cz-hoja cz-cpm" role="dialog" aria-modal="true" aria-labelledby="cz-cpm-t"><h2 id="cz-cpm-t">¿Dónde vives?</h2><p class="mut">Toca tu zona. Solo usamos el código postal para mostrarte las entidades más cercanas.</p>' +
+      '<div class="cz-cpm__map"><svg viewBox="0 0 360 320" role="group" aria-label="Zonas de la red">' + rio + Z.map((z) => { const on = z.id === czCpSel;
+        return '<g class="cz-cpm__z' + (on ? " on" : "") + '" data-act="c-cpzona" data-v="' + z.id + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="' + esc(z.barrio + ", código postal " + z.cp) + '"><circle class="cz-cpm__hit" cx="' + z.x + '" cy="' + z.y + '" r="26"/><circle class="cz-cpm__p" cx="' + z.x + '" cy="' + z.y + '" r="' + (on ? 10 : 7) + '"/><text x="' + z.x + '" y="' + (z.y - 14) + '">' + esc(z.barrio) + "</text></g>"; }).join("") + "</svg></div>" +
+      (sel ? '<div class="cz-cpok">' + ic("map-pin") + "<span><b>" + esc(sel.barrio) + "</b> · " + esc(sel.municipio) + " · " + sel.cp + "</span></div>" : '<p class="cz-cpm__x">Mapa ilustrativo de la zona de la red.</p>') +
+      '<div class="ez-modal__f">' + btn("Cancelar", { v: "mute", act: "c-cpmapa-no" }) + btn("Usar esta zona", { act: "c-cpmapa-ok", a: sel ? { id: "btn-cpmapa-ok" } : { id: "btn-cpmapa-ok", disabled: "" } }) + "</div></div>";
   }
   function cAgenda() {
     const p = yoP(); if (!p) return cBienvenida();
@@ -1308,7 +1323,7 @@
     const h = location.hash, r = RUTAS[ROL].find(([re]) => re.test(h));
     if (!r) { location.replace(INICIO[ROL]); return; }
     const [activo, body] = r[1](h.match(r[0]));
-    $("#app").innerHTML = shell(activo, body) + (aprobando ? modalAprobar() : "") + (verMiCon ? modalMiConector() : "") + (czPedir && ROL === "ciudadano" ? modalPedir() : "");
+    $("#app").innerHTML = shell(activo, body) + (aprobando ? modalAprobar() : "") + (verMiCon ? modalMiConector() : "") + (czPedir && ROL === "ciudadano" ? modalPedir() : "") + (czCpMapa && ROL === "ciudadano" ? modalCpMapa() : "");
     if (aprobando) { const h = $(".sp-sl__h"); if (h) h.focus(); }
     tintSafe();
     try { parent.postMessage({ type: "demo-ruta", hash: h }, "*"); parent.postMessage({ type: "demo-pista", clave: h, texto: pista() }, "*"); } catch (e) { /* sin marco */ }
@@ -1322,6 +1337,8 @@
   }
   document.addEventListener("click", (e) => { if ((popOp || conOp) && !e.target.closest(".ez-popw")) { popOp = false; conOp = false; render(); } if (entOp && !e.target.closest(".bc-ent")) { entOp = false; render(); } });
   document.addEventListener("change", (e) => { const id = e.target.dataset && e.target.dataset.fcon; if (!id) return; fCons = e.target.checked ? fCons.concat(id) : fCons.filter((x) => x !== id); render(); const n = document.querySelector('[data-fcon="' + id + '"]'); if (n) n.focus(); });
+  document.addEventListener("keydown", (e) => { const g = e.target.closest && e.target.closest('g[role="button"][data-act]'); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ACC[g.dataset.act](g, e); } });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && czCpMapa) { czCpMapa = false; render(); } });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (asignando || popOp || conOp || entOp)) { asignando = null; popOp = false; conOp = false; entOp = false; render(); } });
   /* Navegar no es instantáneo en un servicio real: esqueleto breve y entrada escalonada, igual en todas las vistas. */
   const ESPERA_VISTA = 480, ESPERA_ACC = 800, ASIST = /^#\/regist\w+\//;
@@ -1355,7 +1372,7 @@
     if (D.fallo === clave) { rellenar(); D.err = {}; D.fallo = null; render(); return false; }
     D.fallo = clave; render(); return false;
   }
-  const rellenarDatos = () => { const ej = EJEMPLO[D.tipo]; REQ.forEach((k) => { if (!String(D.datos[k] || "").trim() || (k === "cp" && !/^\d{5}$/.test(D.datos.cp))) D.datos[k] = k === "tel" && D.tipo === "con" && D.q ? D.q : ej[k]; }); };
+  const rellenarDatos = () => { const ej = EJEMPLO[D.tipo]; REQ.forEach((k) => { if (!String(D.datos[k] || "").trim() || (k === "cp" && !/^\d{5}$/.test(D.datos.cp)) || (k === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(D.datos.email).trim()))) D.datos[k] = k === "tel" && D.tipo === "con" && D.q ? D.q : ej[k]; }); };
   const rellenarMapa = (dims) => dims.forEach((d) => { if (!D.mapa[d.id]) D.mapa[d.id] = MAPA_EJ[d.id]; });
   const okConsent = () => { if (D.consent.privacidad && D.consent.tratamiento) return true; D.err = { consent: "Faltan los consentimientos obligatorios. Sin ellos no se crea el expediente." }; return false; };
   const okMapa = (dims) => { const f = faltanMapa(dims); if (!f.length) return true; D.err = { mapa: "Falta responder: " + f.join(", ") + "." }; return false; };
@@ -1432,6 +1449,22 @@
       pedirCz(p, r, []);
     },
     "c-pedir-fam": (b) => { const id = b.dataset.fid, sl = czPedir.sel; czPedir.sel = sl.includes(id) ? sl.filter((x) => x !== id) : sl.concat(id); render(); const n = document.querySelector('[data-fid="' + id + '"] [role="checkbox"]'); if (n) n.focus(); },
+    "c-geo": () => {
+      const alMapa = (t) => { czGeo = false; czCpMapa = true; czCpSel = null; toast(t); render(); };
+      if (!navigator.geolocation) return alMapa("Tu navegador no comparte la ubicación: elige tu zona en el mapa.");
+      czGeo = true; render();
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude: la, longitude: lo } = pos.coords, k = Math.cos(la * Math.PI / 180), d = (z) => (z.lat - la) ** 2 + ((z.lng - lo) * k) ** 2;
+        const z = ZONAS().slice().sort((a, b) => d(a) - d(b))[0];
+        /* Más de ~30 km de la zona más cercana: está fuera de la red, mejor que elija. */
+        if (!z || Math.sqrt(d(z)) > 0.27) return alMapa("Tu ubicación está fuera de la zona de la red: elige tu zona en el mapa.");
+        czGeo = false; ponZona(z); toast("Te ubicamos en " + z.barrio + " (" + z.cp + ")."); render();
+      }, () => alMapa("No pudimos usar tu ubicación: elige tu zona en el mapa."), { timeout: 8000, maximumAge: 600000 });
+    },
+    "c-cpmapa": () => { czCpMapa = true; czCpSel = (ZONAS().find((z) => z.cp === D.datos.cp) || {}).id || null; render(); },
+    "c-cpzona": (b) => { czCpSel = b.dataset.v; render(); const n = document.querySelector('[data-act="c-cpzona"][data-v="' + czCpSel + '"]'); if (n) n.focus(); },
+    "c-cpmapa-no": () => { czCpMapa = false; render(); },
+    "c-cpmapa-ok": () => { const z = ZONAS().find((x) => x.id === czCpSel); if (!z) return; ponZona(z); czCpMapa = false; toast("Código postal " + z.cp + " · " + z.barrio + "."); render(); },
     "c-pedir-no": () => { czPedir = null; render(); },
     "c-pedir-ok": () => { const p = yoP(), r = rec(czPedir.r); if (p && r) pedirCz(p, r, czPedir.sel.slice()); },
     "c-fam-ver": (b) => { const f = per(b.dataset.fid); f.verificacion = "Verificada"; f.verificada = hoy(); f.verificadaPor = ent(per(f.titular).entidad).nombre; guardar(); toast(f.nombre + " ya puede acompañarte."); render(); },

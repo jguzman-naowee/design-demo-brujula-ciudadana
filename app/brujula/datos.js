@@ -330,3 +330,18 @@ window.BC_SEMILLA = () => {
   S0.asistencias = [];
   return S0;
 };
+
+/* Zonas para ubicar a la persona sin escribir el código postal: mapa ilustrativo del sur de Madrid
+   (x, y en el dibujo) y coordenadas reales para «Usar mi ubicación» (la zona más cercana). */
+window.BC_ZONAS = [
+  { id: "z1", barrio: "Tetuán", municipio: "Madrid", cp: "28020", lat: 40.4605, lng: -3.6982, x: 182, y: 34 },
+  { id: "z2", barrio: "Centro", municipio: "Madrid", cp: "28012", lat: 40.4115, lng: -3.7038, x: 178, y: 98 },
+  { id: "z3", barrio: "Latina", municipio: "Madrid", cp: "28047", lat: 40.3995, lng: -3.7470, x: 88, y: 122 },
+  { id: "z4", barrio: "Arganzuela", municipio: "Madrid", cp: "28045", lat: 40.3958, lng: -3.6960, x: 196, y: 146 },
+  { id: "z5", barrio: "Vallecas", municipio: "Madrid", cp: "28038", lat: 40.3910, lng: -3.6630, x: 290, y: 138 },
+  { id: "z6", barrio: "Carabanchel", municipio: "Madrid", cp: "28025", lat: 40.3830, lng: -3.7400, x: 110, y: 186 },
+  { id: "z7", barrio: "Usera", municipio: "Madrid", cp: "28026", lat: 40.3830, lng: -3.7060, x: 200, y: 200 },
+  { id: "z8", barrio: "Villaverde", municipio: "Madrid", cp: "28021", lat: 40.3460, lng: -3.7090, x: 212, y: 252 },
+  { id: "z9", barrio: "Leganés", municipio: "Leganés", cp: "28911", lat: 40.3280, lng: -3.7640, x: 76, y: 262 },
+  { id: "z10", barrio: "Getafe", municipio: "Getafe", cp: "28901", lat: 40.3080, lng: -3.7320, x: 150, y: 298 }
+];
