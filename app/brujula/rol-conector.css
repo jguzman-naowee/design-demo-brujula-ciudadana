@@ -299,3 +299,10 @@ body.rol-conector .kz-wizwrap .kz-foot{align-self:stretch;width:auto;margin-left
 /* Título que agrupa las tarjetas del expediente en la ficha */
 .kz-sec{margin:24px 0 0;font-size:20px;font-weight:700;letter-spacing:-.01em}
 @media (max-width:820px){.kz-sec{margin:20px 16px 0}}
+
+/* Postular · cuándo empieza (ola 1). */
+.kz-cuando{display:flex;flex-direction:column;gap:10px;margin:-2px 0 6px;padding:14px 16px;border-radius:18px;background:#fff}
+.kz-cuando h2{margin:0;font-size:15px;font-weight:700}
+.kz-fechas{display:flex;flex-wrap:wrap;gap:8px}
+.kz-fecha{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--bc-mut)}
+.kz-fecha input{min-height:44px;padding:0 12px;border:1px solid #D5D7E2;border-radius:12px;background:#fff;font:inherit;font-size:15px;color:var(--bc-ink)}

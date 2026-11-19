@@ -6,7 +6,7 @@ window.BC_CATALOGO = {
   consentimientos: [
     { id: "privacidad", txt: "Acepto la política de privacidad", obligatorio: true },
     { id: "tratamiento", txt: "Autorizo el tratamiento de mis datos personales", obligatorio: true },
-    { id: "entidades", txt: "Autorizo compartir mi itinerario con otras entidades colaboradoras", obligatorio: false, ayuda: "Necesario para acceder a recursos de otras entidades. Verán en qué recursos estás y su estado, nunca tu diagnóstico." },
+    { id: "entidades", txt: "Autorizo compartir mi itinerario con otras entidades colaboradoras", obligatorio: false, ayuda: "Así cada entidad donde participas ve en qué recursos estás y su estado, nunca tu diagnóstico." },
     { id: "comunicaciones", txt: "Deseo recibir comunicaciones sobre mi expediente", obligatorio: false }
   ],
   bloques: [

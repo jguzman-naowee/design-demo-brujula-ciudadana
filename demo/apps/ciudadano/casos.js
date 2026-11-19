@@ -47,6 +47,17 @@ window.CASOS = [
       SI('[data-act="consent"][data-c="entidades"]', "Puede retirar el permiso de compartir con otras entidades."),
       VE("#consentimientos", "Desde ese momento, las otras entidades dejan de ver su itinerario.")
     ]
+  },
+  {
+    id: "1.3", titulo: "Mi agenda",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=ciudadano&sinsesion=1#/inicio", body: "Cada recurso es un evento con fecha: la persona sabe cuándo le toca." },
+      SI("#btn-ejemplo", "Entra con su expediente."),
+      VE("#proximas", "En su inicio, sus próximas fechas."),
+      SI(NAV("agenda"), "La agenda junta las dos próximas semanas de todos sus recursos, de cualquier entidad."),
+      SI(NAV("recursos"), "Y cada recurso dice cuándo ocurre y cuál es la próxima fecha."),
+      SI(NAV("buscar"), "Al buscar ayuda también ve cuándo ocurre cada recurso y cuántas plazas quedan para la próxima fecha.")
+    ]
   }
 ];
 })();

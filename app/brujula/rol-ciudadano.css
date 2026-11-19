@@ -361,3 +361,15 @@ body.rol-ciudadano .cz-ya .grow b{display:block;font-size:15px;color:#05603A}
 body.rol-ciudadano .cz-ya .grow span{font-size:13px;color:#2B6B4F}
 body.rol-ciudadano .cz-ya .nwt-icon{color:#067647}
 @media (min-width:900px){body.rol-ciudadano .cz-chips{flex-wrap:wrap!important;overflow:visible;margin:0;padding:0}}
+
+/* Agenda y próximas fechas (ola 1): una fila por fecha, hora a la izquierda. */
+body.rol-ciudadano .cz-agenda{display:flex;flex-direction:column;gap:18px}
+body.rol-ciudadano .cz-ags{display:flex;flex-direction:column;gap:0;padding:4px 16px}
+body.rol-ciudadano .cz-ag{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #EEF0F4}
+body.rol-ciudadano .cz-ag:first-child{border-top:0}
+body.rol-ciudadano .cz-ag time{flex:none;min-width:56px;font-size:15px;font-weight:700;color:var(--bc-ink)}
+body.rol-ciudadano .cz-ag time small{display:block;font-size:12px;font-weight:600;color:var(--bc-acc)}
+body.rol-ciudadano .cz-ag .grow b{display:block;font-size:15px}
+body.rol-ciudadano .cz-ag .grow span{font-size:13px;color:var(--bc-mut)}
+body.rol-ciudadano .cz-prox{display:flex;align-items:center;gap:8px;margin:0;padding:10px 12px;border-radius:14px;background:#F1F2F6;font-size:14px;color:#3E4157}
+body.rol-ciudadano .cz-prox .nwt-icon{font-size:18px;color:var(--bc-acc)}

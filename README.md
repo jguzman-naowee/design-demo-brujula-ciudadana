@@ -6,7 +6,7 @@ La portada (`index.html`) pide el **rol**. Cada rol abre su propia demo, con su 
 
 | Rol | Puede | Casos | Superficie por defecto |
 |---|---|---|---|
-| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Buscar ayuda, Mi Mapa de Vida, Privacidad | 1.1 · 1.2 | Móvil |
+| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Agenda, Buscar ayuda, Mi Mapa de Vida, Privacidad | 1.1 · 1.2 · 1.3 | Móvil |
 | Conector | Mis personas, Registrar persona, ficha y derivación, Recursos de la red | 2.1 · 2.2 | Escritorio |
 | Entidad | Resumen, Personas, Conectores, Bandeja | 3.1 · 3.2 | Escritorio |
 | Registro de entidad | Formulario de alta con diseño mínimo | 4.1 | Escritorio |

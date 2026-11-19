@@ -103,6 +103,11 @@ window.ESCENAS = [
     titulo: "Y la persona llega a sus recursos",
     texto: "Cuando la entidad responde, lo ve en su teléfono: qué recursos tiene y en qué punto está cada uno.",
     acciones: EJEMPLO.concat([ { t: "click", sel: ".bc-tabbar [data-nav=\"recursos\"]", espera: 600 } ]) },
+  { id: "ciudadano-agenda", tipo: "vista", rol: "Ciudadano", sup: "movil", duracion: 9000,
+    url: "app/brujula/index.html?rol=ciudadano&sinsesion=1#/inicio",
+    titulo: "Y sabe cuándo le toca",
+    texto: "Cada recurso es un evento con fecha: su agenda junta lo de todas las entidades.",
+    acciones: EJEMPLO.concat([ { t: "click", sel: ".bc-tabbar [data-nav=\"agenda\"]", espera: 600 } ]) },
   { id: "cierre", tipo: "hero", rol: "Cierre", cta: true, duracion: 10000,
     titulo: "Una persona, una sola historia",
     texto: "Muchas puertas abiertas: entidades que se coordinan para llegar a quien lo necesita." }
