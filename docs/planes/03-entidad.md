@@ -60,7 +60,7 @@ red aparece con «enviado por la red».
 
 | Pantalla | Estructura | Componentes | Estados |
 |---|---|---|---|
-| Editor de recurso, paso Catálogo | Rejilla de tipos del catálogo con ícono y descripción; «Otro» al final | Patrón `ez-cats` actual (radios con ícono) | Al elegir, precarga categoría, forma de tiempo y configuración sugerida |
+| Editor de recurso, paso Catálogo | Elegir categoría (rejilla `ez-cats` actual) → buscador y lista de sus recursos del catálogo agrupados por subcategoría, con el formato como etiqueta; «No está en el catálogo» al final (recurso propio) | Patrón `ez-cats`, `nwt-badge` del formato | Al elegir, precarga nombre, categoría y los valores del formato (spec 07). Ocultos los marcados `fuera` y `fase2` |
 | Editor, paso Cuándo | Selector de forma (único, recurrente, sesiones, estadía) y campos según forma; vista previa de las próximas 4 fechas | `ez-segm`, inputs de fecha y hora, `ez-prev` reutilizado como vista previa | Error si fin < inicio; sin días elegidos en recurrente |
 | Editor, paso Acceso y plazas | Modo, plazo de respuesta, plazas, ¿admite acompañantes?, máximo, límite de usos, plazo de confirmación | `ez-modos`, `ez-cupo` (+/−), `nwt-switch`-like `ez-sw` | Acompañantes apagado oculta el máximo |
 | Panel del recurso | Cabecera con nombre, próxima fecha y ocupación; pestañas; acciones «Enviar aviso» y «Editar» | `nwt-tabs` (`bc-subtabs`), `nwt-stat-card` en Resumen, tabla `bc-tr` en Inscritos y Fechas | Sin inscritos: vacío con «Compartir en la red». Fecha pasada sin lista: alerta «Falta pasar lista» |

@@ -10,9 +10,8 @@ forma, de manera transversal.
 
 - **Todo recurso es un evento.** Desaparece la distinción Grupo / Evento / Individual como tipo
   de recurso; lo que la reemplaza es **cómo ocurre en el tiempo** (ver Datos).
-- Los recursos salen de un **catálogo estándar** de tipos (Taller, Curso, Comedor, Alojamiento,
-  Asesoría…), del que la entidad elige qué ofrecer. Las categorías siguen siendo las del Mapa de
-  Vida (`11-definicion-categorias-subcategorias-recursos.md`).
+- Los recursos salen de un **catálogo estándar**: los 150 recursos del cliente, cada uno con un
+  formato que trae sus valores por defecto. Ver [07](07-catalogo.md).
 - Cada recurso tiene una **configuración interna** propia.
 - La forma de acceso (`modo`: Libre, Inscripción, Solicitud) se mantiene.
 
@@ -20,12 +19,13 @@ forma, de manera transversal.
 
 ```js
 recursos: [{
-  id, entidad, nombre, cat, catalogo: "taller",
+  id, entidad, nombre, cat, catalogo: "k110", formato: "taller",   // spec 07
   modo: "Inscripción",                 // Libre | Inscripción | Solicitud
   urg: "Normal",
   tiempo: {
     forma: "sesiones",                 // unico | recurrente | sesiones | estadia
     inicio: "2026-11-24", fin: "2027-01-30",
+    cada: "semana",                    // recurrente: dia | semana | mes
     dias: ["lu", "mi"], hora: "17:00", duracion: 90   // minutos
   },
   plazas: 15,                          // por sesión o en total, según la forma
@@ -66,4 +66,4 @@ Migración de la semilla: `tipo` desaparece. `frecuencia` (Diario/Semanal) pasa 
 
 ## Abierto
 
-- Lista final del catálogo estándar: hay que validarla con el cliente.
+- El catálogo y sus formatos están armados (spec 07); falta validarlos con el cliente.

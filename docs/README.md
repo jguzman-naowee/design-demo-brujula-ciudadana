@@ -16,6 +16,7 @@
 | 04 | [Panel del recurso](specs/04-panel-del-recurso.md) | Base | 02, 03 |
 | 05 | [Comunicados](specs/05-comunicados.md) | Base | 01, 04 |
 | 06 | [Perfil](specs/06-perfil.md) | Base | 03, 05 |
+| 07 | [Catálogo estándar](specs/07-catalogo.md) | Base · datos en `datos.js` | 02 |
 
 **Base** = decisiones tomadas con Jorge el 19-nov-2026, sin validar con el cliente.
 Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
