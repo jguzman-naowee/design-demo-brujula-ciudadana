@@ -674,9 +674,30 @@
 
   /* ── Mis recursos: lo que la entidad ofrece a la red ── */
   const CATS = [...new Set(CAT.dimensiones.map((d) => d.cat))];
-  const REC_OPC = { tipo: ["Individual", "Grupo", "Evento"], modo: ["Libre", "Inscripción", "Solicitud"], urg: ["Normal", "Urgente"] };
-  const REQ_REC = ["nombre", "cat", "tipo", "modo", "urg"];
-  const EJ_REC = { nombre: "Acompañamiento en trámites de empadronamiento", cat: "Documentación y Trámites", tipo: "Individual", modo: "Solicitud", urg: "Normal", cupo: "10", desc: "Cita individual para preparar y presentar el empadronamiento.", requisitos: "Residir en Madrid" };
+  const REC_OPC = { modo: ["Libre", "Inscripción", "Solicitud"], urg: ["Normal", "Urgente"] };
+  const REQ_REC = ["cat", "nombre", "formato", "modo", "urg"];
+  const EJ_REC = { cat: "Documentación y Trámites", catalogo: "k044", nombre: "Acompañamiento en trámites de empadronamiento", formato: "atencion", modo: "Solicitud", urg: "Normal", cupo: "10", forma: "recurrente", cada: "semana", dias: ["ma"], hora: "10:00", duracion: "60", desc: "Cita individual para preparar y presentar el empadronamiento.", requisitos: "Residir en Madrid" };
+  const FMT = (id) => (CAT.formatos || []).find((f) => f.id === id), KAT = (id) => (CAT.recursos || []).find((k) => k.id === id);
+  const DIAS_ORD = ["lu", "ma", "mi", "ju", "vi", "sa", "do"];
+  /* Elegir formato precarga cómo ocurre, cómo se accede y las plazas (spec 07); todo se puede cambiar después. */
+  const aplicarFmt = (x, id) => {
+    const f = FMT(id); if (!f) return;
+    Object.assign(x, { formato: id, modo: f.modo, forma: f.forma, cada: f.cada || "", cupo: f.plazas ? String(f.plazas) : "", limite: f.limite ? String(f.limite) : "", acomp: !!f.acompanantes, maxAcomp: f.maxAcompanantes ? String(f.maxAcompanantes) : f.acompanantes ? "3" : "" });
+    if (!(x.dias || []).length) x.dias = f.cada === "dia" ? ["lu", "ma", "mi", "ju", "vi"] : ["lu"];
+    x.urg = x.urg || "Normal";
+    if (f.forma === "sesiones" && !x.fin) { const d = new Date((x.inicio || hoy()) + "T00:00"); d.setDate(d.getDate() + 56); x.fin = isoDe(d); }
+    if (f.forma !== "estadia") { x.hora = x.hora || "10:00"; x.duracion = x.duracion || "60"; }
+  };
+  const tiempoDe = (x) => {
+    const t = { forma: x.forma, inicio: x.inicio || hoy() };
+    if (x.forma === "recurrente") t.cada = x.cada || "semana";
+    if ((x.forma === "recurrente" && t.cada !== "mes") || x.forma === "sesiones") t.dias = DIAS_ORD.filter((d) => (x.dias || []).includes(d));
+    if (x.fin && (x.forma === "recurrente" || x.forma === "sesiones")) t.fin = x.fin;
+    if (x.forma !== "estadia") { if (x.hora) t.hora = x.hora; if (x.duracion) t.duracion = +x.duracion; }
+    return t;
+  };
+  const TAB_DE = { cat: "catalogo", catalogo: "catalogo", nombre: "basico", formato: "basico", forma: "cuando", dias: "cuando", inicio: "cuando", fin: "cuando", modo: "acceso", urg: "acceso", cupo: "acceso" };
+  const REC_TABS = [["catalogo", "Catálogo"], ["basico", "Básico"], ["cuando", "Cuándo"], ["acceso", "Acceso y plazas"], ["detalles", "Detalles"]];
   const usoRec = (r) => {
     const ss = S.solicitudes.filter((s) => s.recurso === r.id), activas = (r.base || 0) + ss.filter((s) => s.estado === "Aprobada").length;
     return { activas, pend: ss.filter((s) => s.estado === "Pendiente" || s.estado === "Falta información").length, espera: ss.filter((s) => s.estado === "En lista de espera").length, libres: r.cupo ? Math.max(0, r.cupo - activas) : null, lleno: !!r.cupo && activas >= r.cupo };
@@ -717,7 +738,7 @@
         const estado = !on ? ["Pausado", ""] : u.pend ? [u.pend + " por decidir", "ez-uso__e--a"] : lleno ? ["Completo", ""] : ["Al día", "ez-uso__e--v"];
         return card('<div class="ez-rec__h">' + ezIco(r.cat) + '<span class="grow"></span><a class="ez-edit" href="#/recurso/' + esc(r.id) + '" aria-label="Editar ' + esc(r.nombre) + '">' + ic("edit") + "</a>" +
           '<button type="button" role="switch" class="ez-sw" aria-checked="' + on + '" aria-label="' + (on ? "Pausar " : "Reactivar ") + esc(r.nombre) + '" data-act="rec-pausa" data-r="' + esc(r.id) + '"><i></i></button></div>' +
-          "<div><h2>" + esc(r.nombre) + '</h2><p class="ez-sub">' + esc(ezCat(r.cat).n) + "</p></div>" +
+          "<div><h2>" + esc(r.nombre) + '</h2><p class="ez-sub">' + esc(ezCat(r.cat).n) + " · " + esc(cuandoTxt(r)) + "</p>" + (proxTxt(r) ? '<p class="ez-cuando">Próxima: ' + esc(proxTxt(r)) + "</p>" : "") + "</div>" +
           '<div class="row ez-chips"><span class="ez-chip">' + esc(MODO_T[r.modo] || r.modo) + '</span><span class="ez-chip' + (urg ? " ez-chip--a" : "") + '">' + (urg ? "24 h" : "5 días") + "</span></div>" +
           '<div class="ez-uso"><div class="ez-uso__r"><span class="ez-uso__n">' + u.activas + "<small>" + (r.cupo ? " / " + r.cupo : (u.activas === 1 ? " persona" : " personas")) + '</small></span><span class="ez-uso__e ' + estado[1] + '">' + estado[0] + '</span></div><div class="bc-bar' + (lleno || !on ? " ez-lleno" : "") + '" aria-hidden="true"><i style="width:' + (r.cupo ? Math.min(100, Math.round((u.activas / r.cupo) * 100)) : 100) + '%"></i></div></div>', { cls: "ez-rec" + (on ? "" : " ez-off"), a: { "data-recurso": r.id } });
       }).join("") + "</div></div>";
@@ -725,31 +746,55 @@
   function eRecurso(id) {
     const r = id === "nuevo" ? null : rec(id);
     if (id !== "nuevo" && (!r || r.entidad !== ENT)) return eRecursos();
-    if (!D || D.tipo !== "rec" || D.id !== id) D = { tipo: "rec", id, err: {}, datos: r ? { nombre: r.nombre, cat: r.cat, tipo: r.tipo, modo: r.modo, urg: r.urg, cupo: r.cupo ? String(r.cupo) : "", desc: r.desc || "", requisitos: r.requisitos || "" } : {} };
-    const T = D.tab || "basico";
-    const x = D.datos, c = x.cat ? ezCat(x.cat) : null, cupo = x.cupo ? +x.cupo : 0, nombre = (x.nombre || "").trim();
+    if (!D || D.tipo !== "rec" || D.id !== id) {
+      const t = (r && r.tiempo) || {}, cf = (r && r.config) || {};
+      D = { tipo: "rec", id, err: {}, tab: r ? "basico" : "catalogo", datos: r ? { nombre: r.nombre, cat: r.cat, catalogo: r.catalogo || "propio", formato: r.formato || "", modo: r.modo, urg: r.urg, cupo: r.cupo ? String(r.cupo) : "", limite: r.limite ? String(r.limite) : "", forma: t.forma || "", cada: t.cada || "", dias: (t.dias || []).slice(), inicio: t.inicio || "", fin: t.fin || "", hora: t.hora || "", duracion: t.duracion ? String(t.duracion) : "", acomp: !!cf.acompanantes, maxAcomp: cf.maxAcompanantes ? String(cf.maxAcompanantes) : "", desc: r.desc || "", requisitos: r.requisitos || "" } : { dias: [], inicio: hoy() } };
+    }
+    const T = D.tab || "catalogo";
+    const x = D.datos, c = x.cat ? ezCat(x.cat) : null, cupo = x.cupo ? +x.cupo : 0, nombre = (x.nombre || "").trim(), t = tiempoDe(x);
     const err = (k) => D.err[k] ? '<div class="ez-err" role="alert" data-k="' + k + '">' + ic("caution") + esc(D.err[k]) + "</div>" : "";
     const sec = (titulo, cuerpo, k, cls) => '<section class="ez-sec' + (cls ? " " + cls : "") + '"><h2>' + titulo + "</h2>" + cuerpo + (k ? err(k) : "") + "</section>";
-    const segm = (k, act, opts, etiqueta) => '<div class="ez-segm" role="radiogroup" aria-label="' + etiqueta + '">' + opts.map(([v, t]) => '<button type="button" role="radio" aria-checked="' + (x[k] === v) + '" data-act="' + act + '" data-v="' + esc(v) + '">' + t + "</button>").join("") + "</div>";
+    const segm = (k, act, opts, etiqueta) => '<div class="ez-segm" role="radiogroup" aria-label="' + etiqueta + '">' + opts.map(([v, tx]) => '<button type="button" role="radio" aria-checked="' + (x[k] === v) + '" data-act="' + act + '" data-v="' + esc(v) + '">' + tx + "</button>").join("") + "</div>";
+    const pm = (act, n, vacio, nombreN) => '<div class="ez-cupo"><button type="button" class="ez-pm" data-act="' + act + '" data-d="-1" aria-label="Menos ' + nombreN + '">' + ic("minus") + '</button><span class="ez-cupo__n" aria-live="polite">' + (n || vacio) + '</span><button type="button" class="ez-pm" data-act="' + act + '" data-d="1" aria-label="Más ' + nombreN + '">' + ic("plus") + "</button></div>";
+    const campoF = (k, label, tipo) => '<label class="ez-campo" for="f-' + k + '"><span>' + label + '</span><input id="f-' + k + '" type="' + (tipo || "date") + '" data-ez-f="' + k + '" data-ez-r value="' + esc(x[k] || "") + '"' + (tipo === "number" ? ' min="15" step="15"' : "") + (D.err[k] ? ' aria-invalid="true"' : "") + "></label>";
+    const radioCard = (cls, on, act, v, b, sub) => '<button type="button" role="radio" class="' + cls + '" aria-checked="' + on + '" data-act="' + act + '" data-v="' + esc(v) + '"><b>' + esc(b) + "</b><span>" + esc(sub) + "</span></button>";
+    /* Paso 1 · Catálogo: la necesidad y, dentro, los recursos comunes de la red (sin los fuera de alcance). */
+    const kats = x.cat ? (CAT.recursos || []).filter((k) => k.cat === x.cat && !k.e) : [], subs = [...new Set(kats.map((k) => k.sub))];
+    const vCat = sec("Qué necesidad atiende", '<div class="ez-cats" role="radiogroup" aria-label="Necesidad">' + CATS.map((k) => { const m = ezCat(k); return '<button type="button" role="radio" class="ez-cat" aria-checked="' + (x.cat === k) + '" data-act="e-cat" data-v="' + esc(k) + '">' + ic(m.ic) + "<span>" + esc(m.n) + "</span></button>"; }).join("") + "</div>", "cat") +
+      (c ? sec("Elige del catálogo", '<p class="ez-sec__x">Son los recursos comunes de la red para ' + esc(c.n) + ". Al elegir uno se precargan su formato, cuándo ocurre y las plazas; luego puedes cambiarlo todo.</p>" +
+        subs.map((sb) => '<div class="ez-kat-g"><h3>' + esc(sb) + '</h3><div class="ez-kats" role="radiogroup" aria-label="' + esc(sb) + '">' + kats.filter((k) => k.sub === sb).map((k) => radioCard("ez-kat", x.catalogo === k.id, "e-kat", k.id, k.n, FMT(k.f).n)).join("") + "</div></div>").join("") +
+        '<div class="ez-kats" role="radiogroup" aria-label="Otro">' + radioCard("ez-kat ez-kat--propio", x.catalogo === "propio", "e-kat", "propio", "No está en el catálogo", "Lo describes tú y eliges su formato") + "</div>", "catalogo") : "");
+    const vBas = '<section class="ez-sec"><label class="ez-nombre" for="f-nombre"><span>Nombre</span><input id="f-nombre" data-ez-f="nombre" value="' + esc(x.nombre || "") + '" placeholder="¿Qué ofrece tu entidad?" autocomplete="off"' + (D.err.nombre ? ' aria-invalid="true"' : "") + "></label>" + err("nombre") + "</section>" +
+      sec("Formato", '<div class="ez-modos ez-fmts" role="radiogroup" aria-label="Formato">' + (CAT.formatos || []).map((f) => radioCard("ez-modo", x.formato === f.id, "e-fmt", f.id, f.n, f.d)).join("") + "</div>", "formato");
+    /* Paso 3 · Cuándo: la forma decide qué campos pide; las próximas fechas se ven al momento. */
+    const conDias = (x.forma === "recurrente" && x.cada !== "mes") || x.forma === "sesiones", prox = x.forma ? proximas({ tiempo: t }, 4) : [];
+    const vCua = sec("Cómo ocurre", segm("forma", "e-forma", Object.entries(FORMA_T), "Cómo ocurre"), "forma") +
+      (x.forma === "recurrente" ? sec("Cada cuánto", segm("cada", "e-cada", [["dia", "Cada día"], ["semana", "Cada semana"], ["mes", "Cada mes"]], "Cada cuánto")) : "") +
+      (conDias ? sec("Qué días", '<div class="ez-dias" role="group" aria-label="Días">' + DIAS_ORD.map((d) => '<button type="button" role="checkbox" aria-checked="' + (x.dias || []).includes(d) + '" data-act="e-dia" data-v="' + d + '">' + DNOM[d] + "</button>").join("") + "</div>", "dias") : "") +
+      (x.forma ? sec(x.forma === "unico" ? "Fecha y hora" : x.forma === "estadia" ? "Disponible desde" : "Fechas y horario", '<div class="ez-fechas">' + campoF("inicio", x.forma === "unico" ? "Fecha" : "Desde") + (x.forma === "sesiones" ? campoF("fin", "Última sesión") : x.forma === "recurrente" ? campoF("fin", "Hasta (opcional)") : "") + (x.forma !== "estadia" ? campoF("hora", "Hora", "time") + campoF("duracion", "Duración (min)", "number") : "") + "</div>" + err("inicio") + err("fin")) +
+        sec("Próximas fechas", x.forma === "estadia" ? '<p class="ez-sec__x">Cada persona entra y sale en sus propias fechas; las plazas se cuentan por noche.</p>' : prox.length ? '<div class="ez-prox">' + prox.map((f) => "<span>" + fCorta(f) + (x.hora ? " · " + esc(x.hora) : "") + "</span>").join("") + "</div>" : '<p class="ez-sec__x">Con estos datos no hay fechas próximas.</p>') : "");
+    const vAcc = sec("Cómo se accede", '<div class="ez-modos" role="radiogroup" aria-label="Acceso">' + REC_OPC.modo.map((m) => radioCard("ez-modo", x.modo === m, "e-modo", m, MODO_T[m], MODO_D[m])).join("") + "</div>", "modo") +
+      '<div class="ez-dos">' + sec("Respuesta", segm("urg", "e-urg", [["Normal", "5 días"], ["Urgente", "24 h"]], "Plazo de respuesta"), "urg") +
+      sec(x.forma === "estadia" ? "Plazas por noche" : x.forma === "recurrente" ? "Plazas por fecha" : "Plazas", pm("e-cupo", cupo, "Sin límite", "plazas"), "cupo") + "</div>" +
+      '<div class="ez-dos">' + (x.forma === "recurrente" ? sec("Usos por persona", pm("e-lim", +x.limite || 0, "Sin límite", "usos")) : "") +
+      sec("Acompañantes", '<div class="ez-acomp"><span class="grow">' + (x.acomp ? "Puede venir con su familia; cada acompañante ocupa plaza." : "Solo la persona inscrita.") + '</span><button type="button" role="switch" class="ez-sw" aria-checked="' + !!x.acomp + '" aria-label="Admite acompañantes" data-act="e-acomp"><i></i></button></div>' + (x.acomp ? '<p class="ez-sec__x">Máximo por persona</p>' + pm("e-maxac", +x.maxAcomp || 0, "Sin máximo", "acompañantes") : "")) + "</div>";
+    const vDet = sec("Detalles", '<p class="ez-sec__x">Lo que cuentes aquí lo lee el conector antes de proponer el recurso: la descripción dice de qué trata y el requisito, quién puede acceder.</p><div class="grid2">' + fld("desc", "Descripción breve", { opc: true }) + fld("requisitos", "Requisito de acceso", { opc: true }) + "</div>");
+    const conErr = (k) => Object.keys(D.err).some((e) => TAB_DE[e] === k), faltan = REC_TABS.filter(([k]) => conErr(k)).map(([, tx]) => tx);
+    const aviso = T === "detalles" && faltan.length ? alerta("<b>Falta completar " + faltan.join(", ") + ".</b> Revísalo en " + (faltan.length > 1 ? "esos pasos" : "ese paso") + " o toca «Publicar» otra vez para completarlo con un ejemplo.", "warning") : "";
+    const cuerpo = { catalogo: vCat, basico: vBas, cuando: vCua, acceso: vAcc, detalles: aviso + vDet }[T] || vCat, ult = T === "detalles";
     return '<div class="bc-page stack"><div class="ez-top"><a class="ez-x" href="#/recursos" aria-label="Cerrar">' + ic("close") + "</a><h1>" + (r ? "Editar recurso" : "Nuevo recurso") + "</h1></div>" +
       (r ? "" : '<div class="bc-ejemplo">' + btn("Completar con datos de ejemplo", { v: "quiet", size: "small", icon: "sparkles", act: "ejemplo", a: { "data-k": "rec" } }) + "</div>") +
-      '<div class="ez-rg' + (T === "detalles" ? "" : " ez-rg--solo") + '"><div class="stack ez-form">' +
-      '<div class="nwt-tabs bc-subtabs"><div class="nwt-tabs__list" role="tablist" aria-label="Secciones">' + [["basico", "Básico"], ["acceso", "Acceso"], ["detalles", "Detalles"]].map(([k, t]) => '<button type="button" class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" data-act="e-tab" data-v="' + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + "</span></span></button>").join("") + "</div></div>" +
-      (T === "basico" ? '<section class="ez-sec"><label class="ez-nombre" for="f-nombre"><span>Nombre</span><input id="f-nombre" data-ez-f="nombre" value="' + esc(x.nombre || "") + '" placeholder="¿Qué ofrece tu entidad?" autocomplete="off"' + (D.err.nombre ? ' aria-invalid="true"' : "") + "></label>" + err("nombre") + "</section>" +
-      sec("Qué necesidad atiende", '<div class="ez-cats" role="radiogroup" aria-label="Necesidad">' + CATS.map((k) => { const m = ezCat(k); return '<button type="button" role="radio" class="ez-cat" aria-checked="' + (x.cat === k) + '" data-act="e-cat" data-v="' + esc(k) + '">' + ic(m.ic) + "<span>" + esc(m.n) + "</span></button>"; }).join("") + "</div>", "cat") : "") +
-      (T === "acceso" ? sec("Cómo se accede", '<div class="ez-modos" role="radiogroup" aria-label="Acceso">' + REC_OPC.modo.map((m) => '<button type="button" role="radio" class="ez-modo" aria-checked="' + (x.modo === m) + '" data-act="e-modo" data-v="' + m + '"><b>' + esc(MODO_T[m]) + "</b><span>" + MODO_D[m] + "</span></button>").join("") + "</div>", "modo") +
-      '<div class="ez-dos">' + sec("Respuesta", segm("urg", "e-urg", [["Normal", "5 días"], ["Urgente", "24 h"]], "Plazo de respuesta"), "urg") +
-      sec("Plazas", '<div class="ez-cupo"><button type="button" class="ez-pm" data-act="e-cupo" data-d="-1" aria-label="Menos plazas">' + ic("minus") + '</button><span class="ez-cupo__n" aria-live="polite">' + (cupo || "Sin límite") + '</span><button type="button" class="ez-pm" data-act="e-cupo" data-d="1" aria-label="Más plazas">' + ic("plus") + "</button></div>", "cupo") + "</div>" : "") +
-      (T === "detalles" ? sec("Formato", segm("tipo", "e-tipo", REC_OPC.tipo.map((t) => [t, t]), "Formato"), "tipo") +
-      sec("Detalles", '<p class="ez-sec__x">Lo que cuentes aquí lo lee el conector antes de proponer el recurso: la descripción dice de qué trata y el requisito, quién puede acceder.</p><div class="grid2">' + fld("desc", "Descripción breve", { opc: true }) + fld("requisitos", "Requisito de acceso", { opc: true }) + "</div>") : "") + "</div>" +
-      (T !== "detalles" ? "" : '<aside class="ez-prev"><span class="ez-prev__t">' + ic("eye") + 'Así lo verán los conectores</span><p class="ez-prev__x">Es la tarjeta que cada conector ve cuando le sugerimos este recurso a una persona.</p><div class="ez-prev__c"><div class="ez-prev__h">' + (c ? ezIco(x.cat) : ezIco(null, "shapes", 0)) + "<div><span>" + esc(ent(ENT).nombre) + '</span><b class="ez-prev__nombre">' + esc(nombre || "Tu recurso") + "</b></div></div>" +
-      '<div class="ez-prev__p">' + (c ? "<span>" + esc(c.n) + "</span>" : "") + (x.modo ? "<span>" + esc(MODO_T[x.modo]) + "</span>" : "") + "<span>" + (cupo ? cupo + " plazas" : "Sin límite") + "</span>" + (x.urg ? "<span>" + (x.urg === "Urgente" ? "24 h" : "5 días") + "</span>" : "") + "</div>" +
+      '<div class="ez-rg' + (ult ? "" : " ez-rg--solo") + '"><div class="stack ez-form">' +
+      '<div class="nwt-tabs bc-subtabs"><div class="nwt-tabs__list" role="tablist" aria-label="Pasos">' + REC_TABS.map(([k, tx]) => '<button type="button" class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" data-act="e-tab" data-v="' + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + tx + (conErr(k) ? ' <span class="ez-tab-err" aria-label="falta completar">●</span>' : "") + "</span></span></button>").join("") + "</div></div>" +
+      cuerpo + "</div>" +
+      (!ult ? "" : '<aside class="ez-prev"><span class="ez-prev__t">' + ic("eye") + 'Así lo verán los conectores</span><p class="ez-prev__x">Es la tarjeta que cada conector ve cuando le sugerimos este recurso a una persona.</p><div class="ez-prev__c"><div class="ez-prev__h">' + (c ? ezIco(x.cat) : ezIco(null, "shapes", 0)) + "<div><span>" + esc(ent(ENT).nombre) + '</span><b class="ez-prev__nombre">' + esc(nombre || "Tu recurso") + "</b></div></div>" +
+      '<div class="ez-prev__p">' + (x.forma ? "<span>" + esc(cuandoTxt({ tiempo: t })) + "</span>" : "") + (x.modo ? "<span>" + esc(MODO_T[x.modo]) + "</span>" : "") + "<span>" + (cupo ? cupo + " plazas" : "Sin límite") + "</span>" + (x.urg ? "<span>" + (x.urg === "Urgente" ? "24 h" : "5 días") + "</span>" : "") + "</div>" +
       '<p class="ez-prev__s"><i></i>' + (c ? "Se sugiere a quien marque " + esc(c.n) + " en su Mapa" : "Elige una necesidad para ver a quién se sugiere") + "</p></div></aside>") + "</div>" +
       /* Paso a paso: la barra inferior cambia de paso; en el último guarda (con el relleno de ejemplo al 2.º toque). */
-      '<div class="ez-bar">' + (T === "basico" ? "<span></span>" : btn("Atrás", { v: "quiet", act: "e-prev" })) + (T === "detalles" ? btn(r ? "Guardar cambios" : "Publicar en la red", { act: "rec-guardar", a: { id: "btn-sig" } }) : btn("Continuar", { act: "e-next", a: { id: "btn-sig" } })) + "</div></div>";
+      '<div class="ez-bar">' + (T === "catalogo" ? "<span></span>" : btn("Atrás", { v: "quiet", act: "e-prev" })) + (ult ? btn(r ? "Guardar cambios" : "Publicar en la red", { act: "rec-guardar", a: { id: "btn-sig" } }) : btn("Continuar", { act: "e-next", a: { id: "btn-sig" } })) + "</div></div>";
   }
   const MODO_T = { Libre: "Acceso libre", "Inscripción": "Inscripción", Solicitud: "Por solicitud" };
-  const MODO_D = { Libre: "Sin decisión", "Inscripción": "Confirma plaza", Solicitud: "Decides tú" };
+  const MODO_D = { Libre: "Sin decisión", "Inscripción": "Plaza directa si hay sitio", Solicitud: "Decides tú" };
   const ezCampo = (k) => (b) => { D.datos[k] = b.dataset.v; delete D.err[k]; ezRe('[data-act="' + b.dataset.act + '"][data-v="' + b.dataset.v + '"]'); };
   /* El nombre es un campo propio: actualiza la vista previa sin repintar y no pierde el foco. */
   document.addEventListener("input", (e) => {
@@ -759,11 +804,15 @@
     const v = document.querySelector(".ez-prev__nombre"); if (v) v.textContent = t.value.trim() || "Tu recurso";
   });
   const validarRec = () => {
-    D.err = {};
-    REQ_REC.forEach((k) => { if (!String(D.datos[k] || "").trim()) D.err[k] = "Este dato es obligatorio."; });
-    if (D.datos.cupo && !/^[1-9]\d*$/.test(String(D.datos.cupo).trim())) D.err.cupo = "Escribe un número de plazas, o déjalo vacío.";
-    const TAB_DE = { nombre: "basico", cat: "basico", modo: "acceso", urg: "acceso", cupo: "acceso", tipo: "detalles" }, k1 = Object.keys(D.err)[0];
-    if (k1) D.tab = TAB_DE[k1] || D.tab;
+    D.err = {}; const x = D.datos;
+    REQ_REC.forEach((k) => { if (!String(x[k] || "").trim()) D.err[k] = "Este dato es obligatorio."; });
+    if (!x.catalogo) D.err.catalogo = "Elige un recurso del catálogo o «No está en el catálogo».";
+    if (!x.forma) D.err.forma = "Elige cómo ocurre.";
+    if (!x.inicio) D.err.inicio = "Pon la fecha de inicio.";
+    if (((x.forma === "recurrente" && x.cada !== "mes") || x.forma === "sesiones") && !(x.dias || []).length) D.err.dias = "Marca al menos un día.";
+    if (x.forma === "sesiones" && !x.fin) D.err.fin = "Pon la fecha de la última sesión.";
+    else if (x.fin && x.inicio && x.fin < x.inicio) D.err.fin = "La fecha final no puede ser anterior a la de inicio.";
+    if (x.cupo && !/^[1-9]\d*$/.test(String(x.cupo).trim())) D.err.cupo = "Escribe un número de plazas, o déjalo vacío.";
     return !Object.keys(D.err).length;
   };
   const rellenarRec = () => { Object.keys(EJ_REC).forEach((k) => { if (!String(D.datos[k] || "").trim() || D.err[k]) D.datos[k] = EJ_REC[k]; }); };
@@ -775,7 +824,7 @@
     if (!p) return '<div class="bc-page">' + volver + '<p class="mut">No existe este expediente.</p></div>';
     if (p.entidad !== ENT) {
       const s = solsDe(p.id).find((x) => rec(x.recurso).entidad === ENT);
-      return '<div class="bc-page stack">' + volver + (s ? card(cardH("Ficha mínima") + fichaMinima(p, rec(s.recurso)) + '<div style="margin-top:14px">' + alerta("Esta persona es de " + esc(ent(p.entidad).nombre) + ". Solo ves lo necesario para decidir su solicitud.", "informative") + "</div>", { cls: "bc-minima" })
+      return '<div class="bc-page stack">' + volver + (s ? card(cardH("Ficha mínima") + fichaMinima(p, rec(s.recurso)) + '<div style="margin-top:14px">' + alerta("Le atiende " + esc(ent(p.entidad).nombre) + ". Solo ves lo necesario para decidir su solicitud.", "informative") + "</div>", { cls: "bc-minima" })
         : '<div class="bc-lock">' + ic("lock") + "<div><b>No tienes acceso a este expediente.</b><p class=\"mut\">Pertenece a otra entidad.</p></div></div>") + "</div>";
     }
     if (!vistos.has(p.id)) { vistos.add(p.id); S.accesos.push({ persona: p.id, quien: ROL === "entidad" ? "Coordinación" : con(YO).nombre, entidad: ENT, cuando: ahora(), para: ROL === "entidad" ? "Coordinación del caso" : "Seguimiento del caso" }); guardar(); }
@@ -1086,7 +1135,7 @@
     "rec-pausa": (b) => { const r = rec(b.dataset.r); r.pausado = !r.pausado; guardar(); toast(r.pausado ? r.nombre + " queda pausado: deja de proponerse en la red." : r.nombre + " vuelve a estar activo."); ezRe('[data-act="rec-pausa"][data-r="' + r.id + '"]'); },
     "rec-guardar": () => {
       if (!insistir("rec", validarRec, rellenarRec)) return;
-      const x = D.datos, campos = { nombre: x.nombre.trim(), cat: x.cat, tipo: x.tipo, modo: x.modo, urg: x.urg, cupo: x.cupo ? +x.cupo : undefined, desc: (x.desc || "").trim(), requisitos: (x.requisitos || "").trim() };
+      const x = D.datos, campos = { nombre: x.nombre.trim(), cat: x.cat, catalogo: x.catalogo, formato: x.formato, modo: x.modo, urg: x.urg, cupo: x.cupo ? +x.cupo : undefined, limite: x.forma === "recurrente" && x.limite ? +x.limite : undefined, tiempo: tiempoDe(x), config: { acompanantes: !!x.acomp, maxAcompanantes: x.acomp && x.maxAcomp ? +x.maxAcomp : undefined }, desc: (x.desc || "").trim(), requisitos: (x.requisitos || "").trim() };
       if (D.id === "nuevo") S.recursos.push(Object.assign({ id: "r" + Date.now(), entidad: ENT }, campos)); else Object.assign(rec(D.id), campos);
       guardar(); toast(D.id === "nuevo" ? "Recurso creado. Ya se propone a los conectores de la red." : "Cambios guardados."); D = null; ir("#/recursos");
     },
@@ -1101,12 +1150,20 @@
     "ver-con": (b) => { fCons = [b.dataset.c]; filtro = "todas"; busca = ""; ir("#/personas"); },
     "quitar-con": () => { fCons = []; render(); },
     "pop-con": () => { conOp = !conOp; ezRe("#btn-fcon"); },
-    "e-next": () => { const o = ["basico", "acceso", "detalles"], k = o.indexOf(D.tab || "basico"); D.tab = o[Math.min(k + 1, 2)]; ezRe("#btn-sig"); },
-    "e-prev": () => { const o = ["basico", "acceso", "detalles"], k = o.indexOf(D.tab || "basico"); D.tab = o[Math.max(k - 1, 0)]; ezRe("#btn-sig"); },
+    "e-next": () => { const o = REC_TABS.map((x) => x[0]), k = o.indexOf(D.tab || "catalogo"); D.tab = o[Math.min(k + 1, o.length - 1)]; ezRe("#btn-sig"); },
+    "e-prev": () => { const o = REC_TABS.map((x) => x[0]), k = o.indexOf(D.tab || "catalogo"); D.tab = o[Math.max(k - 1, 0)]; ezRe("#btn-sig"); },
     "e-tab": (b) => { D.tab = b.dataset.v; ezRe('[data-act="e-tab"][data-v="' + b.dataset.v + '"]'); },
     "e-sel": (b) => { ezSel = b.dataset.id; ezRe('[data-act="e-sel"][data-id="' + b.dataset.id + '"]'); },
     "e-ir": (b) => { ezSel = b.dataset.id; ir(b.dataset.v === "solicitudes" ? "#/personas/solicitudes" : "#/personas/asignar"); },
-    "e-cat": ezCampo("cat"), "e-modo": ezCampo("modo"), "e-urg": ezCampo("urg"), "e-tipo": ezCampo("tipo"),
+    "e-cat": (b) => { const x = D.datos, k = KAT(x.catalogo); x.cat = b.dataset.v; if (k && k.cat !== x.cat) x.catalogo = ""; delete D.err.cat; ezRe('[data-act="e-cat"][data-v="' + b.dataset.v + '"]'); },
+    "e-kat": (b) => { const x = D.datos, k = KAT(b.dataset.v), previo = KAT(x.catalogo); x.catalogo = b.dataset.v; if (k) { if (!x.nombre || (previo && x.nombre === previo.n)) x.nombre = k.n; aplicarFmt(x, k.f); } delete D.err.catalogo; delete D.err.nombre; ezRe('[data-act="e-kat"][data-v="' + b.dataset.v + '"]'); },
+    "e-fmt": (b) => { aplicarFmt(D.datos, b.dataset.v); delete D.err.formato; ezRe('[data-act="e-fmt"][data-v="' + b.dataset.v + '"]'); },
+    "e-forma": (b) => { const x = D.datos; x.forma = b.dataset.v; if (x.forma === "recurrente" && !x.cada) x.cada = "semana"; delete D.err.forma; ezRe('[data-act="e-forma"][data-v="' + b.dataset.v + '"]'); },
+    "e-dia": (b) => { const x = D.datos, d = b.dataset.v; x.dias = (x.dias || []).includes(d) ? x.dias.filter((y) => y !== d) : (x.dias || []).concat(d); delete D.err.dias; ezRe('[data-act="e-dia"][data-v="' + d + '"]'); },
+    "e-acomp": () => { D.datos.acomp = !D.datos.acomp; ezRe('[data-act="e-acomp"]'); },
+    "e-lim": (b) => { const n = +D.datos.limite || 0, d = +b.dataset.d; D.datos.limite = d > 0 ? String(n ? n + 1 : 4) : n > 1 ? String(n - 1) : ""; ezRe('[data-act="e-lim"][data-d="' + b.dataset.d + '"]'); },
+    "e-maxac": (b) => { const n = +D.datos.maxAcomp || 0, d = +b.dataset.d; D.datos.maxAcomp = d > 0 ? String(n + 1) : n > 1 ? String(n - 1) : ""; ezRe('[data-act="e-maxac"][data-d="' + b.dataset.d + '"]'); },
+    "e-cada": ezCampo("cada"), "e-modo": ezCampo("modo"), "e-urg": ezCampo("urg"),
     "e-cupo": (b) => { const n = +D.datos.cupo || 0, d = +b.dataset.d; D.datos.cupo = d > 0 ? String(n ? n + 1 : 10) : n > 1 ? String(n - 1) : ""; delete D.err.cupo; ezRe('[data-act="e-cupo"][data-d="' + b.dataset.d + '"]'); },
     "asignar-a": (b) => { const p = per(b.dataset.p); p.conector = b.dataset.c; guardar(); toast(p.nombre + " queda asignada a " + con(p.conector).nombre + "."); render(); },
     "asignar-ab": (b) => { asignando = b.dataset.p; conSel = (S.conectores.find((c) => c.entidad === ENT) || {}).id; ezRe("#ez-mt"); },
@@ -1198,7 +1255,7 @@
     if (t.hasAttribute("data-czq")) { czQ = t.value; const pos = t.selectionStart; render(); const n = $("#f-czq"); n.focus(); n.setSelectionRange(pos, pos); return; }
     if (t.hasAttribute("data-busca")) { busca = t.value; const pos = t.selectionStart; render(); const n = $("#f-busca"); n.focus(); n.setSelectionRange(pos, pos); }
   });
-  document.addEventListener("change", (e) => { if (e.target.dataset.f) D.datos[e.target.dataset.f] = e.target.value; });
+  document.addEventListener("change", (e) => { if (e.target.dataset.f) D.datos[e.target.dataset.f] = e.target.value; if (e.target.hasAttribute("data-ez-r")) ezRe("#" + e.target.id); });
   /* El rechazo no se confirma sin motivo: el botón se habilita al elegirlo. */
   document.addEventListener("change", (e) => { const id = e.target.dataset && e.target.dataset.mot; if (!id) return; const b = document.querySelector('[data-act="rechazar"][data-s="' + id + '"]'); if (b) b.disabled = !e.target.value; });
 

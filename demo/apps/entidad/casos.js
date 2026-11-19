@@ -57,15 +57,17 @@ window.CASOS = [
     id: "3.3", titulo: "Mis recursos",
     steps: [
       { t: "goto", url: APP + "index.html?rol=entidad#/recursos", body: "Lo que la entidad ofrece a la red: lo registró al darse de alta y lo gestiona aquí." },
-      VE('[data-recurso="r1"]', "Cada recurso con su acceso, plazo, plazas ocupadas y solicitudes por decidir."),
+      VE('[data-recurso="r1"]', "Cada recurso con cuándo ocurre, su próxima fecha, plazas ocupadas y solicitudes por decidir."),
       SI('[data-recurso="r4"] [data-act="rec-pausa"]', "Pausar: deja de proponerse a los conectores, pero conserva a sus personas."),
       SI('[data-recurso="r4"] [data-act="rec-pausa"]', "Y se reactiva igual."),
       SI("#btn-nuevo-rec", "Añade un recurso nuevo."),
-      SI("#btn-sig", "Continuar pasa de Básico a Acceso."),
-      SI("#btn-sig", "Y de Acceso a Detalles; en el último paso el botón publica."),
-      SI("#btn-sig", "Si falta algo, lo marca."),
-      SI("#btn-sig", "La segunda vez lo completa con un ejemplo."),
-      SI("#btn-sig", "La tercera lo crea: desde ya se propone en toda la red."),
+      SI('[data-act="e-cat"][data-v="Formación"]', "Primero, la necesidad que atiende."),
+      SI('[data-act="e-kat"][data-v="k110"]', "Y el recurso del catálogo común: precarga su formato, cuándo ocurre y las plazas."),
+      SI("#btn-sig", "Básico: el nombre y el formato, ya elegidos."),
+      SI("#btn-sig", "Cuándo: por sesiones, con las próximas fechas a la vista."),
+      SI("#btn-sig", "Acceso y plazas: cómo se entra, cuántos caben y si admite acompañantes."),
+      SI("#btn-sig", "Detalles y vista previa: así lo verán los conectores."),
+      SI("#btn-sig", "Publicar: desde ya se propone en toda la red, con su calendario."),
       VE(".cols", "El nuevo recurso aparece en la lista, activo.")
     ]
   }

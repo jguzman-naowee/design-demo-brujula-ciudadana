@@ -607,3 +607,29 @@ body.rol-entidad{--sp-r-tx:#B42318;--sp-r-bg:#FDE3E1;--sp-a-tx:#93370D;--sp-a-bg
 .sp-card--lista:not(.sp-card--abierta) .sp-row{border-bottom:0}
 .ez-sec__x,.ez-prev__x{margin:0 0 12px;font-size:13px;line-height:1.4;color:var(--bc-mut)}
 .ez-prev__x{margin:-4px 0 12px}
+
+/* Editor por pasos (ola 1): catálogo, formato, cuándo y acompañantes. Reusa ez-modo y ez-segm. */
+.ez-kat-g{display:flex;flex-direction:column;gap:8px}
+.ez-kat-g h3{margin:4px 0 0;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--bc-mut)}
+.ez-kats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.ez-kat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:60px;padding:12px 14px;border:2px solid transparent;border-radius:16px;background:var(--bc-inset);color:var(--bc-ink);font-family:inherit;text-align:left;cursor:pointer}
+.ez-kat b{font-size:14px;font-weight:600}
+.ez-kat span{font-size:12px;color:var(--bc-mut)}
+.ez-kat[aria-checked=true]{border-color:var(--bc-acc);background:var(--bc-acc-soft)}
+.ez-kat--propio{border-style:dashed;border-color:#C9CBD9;background:transparent}
+.ez-fmts{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.ez-dias{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.ez-dias button{min-height:44px;border:2px solid transparent;border-radius:12px;background:var(--bc-inset);color:#3E4157;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ez-dias button[aria-checked=true]{border-color:var(--bc-acc);background:var(--bc-acc-soft);color:var(--bc-acc)}
+.ez-fechas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.ez-campo{display:flex;flex-direction:column;gap:6px}
+.ez-campo span{font-size:13px;color:var(--bc-mut)}
+.ez-campo input{min-height:44px;padding:0 12px;border:1px solid #D5D7E2;border-radius:12px;background:#fff;color:var(--bc-ink);font-family:inherit;font-size:15px}
+.ez-campo input:focus{outline:2px solid var(--bc-acc);outline-offset:1px}
+.ez-campo input[aria-invalid=true]{border-color:#D92D20}
+.ez-prox{display:flex;flex-wrap:wrap;gap:6px}
+.ez-prox span{padding:6px 12px;border-radius:999px;background:var(--bc-inset);font-size:13px;font-weight:600}
+.ez-acomp{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--bc-mut)}
+.ez-rec .ez-cuando{margin:4px 0 0;font-size:13px;font-weight:600;color:var(--bc-acc)}
+@media (max-width:720px){.ez-dias{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ez-tab-err{color:#D92D20;font-size:10px;vertical-align:middle}
