@@ -28,10 +28,14 @@ recursos: [{
     cada: "semana",                    // recurrente: dia | semana | mes
     dias: ["lu", "mi"], hora: "17:00", duracion: 90   // minutos
   },
-  plazas: 15,                          // por sesión o en total, según la forma
-  config: { acompanantes: true, maxAcompanantes: 3, limite: 12 }   // limite = usos por persona
+  cupo: 15,                            // plazas: por fecha o en total, según la forma
+  limite: 12,                          // usos por persona (recurrentes con consumo)
+  config: { acompanantes: true, maxAcompanantes: 3 }
 }]
 ```
+
+En la demo se mantienen los nombres `cupo` y `limite` que ya usaba la app; `plazas` en el texto
+de las specs es lo mismo que `cupo`.
 
 | Forma | Ejemplo | Qué cuenta |
 |---|---|---|
@@ -41,7 +45,7 @@ recursos: [{
 | `estadia` | Albergue, piso de acogida | Plazas ocupadas entre desde–hasta de cada persona |
 
 Migración de la semilla: `tipo` desaparece. `frecuencia` (Diario/Semanal) pasa a
-`tiempo.forma: "recurrente"`. `limite` y `cupo` pasan a `config.limite` y `plazas`.
+`tiempo.forma: "recurrente"` con `cada`. `cupo` y `limite` se mantienen.
 
 ## Reglas
 

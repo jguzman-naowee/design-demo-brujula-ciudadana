@@ -223,6 +223,7 @@ window.BC_SEMILLA = () => {
   const M = (s) => Object.fromEntries(window.BC_CATALOGO.dimensiones.map((d, i) => [d.id, "var"[+s[i]] || "v"]));
   const B1 = (s) => window.BC_DERIVAR(Object.fromEntries(window.BC_CATALOGO.autoevaluacion.map((q, i) => [q.id, "var"[+s[i]]])));
   const C = (e, c) => ({ privacidad: true, tratamiento: true, entidades: e, comunicaciones: c });
+  const F = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   const P = (o) => Object.assign({ email: "", docTipo: "En trámite", doc: "", idioma: "Español", canal: "WhatsApp", municipio: "Madrid", estado: "En seguimiento", mapaTipo: "completo", notas: "" }, o);
   return {
     entidades: [
@@ -238,25 +239,25 @@ window.BC_SEMILLA = () => {
       { id: "c5", nombre: "Ana Belén Ruiz", entidad: "e3", rol: "Trabajadora social", ultima: "Hoy, 08:50" }
     ],
     recursos: [
-      { id: "r1", entidad: "e1", nombre: "Bolsa de alquiler social", catalogo: "k007", formato: "atencion", cat: "Vivienda", tipo: "Grupo", modo: "Solicitud", urg: "Normal", cupo: 12 },
-      { id: "r2", entidad: "e1", nombre: "Orientación jurídica", catalogo: "k050", formato: "atencion", cat: "Documentación y Trámites", tipo: "Evento", modo: "Inscripción", urg: "Normal", cupo: 20 },
-      { id: "r3", entidad: "e1", nombre: "Banco de alimentos", catalogo: "k025", formato: "entrega", cat: "Alimentación", tipo: "Grupo", modo: "Libre", urg: "Urgente", frecuencia: "Diario", limite: 30 },
-      { id: "r4", entidad: "e1", nombre: "Taller de competencias digitales", catalogo: "k119", formato: "taller", cat: "Competencias Digitales", tipo: "Evento", modo: "Inscripción", urg: "Normal", cupo: 15 },
-      { id: "r5", entidad: "e2", nombre: "Albergue", catalogo: "k002", formato: "alojamiento", cat: "Vivienda", tipo: "Grupo", modo: "Solicitud", urg: "Urgente", cupo: 30 },
-      { id: "r6", entidad: "e2", nombre: "Orientación laboral", catalogo: "k097", formato: "atencion", cat: "Empleo", tipo: "Grupo", modo: "Inscripción", urg: "Normal", cupo: 25 },
-      { id: "r7", entidad: "e2", nombre: "Grupos de apoyo", catalogo: "k057", formato: "grupo", cat: "Red de Apoyo", tipo: "Grupo", modo: "Libre", urg: "Normal" },
-      { id: "r8", entidad: "e3", nombre: "Comedor social", catalogo: "k023", formato: "entrega", cat: "Alimentación", tipo: "Grupo", modo: "Libre", urg: "Urgente", frecuencia: "Diario", limite: 30 },
-      { id: "r9", entidad: "e3", nombre: "Atención psicológica", catalogo: "k037", formato: "atencion", cat: "Salud y Bienestar", tipo: "Grupo", modo: "Solicitud", urg: "Normal", cupo: 8 },
-      { id: "r10", entidad: "e3", nombre: "Clases de español", catalogo: "k102", formato: "taller", cat: "Formación", tipo: "Grupo", modo: "Inscripción", urg: "Normal", cupo: 18 },
-      { id: "r11", entidad: "e2", nombre: "Asesoría legal en extranjería", catalogo: "k046", formato: "atencion", cat: "Documentación y Trámites", tipo: "Evento", modo: "Solicitud", urg: "Urgente", cupo: 6 },
-      { id: "r12", entidad: "e3", nombre: "Mentor social", catalogo: "k055", formato: "atencion", cat: "Red de Apoyo", tipo: "Grupo", modo: "Inscripción", urg: "Normal", cupo: 10 },
-      { id: "r13", entidad: "e1", nombre: "Piso de acogida temporal", catalogo: "k004", formato: "alojamiento", cat: "Vivienda", tipo: "Individual", modo: "Solicitud", urg: "Normal", cupo: 2 },
-      { id: "r14", entidad: "e1", nombre: "Taller de cocina intercultural", catalogo: "k110", formato: "taller", cat: "Formación", tipo: "Evento", modo: "Inscripción", urg: "Normal", cupo: 12, base: 12 },
-      { id: "r15", entidad: "e1", nombre: "Cupo de emergencia habitacional", catalogo: "k003", formato: "alojamiento", cat: "Vivienda", tipo: "Grupo", modo: "Solicitud", urg: "Urgente", cupo: 4, base: 3 },
-      { id: "r16", entidad: "e1", nombre: "Apoyo escolar", catalogo: "k075", formato: "grupo", cat: "Infancia y Menores", tipo: "Grupo", modo: "Inscripción", urg: "Normal", cupo: 20, base: 6, frecuencia: "Semanal", limite: 12 },
-      { id: "r17", entidad: "e1", nombre: "Acompañamiento psicosocial", catalogo: "k038", formato: "atencion", cat: "Salud y Bienestar", tipo: "Individual", modo: "Solicitud", urg: "Normal", cupo: 8, base: 8 },
-      { id: "r18", entidad: "e1", nombre: "Despensa solidaria", catalogo: "k026", formato: "entrega", cat: "Alimentación", tipo: "Grupo", modo: "Libre", urg: "Normal", frecuencia: "Semanal", limite: 12 },
-      { id: "r19", entidad: "e1", nombre: "Feria de empleo", catalogo: "propio", formato: "evento", cat: "Empleo", tipo: "Evento", modo: "Inscripción", urg: "Normal", cupo: 40, base: 38 }
+      { id: "r1", entidad: "e1", nombre: "Bolsa de alquiler social", catalogo: "k007", formato: "atencion", cat: "Vivienda", modo: "Solicitud", urg: "Normal", cupo: 12, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["ma"], hora: "10:00", duracion: 60 } },
+      { id: "r2", entidad: "e1", nombre: "Orientación jurídica", catalogo: "k050", formato: "atencion", cat: "Documentación y Trámites", modo: "Inscripción", urg: "Normal", cupo: 20, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["ju"], hora: "16:00", duracion: 90 } },
+      { id: "r3", entidad: "e1", nombre: "Banco de alimentos", catalogo: "k025", formato: "entrega", cat: "Alimentación", modo: "Libre", urg: "Urgente", limite: 30, tiempo: { forma: "recurrente", cada: "dia", inicio: "2026-09-01", dias: ["lu", "ma", "mi", "ju", "vi"], hora: "11:00", duracion: 60 } },
+      { id: "r4", entidad: "e1", nombre: "Taller de competencias digitales", catalogo: "k119", formato: "taller", cat: "Competencias Digitales", modo: "Inscripción", urg: "Normal", cupo: 15, tiempo: { forma: "sesiones", inicio: F(-14), fin: F(28), dias: ["lu", "mi"], hora: "17:00", duracion: 90 } },
+      { id: "r5", entidad: "e2", nombre: "Albergue", catalogo: "k002", formato: "alojamiento", cat: "Vivienda", modo: "Solicitud", urg: "Urgente", cupo: 30, tiempo: { forma: "estadia", inicio: "2026-01-01" } },
+      { id: "r6", entidad: "e2", nombre: "Orientación laboral", catalogo: "k097", formato: "atencion", cat: "Empleo", modo: "Inscripción", urg: "Normal", cupo: 25, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["mi"], hora: "10:00", duracion: 60 } },
+      { id: "r7", entidad: "e2", nombre: "Grupos de apoyo", catalogo: "k057", formato: "grupo", cat: "Red de Apoyo", modo: "Libre", urg: "Normal", tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["vi"], hora: "18:00", duracion: 90 } },
+      { id: "r8", entidad: "e3", nombre: "Comedor social", catalogo: "k023", formato: "entrega", cat: "Alimentación", modo: "Libre", urg: "Urgente", limite: 30, tiempo: { forma: "recurrente", cada: "dia", inicio: "2026-09-01", dias: ["lu", "ma", "mi", "ju", "vi", "sa", "do"], hora: "13:30", duracion: 90 } },
+      { id: "r9", entidad: "e3", nombre: "Atención psicológica", catalogo: "k037", formato: "atencion", cat: "Salud y Bienestar", modo: "Solicitud", urg: "Normal", cupo: 8, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["ma", "ju"], hora: "09:30", duracion: 50 } },
+      { id: "r10", entidad: "e3", nombre: "Clases de español", catalogo: "k102", formato: "taller", cat: "Formación", modo: "Inscripción", urg: "Normal", cupo: 18, tiempo: { forma: "sesiones", inicio: F(-30), fin: F(60), dias: ["ma", "ju"], hora: "18:00", duracion: 90 } },
+      { id: "r11", entidad: "e2", nombre: "Asesoría legal en extranjería", catalogo: "k046", formato: "atencion", cat: "Documentación y Trámites", modo: "Solicitud", urg: "Urgente", cupo: 6, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["lu"], hora: "11:00", duracion: 60 } },
+      { id: "r12", entidad: "e3", nombre: "Mentor social", catalogo: "k055", formato: "atencion", cat: "Red de Apoyo", modo: "Inscripción", urg: "Normal", cupo: 10, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["mi"], hora: "17:00", duracion: 60 } },
+      { id: "r13", entidad: "e1", nombre: "Piso de acogida temporal", catalogo: "k004", formato: "alojamiento", cat: "Vivienda", modo: "Solicitud", urg: "Normal", cupo: 2, tiempo: { forma: "estadia", inicio: "2026-01-01" } },
+      { id: "r14", entidad: "e1", nombre: "Taller de cocina intercultural", catalogo: "k110", formato: "taller", cat: "Formación", modo: "Inscripción", urg: "Normal", cupo: 12, base: 12, tiempo: { forma: "sesiones", inicio: F(5), fin: F(33), dias: ["sa"], hora: "11:00", duracion: 120 } },
+      { id: "r15", entidad: "e1", nombre: "Cupo de emergencia habitacional", catalogo: "k003", formato: "alojamiento", cat: "Vivienda", modo: "Solicitud", urg: "Urgente", cupo: 4, base: 3, tiempo: { forma: "estadia", inicio: "2026-01-01" } },
+      { id: "r16", entidad: "e1", nombre: "Apoyo escolar", catalogo: "k075", formato: "grupo", cat: "Infancia y Menores", modo: "Inscripción", urg: "Normal", cupo: 20, base: 6, limite: 12, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["lu", "mi"], hora: "16:30", duracion: 90 } },
+      { id: "r17", entidad: "e1", nombre: "Acompañamiento psicosocial", catalogo: "k038", formato: "atencion", cat: "Salud y Bienestar", modo: "Solicitud", urg: "Normal", cupo: 8, base: 8, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["vi"], hora: "10:00", duracion: 60 } },
+      { id: "r18", entidad: "e1", nombre: "Despensa solidaria", catalogo: "k026", formato: "entrega", cat: "Alimentación", modo: "Libre", urg: "Normal", limite: 12, tiempo: { forma: "recurrente", cada: "semana", inicio: "2026-09-01", dias: ["sa"], hora: "10:00", duracion: 120 } },
+      { id: "r19", entidad: "e1", nombre: "Feria de empleo", catalogo: "propio", formato: "evento", cat: "Empleo", modo: "Inscripción", urg: "Normal", cupo: 40, base: 38, tiempo: { forma: "unico", inicio: F(9), hora: "10:00", duracion: 240 } }
     ],
     personas: [
       P({ id: "BC-2026-0141", nombre: "Yasmina", apellidos: "Haddad", nac: "1991-04-12", tel: "+34 611 204 118", cp: "28026", idioma: "Árabe", origen: "conector", entidad: "e1", conector: "c1", alta: "2026-10-02", consent: C(true, true), mapa: M("2101120010110011") }),

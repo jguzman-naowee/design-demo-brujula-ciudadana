@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v3";
+  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v4";
   const qs = new URLSearchParams(location.search);
   const ROL = ["ciudadano", "conector", "entidad"].includes(qs.get("rol")) ? qs.get("rol") : "ciudadano";
   document.body.classList.add("rol-" + ROL);
@@ -429,7 +429,7 @@
   }
   function kRed() {
     return '<div class="bc-page kz-page stack"><div class="kz-head"><div><span class="kz-eyebrow">Catálogo</span><h1>Recursos de entidades</h1></div></div>' +
-      S.entidades.map((e) => S.recursos.filter((r) => r.entidad === e.id && !r.pausado).map((r) => card('<span class="kz-ent">' + ic("building") + esc(e.nombre) + " · " + esc(e.zona) + '</span><div class="bc-item"><div class="grow"><div class="t">' + esc(r.nombre) + '</div><div class="s">' + esc(r.cat) + " · " + esc(r.tipo) + (r.cupo ? " · cupo " + r.cupo : "") + '</div></div><span class="row" style="gap:6px">' + tag("Acceso: " + r.modo) + tag(r.urg, r.urg === "Urgente" ? "warning" : "neutral") + "</span></div>", { cls: "kz-recurso" })).join("")).join("") + "</div>";
+      S.entidades.map((e) => S.recursos.filter((r) => r.entidad === e.id && !r.pausado).map((r) => card('<span class="kz-ent">' + ic("building") + esc(e.nombre) + " · " + esc(e.zona) + '</span><div class="bc-item"><div class="grow"><div class="t">' + esc(r.nombre) + '</div><div class="s">' + esc(r.cat) + " · " + esc(cuandoTxt(r)) + (proxTxt(r) ? " · próxima " + esc(proxTxt(r)) : "") + (r.cupo ? " · " + r.cupo + " plazas" : "") + '</div></div><span class="row" style="gap:6px">' + tag("Acceso: " + r.modo) + tag(r.urg, r.urg === "Urgente" ? "warning" : "neutral") + "</span></div>", { cls: "kz-recurso" })).join("")).join("") + "</div>";
   }
 
   /* ════════ ENTIDAD ════════ */
@@ -681,6 +681,34 @@
     const ss = S.solicitudes.filter((s) => s.recurso === r.id), activas = (r.base || 0) + ss.filter((s) => s.estado === "Aprobada").length;
     return { activas, pend: ss.filter((s) => s.estado === "Pendiente" || s.estado === "Falta información").length, espera: ss.filter((s) => s.estado === "En lista de espera").length, libres: r.cupo ? Math.max(0, r.cupo - activas) : null, lleno: !!r.cupo && activas >= r.cupo };
   };
+  /* ── Tiempo del recurso (spec 02): todo recurso es un evento con fecha o recurrencia ── */
+  const DSEM = ["do", "lu", "ma", "mi", "ju", "vi", "sa"], DNOM = { lu: "Lun", ma: "Mar", mi: "Mié", ju: "Jue", vi: "Vie", sa: "Sáb", do: "Dom" };
+  const isoDe = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const fCorta = (f) => { const d = new Date(f + "T00:00"); return DNOM[DSEM[d.getDay()]] + " " + d.getDate() + " " + d.toLocaleDateString("es-ES", { month: "short" }).replace(".", ""); };
+  /* Próximas ocurrencias desde hoy; la estadía no tiene fechas fijas (cuenta noches por persona). */
+  function proximas(r, n, desde) {
+    const t = r && r.tiempo, out = [], ini = desde || hoy(); if (!t || t.forma === "estadia") return out;
+    if (t.forma === "unico") return t.inicio >= ini ? [t.inicio] : out;
+    const d = new Date((t.inicio > ini ? t.inicio : ini) + "T00:00"), dia0 = +t.inicio.slice(8);
+    for (let i = 0; i < 400 && out.length < (n || 4); i++, d.setDate(d.getDate() + 1)) {
+      const f = isoDe(d); if (t.fin && f > t.fin) break;
+      if (t.cada === "mes" ? d.getDate() === dia0 : (t.dias || DSEM).includes(DSEM[d.getDay()])) out.push(f);
+    }
+    return out;
+  }
+  const listaDias = (ds) => { const o = ds.map((x) => DNOM[x]); if (ds.length === 7) return "Cada día"; if (ds.join() === "lu,ma,mi,ju,vi") return "Lun a vie"; return o.length > 1 ? o.slice(0, -1).join(", ") + " y " + o[o.length - 1].toLowerCase() : o[0]; };
+  /* «Cuándo ocurre» en una línea: lo que lee el ciudadano, el conector y la entidad. */
+  function cuandoTxt(r) {
+    const t = r && r.tiempo; if (!t) return "";
+    const h = t.hora ? " · " + t.hora : "";
+    if (t.forma === "unico") return fCorta(t.inicio) + h;
+    if (t.forma === "estadia") return "Estadía · plazas por noche";
+    if (t.cada === "mes") return "Cada mes";
+    const base = listaDias(t.dias || DSEM) + h;
+    return t.forma === "sesiones" ? base + (t.fin ? " · hasta " + fCorta(t.fin).slice(4) : "") : base;
+  }
+  const proxTxt = (r) => { const p = proximas(r, 1)[0]; return p ? fCorta(p) + (r.tiempo.hora ? ", " + r.tiempo.hora : "") : ""; };
+  const FORMA_T = { unico: "Un día", recurrente: "Se repite", sesiones: "Por sesiones", estadia: "Estadía" };
   function eRecursos() {
     const rs = S.recursos.filter((r) => r.entidad === ENT), activos = rs.filter((r) => !r.pausado).length;
     return '<div class="bc-page stack"><div class="bc-head"><div class="stack-s"><h1>Mis recursos</h1><p class="mut">' + activos + " de " + rs.length + " activos en la red</p></div>" + btn("Nuevo recurso", { icon: "plus", href: "#/recurso/nuevo", a: { id: "btn-nuevo-rec" } }) + "</div>" +
@@ -786,9 +814,10 @@
   let postSel = null;
   /* Consumo de un beneficio recurrente (diario o semanal): cuánto lleva y cuándo lo usó. */
   const usoBloque = (s) => {
-    const r = rec(s.recurso); if (!r.frecuencia || s.estado !== "Aprobada") return "";
-    const u = (s.usos || []).slice().sort(), n = u.length, m = r.limite, un = r.frecuencia === "Diario" ? (n === 1 ? "día" : "días") : (n === 1 ? "vez" : "veces");
-    return '<div class="uso"><div class="uso__h"><b>Usó ' + n + (m ? " de " + m : "") + " " + un + "</b><span>" + r.frecuencia + (n ? " · Último: " + fecha(u[n - 1]) : " · Aún sin usos") + "</span></div>" +
+    const r = rec(s.recurso), t = r.tiempo || {}; if (t.forma !== "recurrente" || !r.limite || s.estado !== "Aprobada") return "";
+    const fr = { dia: "Diario", semana: "Semanal", mes: "Mensual" }[t.cada] || "Recurrente";
+    const u = (s.usos || []).slice().sort(), n = u.length, m = r.limite, un = t.cada === "dia" ? (n === 1 ? "día" : "días") : (n === 1 ? "vez" : "veces");
+    return '<div class="uso"><div class="uso__h"><b>Usó ' + n + (m ? " de " + m : "") + " " + un + "</b><span>" + fr + (n ? " · Último: " + fecha(u[n - 1]) : " · Aún sin usos") + "</span></div>" +
       (m ? '<div class="uso__b" role="img" aria-label="' + n + " de " + m + ' usos"><i style="width:' + Math.min(100, Math.round(n / m * 100)) + '%"></i></div>' : "") +
       (n ? '<details class="uso__d"><summary>Ver usos</summary><ul>' + u.slice().reverse().map((x) => "<li>" + fecha(x) + "</li>").join("") + "</ul></details>" : "") + "</div>";
   };
