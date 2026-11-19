@@ -6,7 +6,7 @@ La portada (`index.html`) pide el **rol**. Cada rol abre su propia demo, con su 
 
 | Rol | Puede | Casos | Superficie por defecto |
 |---|---|---|---|
-| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Mi Mapa de Vida, Privacidad | 1.1 · 1.2 | Móvil |
+| Ciudadano · *decisión nueva* | Registrarse, Mi expediente, Mis recursos, Buscar ayuda, Mi Mapa de Vida, Privacidad | 1.1 · 1.2 | Móvil |
 | Conector | Mis personas, Registrar persona, ficha y derivación, Recursos de la red | 2.1 · 2.2 | Escritorio |
 | Entidad | Resumen, Personas, Conectores, Bandeja | 3.1 · 3.2 | Escritorio |
 | Registro de entidad | Formulario de alta con diseño mínimo | 4.1 | Escritorio |
@@ -29,6 +29,7 @@ Presentación de unos dos minutos que recorre las vistas reales de la app. Se en
 - `app/brujula/`: **la app, una sola copia**. `index.html?rol=ciudadano|conector|entidad`, `alta-entidad.html`, `datos.js` (catálogo y semilla), `app.js` (rutas por hash y marcado `nwt-*`), `app.css` (solo distribución).
 - Estilos: SDK Naowee (`sdk-frontend-foundations`) en `app/brujula/_sdk/`, con los íconos de `design-demo-digitacion`.
 - Fuente de campos y reglas: `design-avivla-research` (docs 01, 03, 09 y 11).
+- Specs, planes de UI y entregables: `docs/` (índice en `docs/README.md`).
 
 ```bash
 npm run dev   # http://localhost:8781   (?dev=1 en la demo para el modo dev)

@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo evoluciona Brújula</title>
+<style>
+@font-face{font-family:"Google Sans";font-style:normal;font-weight:400 700;font-display:swap;src:url("../../shared/fonts/google-sans-latin.woff2") format("woff2")}
+:root{
+  --ink:#16172B;--mut:#5E6075;--bg:#F2F3F7;--surface:#fff;--inset:#F5F6F9;--line:#E2E4EC;
+  --acc:#C2410C;--acc-soft:#FFF3EB;--v:#17B26A;--a:#F79009;--r:#D92D20;
+  --blue:#3E4066;--teal:#0E7C7B;--teal-soft:#E6F4F3;--blue-soft:#ECEDF6;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Google Sans",system-ui,-apple-system,"Segoe UI",sans-serif;background:#0d0e1a;color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+.stage{position:fixed;inset:0;display:grid;place-items:center}
+.deck{width:1280px;height:720px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--bg);border-radius:18px;overflow:hidden;padding:64px 80px;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .35s ease,transform .35s ease,visibility 0s .35s}
+.slide.on{opacity:1;visibility:visible;transform:none;transition:opacity .35s ease,transform .35s ease}
+.slide.prev{transform:translateX(-24px)}
+.slide.dark{background:var(--ink);color:#fff}
+.eyebrow{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin:0 0 14px}
+.dark .eyebrow{color:#FDBA8C}
+h1{font-size:64px;line-height:1.05;margin:0;letter-spacing:-.02em}
+h2{font-size:42px;line-height:1.1;margin:0 0 12px;letter-spacing:-.015em}
+h3{font-size:21px;margin:0 0 6px}
+p{margin:0}
+.lead{font-size:22px;color:var(--mut);max-width:880px;line-height:1.4}
+.dark .lead{color:#B9BBD0}
+.grow{flex:1}
+.row{display:flex;gap:20px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--surface);border-radius:18px;padding:22px 24px;box-shadow:0 1px 2px rgba(22,23,43,.05)}
+.card p{color:var(--mut);font-size:16px;line-height:1.4}
+.dark .card{background:#22243a;box-shadow:none}.dark .card p{color:#B9BBD0}
+.num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:16px;margin-bottom:12px}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--inset);color:var(--mut)}
+.tag.acc{background:var(--acc-soft);color:var(--acc)}.tag.v{background:#E7F8EF;color:#067647}.tag.a{background:#FEF4E6;color:#93370D}.tag.r{background:#FEECEB;color:#B42318}.tag.t{background:var(--teal-soft);color:var(--teal)}
+.mt{margin-top:28px}.mt-s{margin-top:14px}
+.foot{position:absolute;left:80px;right:80px;bottom:28px;display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+.dark .foot{color:#7D7F99}
+.logo{height:34px}
+/* Antes / después */
+.vs{display:grid;grid-template-columns:1fr 56px 1fr;align-items:stretch;gap:0}
+.vs .arrow{display:grid;place-items:center;font-size:30px;color:var(--acc)}
+.vs .card h3{display:flex;align-items:center;gap:10px}
+ul.clean{list-style:none;margin:10px 0 0;padding:0}
+ul.clean li{padding:9px 0;border-top:1px solid var(--line);font-size:17px;display:flex;gap:10px;align-items:baseline}
+ul.clean li:first-child{border-top:0}
+ul.clean li b{min-width:0}
+.x{color:var(--r);font-weight:700}.ok{color:var(--v);font-weight:700}
+/* Diagrama red */
+.net{position:relative;height:380px}
+.node{position:absolute;border-radius:16px;padding:14px 18px;font-weight:700;font-size:17px;background:var(--surface);box-shadow:0 1px 3px rgba(22,23,43,.08);text-align:center}
+.node small{display:block;font-weight:400;font-size:13px;color:var(--mut);margin-top:3px}
+.node.red{background:var(--ink);color:#fff}.node.red small{color:#B9BBD0}
+.node.per{background:var(--acc);color:#fff}.node.per small{color:#FFE0CC}
+.net svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+/* Formas de tiempo */
+.forma .ej{font-size:14px;color:var(--mut);margin-top:10px}
+.tl{display:flex;gap:6px;margin:16px 0 4px;height:26px;align-items:center}
+.tl i{display:block;height:14px;border-radius:7px;background:var(--acc)}
+.tl i.o{background:var(--line)}
+/* Ciclo */
+.cycle{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative}
+.step{background:var(--surface);border-radius:18px;padding:20px;position:relative}
+.step .who{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.step p{font-size:15px;color:var(--mut);line-height:1.4}
+.step:not(:last-child)::after{content:"→";position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:var(--acc);font-weight:700;font-size:18px;z-index:1}
+.c-ent{color:var(--teal)}.c-ciu{color:var(--acc)}.c-equ{color:var(--blue)}
+/* Tabla */
+table{border-collapse:collapse;width:100%;font-size:16px}
+th{text-align:left;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:10px 14px;border-bottom:2px solid var(--line)}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tbl{background:var(--surface);border-radius:18px;padding:8px 10px}
+/* Familia */
+.fam{display:flex;gap:14px;align-items:center}
+.av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;flex:none}
+.seat{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--acc);margin-right:5px}
+.seat.o{background:var(--line)}
+.uso{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
+.uso i{display:block;height:100%;background:var(--v)}
+/* Olas */
+.olas{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.ola{background:var(--surface);border-radius:18px;padding:20px;border-top:5px solid var(--acc)}
+.ola .n{font-size:44px;font-weight:700;color:var(--acc);line-height:1}
+.ola h3{margin-top:10px;font-size:19px}
+.ola p{font-size:15px;color:var(--mut);margin-top:8px;line-height:1.4}
+.ola .roles{margin-top:14px;display:flex;gap:4px;flex-wrap:wrap}
+.big{font-size:88px;line-height:1;font-weight:700;letter-spacing:-.03em}
+/* Controles */
+.ui{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;padding:10px 18px;color:#B9BBD0;font-size:13px;z-index:10;opacity:.0;transition:opacity .2s}
+body:hover .ui,.ui:focus-within{opacity:1}
+.ui button{background:#22243a;color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+.ui button:focus-visible{outline:3px solid #FDBA8C;outline-offset:2px}
+.bar{position:fixed;left:0;top:0;height:4px;background:var(--acc);transition:width .35s ease;z-index:10}
+.ui .sp{flex:1}
+@media (prefers-reduced-motion:reduce){.slide,.bar{transition:none!important}}
+.quieto .slide,.quieto~.bar{transition:none!important}
+@media print{body{overflow:visible;background:#fff}.stage{position:static;display:block}.deck{transform:none!important;width:auto;height:auto}.slide{position:relative;opacity:1;visibility:visible;transform:none;width:1280px;height:720px;page-break-after:always;border-radius:0}.ui,.bar{display:none}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="stage"><div class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide dark" aria-label="Portada">
+  <img class="logo" src="../../shared/img/marca-brujula-horizontal-oscuro.svg" alt="Brújula Ciudadana">
+  <div class="grow"></div>
+  <p class="eyebrow">Evolución de la plataforma · noviembre 2026</p>
+  <h1>De una lista de recursos<br>a una red que <span style="color:#FDBA8C">acompaña en el tiempo</span></h1>
+  <p class="lead mt">Qué tenemos hoy, qué cambia, cómo lo vive cada rol y en qué orden entra a la demo.</p>
+  <div class="grow"></div>
+  <div class="foot"><span>Brújula Ciudadana · Naowee</span><span>Usa ← → para avanzar</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide" aria-label="Hoy">
+  <p class="eyebrow">Punto de partida</p>
+  <h2>Hoy: una persona, sus solicitudes y los recursos de la red</h2>
+  <p class="lead">La demo ya resuelve el registro único, el Mapa de Vida y la derivación entre entidades.</p>
+  <div class="grid g4 mt">
+    <div class="card"><span class="tag acc">Ciudadano</span><h3 class="mt-s">Se registra y pide</h3><p>Expediente, Mapa de Vida, buscar ayuda y privacidad.</p></div>
+    <div class="card"><span class="tag" style="background:var(--blue-soft);color:var(--blue)">Conector</span><h3 class="mt-s">Acompaña</h3><p>Registra personas, ve su ficha y las postula a recursos.</p></div>
+    <div class="card"><span class="tag t">Entidad</span><h3 class="mt-s">Decide y publica</h3><p>Bandeja de solicitudes, personas, conectores y sus recursos.</p></div>
+    <div class="card"><span class="tag">Alta</span><h3 class="mt-s">Entra a la red</h3><p>Registro de una entidad nueva con un formulario mínimo.</p></div>
+  </div>
+  <div class="card mt" style="display:flex;gap:28px;align-items:center">
+    <div class="grow"><h3>Lo que ya es regla</h3><p>La persona se ata a cada <b>beneficio</b>, no a una entidad · se ve su consumo («usó N de M») · no se pide la misma necesidad en dos lugares a la vez.</p></div>
+    <span class="tag v">Se mantiene</span>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" aria-label="Qué cambia">
+  <p class="eyebrow">El cambio</p>
+  <h2>Cinco ideas que mueven todo lo demás</h2>
+  <div class="grid g5 mt">
+    <div class="card"><span class="num">1</span><h3>Red de entidades</h3><p>Una capa que agrupa entidades: un ayuntamiento, un grupo.</p></div>
+    <div class="card"><span class="num">2</span><h3>Todo recurso es un evento</h3><p>Con fecha o recurrencia. Talleres, cursos y ayudas, igual.</p></div>
+    <div class="card"><span class="num">3</span><h3>Familia</h3><p>Se va con la familia; cada uno ocupa plaza y lleva su consumo.</p></div>
+    <div class="card"><span class="num">4</span><h3>Panel y asistencia</h3><p>El ciudadano confirma «Voy»; el equipo pasa lista.</p></div>
+    <div class="card"><span class="num">5</span><h3>Comunicados</h3><p>Avisos y comunicados por correo y app, con registro.</p></div>
+  </div>
+  <div class="row mt" style="align-items:center;gap:12px">
+    <span class="tag">Fuera de alcance</span>
+    <span style="color:var(--mut);font-size:17px">Voluntariado y certificados de horas: no se hacen · Empleo y empresas: fase 2</span>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" aria-label="Red de entidades">
+  <p class="eyebrow">1 · Red de entidades</p>
+  <h2>La persona tiene una entidad que la atiende y beneficios de muchas</h2>
+  <div class="row mt grow" style="gap:40px">
+    <div class="net grow" aria-hidden="true">
+      <svg viewBox="0 0 700 380" preserveAspectRatio="none">
+        <g stroke="#C9CBD8" stroke-width="2" fill="none">
+          <path d="M350 62 L120 160"/><path d="M350 62 L350 160"/><path d="M350 62 L580 160"/>
+        </g>
+        <g stroke="#C2410C" stroke-width="2.5" fill="none">
+          <path d="M350 330 L120 214"/>
+        </g>
+        <g stroke="#C2410C" stroke-width="2" fill="none" stroke-dasharray="6 6">
+          <path d="M350 330 L350 214"/><path d="M350 330 L580 214"/>
+        </g>
+      </svg>
+      <div class="node red" style="left:250px;top:10px;width:200px">Red Sur Madrid<small>Ayuntamiento</small></div>
+      <div class="node" style="left:30px;top:160px;width:180px">Asociación Puentes<small>la atiende</small></div>
+      <div class="node" style="left:260px;top:160px;width:180px">Fundación Raíces<small>orientación laboral</small></div>
+      <div class="node" style="left:490px;top:160px;width:180px">Red Vecinal Sur<small>comedor social</small></div>
+      <div class="node per" style="left:260px;top:300px;width:180px">Yasmina<small>BC-2026-0141</small></div>
+    </div>
+    <div style="width:400px" class="grid">
+      <div class="card"><h3>Gestor multi-entidad</h3><p>Quien está en varias entidades las gestiona todas y elige en cuál trabaja.</p></div>
+      <div class="card"><h3>La entidad que atiende</h3><p>Asigna conector, ve el caso completo y <b>verifica a la familia</b>. No es dueña de los beneficios.</p></div>
+      <div class="card"><h3>La red comunica</h3><p>A nombre propio o de una de sus entidades. Ve agregados, no casos.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" aria-label="Recurso como evento">
+  <p class="eyebrow">2 · Recurso como evento</p>
+  <h2>Cuatro formas de ocurrir en el tiempo, un solo modelo</h2>
+  <p class="lead">Desaparece «Grupo / Evento / Individual». Cada recurso sale de un catálogo estándar y tiene su configuración: plazas, acompañantes, límite de usos.</p>
+  <div class="grid g4 mt">
+    <div class="card forma"><span class="tag acc">Único</span><div class="tl"><i class="o" style="width:30%"></i><i style="width:14px"></i><i class="o" style="width:55%"></i></div><h3>Un día</h3><p>Cuentan las plazas de ese día.</p><p class="ej">Feria de empleo</p></div>
+    <div class="card forma"><span class="tag acc">Recurrente</span><div class="tl"><i style="width:14px"></i><i style="width:14px"></i><i style="width:14px"></i><i style="width:14px"></i><i style="width:14px"></i><i style="width:14px"></i><i style="width:14px"></i></div><h3>Diario o semanal</h3><p>Plazas por fecha y usos por persona.</p><p class="ej">Comedor, despensa</p></div>
+    <div class="card forma"><span class="tag acc">Sesiones</span><div class="tl"><i style="width:14px"></i><i class="o" style="width:16px"></i><i style="width:14px"></i><i class="o" style="width:16px"></i><i style="width:14px"></i><i class="o" style="width:16px"></i><i style="width:14px"></i></div><h3>Un grupo, varias fechas</h3><p>Plazas del grupo y asistencia por sesión.</p><p class="ej">Taller de 8 sesiones, curso</p></div>
+    <div class="card forma"><span class="tag acc">Estadía</span><div class="tl"><i class="o" style="width:15%"></i><i style="width:60%"></i><i class="o" style="width:15%"></i></div><h3>Desde – hasta</h3><p>Plazas ocupadas por noche.</p><p class="ej">Albergue, piso de acogida</p></div>
+  </div>
+  <p class="mt" style="color:var(--mut);font-size:16px">Lo que no cambia: el modo de acceso (Libre · Inscripción · Solicitud) y los estados de la solicitud.</p>
+</section>
+
+<!-- 6 -->
+<section class="slide" aria-label="Familia">
+  <p class="eyebrow">3 · Familia</p>
+  <h2>Se va con la familia, pero cada persona cuenta</h2>
+  <div class="grid g3 mt">
+    <div class="card">
+      <h3>Grupos familiares</h3><p>La persona registra uno o varios grupos y elige quién la acompaña.</p>
+      <div class="fam mt">
+        <div class="av" style="background:var(--acc)">YH</div>
+        <div class="av" style="background:var(--teal)">AH</div>
+        <div class="av" style="background:var(--blue)">OH</div>
+      </div>
+      <p class="mt-s" style="font-size:14px">Yasmina · Amira (hija) · Omar (hijo)</p>
+    </div>
+    <div class="card">
+      <h3>Ficha propia y verificada</h3><p>Todo familiar tiene ficha. Si la crea el titular nace <b>Por verificar</b>; la verifica la entidad que atiende al titular.</p>
+      <div class="row mt" style="gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="tag a">Por verificar</span><span style="color:var(--mut)">→</span><span class="tag v">Verificada</span>
+      </div>
+      <p class="mt-s" style="font-size:14px">Sin verificar no acompaña. En la demo, la verificación es inmediata.</p>
+    </div>
+    <div class="card">
+      <h3>Plazas y consumo</h3><p>Cada acompañante ocupa plaza y lleva su propio contador.</p>
+      <div class="mt"><span class="seat"></span><span class="seat"></span><span class="seat"></span><span class="seat o"></span><span class="seat o"></span></div>
+      <p class="mt-s" style="font-size:14px">Ocupan 3 de 5 plazas</p>
+      <p class="mt-s" style="font-size:14px;color:var(--ink)"><b>Amira</b> · usó 3 de 12</p>
+      <div class="uso"><i style="width:25%"></i></div>
+    </div>
+  </div>
+  <div class="card mt" style="display:flex;gap:16px;align-items:center">
+    <span class="tag r">Si no alcanzan</span>
+    <p style="font-size:17px">No se parte a la familia sin preguntar: la entidad elige <b>lista de espera para todos</b> o <b>aprobar a los que caben</b>, y la persona confirma quién va.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" aria-label="Ciclo de un evento">
+  <p class="eyebrow">4 · Panel y asistencia</p>
+  <h2>El ciclo completo de un recurso</h2>
+  <p class="lead">La asistencia es mixta: el ciudadano avisa antes, el equipo confirma el día.</p>
+  <div class="cycle mt">
+    <div class="step"><div class="who c-ent">Entidad</div><h3>Publica</h3><p>Elige del catálogo, define cuándo ocurre y sus plazas.</p></div>
+    <div class="step"><div class="who c-ciu">Ciudadano</div><h3>Se apunta</h3><p>Elige fechas y quién viene con él.</p></div>
+    <div class="step"><div class="who c-ciu">Ciudadano</div><h3>Confirma «Voy»</h3><p>En los recurrentes, con tiempo: 24 h antes por defecto.</p></div>
+    <div class="step"><div class="who c-equ">Equipo</div><h3>Pasa lista</h3><p>Usó / No vino sobre los confirmados.</p></div>
+    <div class="step"><div class="who">Todos</div><h3>Ven el uso</h3><p>«Usó N de M» por persona, con quién lo marcó.</p></div>
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h3>Panel del recurso</h3><p>Resumen · Inscritos con acompañantes · Fechas · Uso · Comunicados · Configuración.</p></div>
+    <div class="card"><h3>Sin confirmar a tiempo</h3><p>La plaza de esa fecha pasa a la lista de espera; la inscripción no se pierde. <span class="tag a" style="margin-left:6px">Validar con el cliente</span></p></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" aria-label="Comunicados">
+  <p class="eyebrow">5 · Comunicados</p>
+  <h2>Quién puede escribir, a quién y en nombre de quién</h2>
+  <div class="row mt-s" style="gap:12px"><span class="tag acc">Aviso: atado a un evento</span><span class="tag">Comunicado: información general</span><span class="tag t">Correo y app</span></div>
+  <div class="tbl mt">
+    <table>
+      <thead><tr><th>Quién</th><th>Qué envía</th><th>Aprobación</th><th>Firma</th></tr></thead>
+      <tbody>
+        <tr><td><b>Sistema</b></td><td>Confirmación, recordatorio, cancelación</td><td>—</td><td>Entidad del recurso</td></tr>
+        <tr><td><b>Conector</b></td><td>Avisos de sus recursos</td><td><span class="ok">Directo</span></td><td>Entidad</td></tr>
+        <tr><td><b>Conector</b></td><td>Comunicados</td><td>Borrador → aprueba el responsable</td><td>Entidad</td></tr>
+        <tr><td><b>Responsable</b></td><td>Avisos y comunicados; aprueba borradores</td><td>—</td><td>Entidad</td></tr>
+        <tr><td><b>Gestor de red</b></td><td>Comunicados a equipos y ciudadanos</td><td>—</td><td>La red <b>o</b> una entidad</td></tr>
+        <tr><td><b>Ciudadano</b></td><td>Solo responde Voy / No voy</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-s" style="color:var(--mut);font-size:15px">Queda registrado quién escribió, quién aprobó, cuándo, a quién, por qué canal y si se leyó. Los casos protegidos nunca entran en envíos masivos.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" aria-label="Perfil">
+  <p class="eyebrow">Perfil</p>
+  <h2>Lo que el formulario no pide, sin pedirlo dos veces</h2>
+  <div class="grid g3 mt">
+    <div class="card"><span class="tag">Solo el equipo</span><h3 class="mt-s">Notas internas</h3><p>Lista con autor y fecha. Las ve la entidad que las escribió; no se editan, se agrega otra.</p></div>
+    <div class="card"><span class="tag acc">Ciudadano y equipo</span><h3 class="mt-s">Mi familia</h3><p>Grupos, vínculos y el estado de verificación de cada miembro.</p></div>
+    <div class="card"><span class="tag acc">Ciudadano y equipo</span><h3 class="mt-s">Avisos recibidos</h3><p>Historial de lo que se le comunicó y quién lo firmó.</p></div>
+  </div>
+  <div class="card mt"><p style="font-size:17px">Si un mismo dato aparece en muchas notas, es candidato a campo del formulario. Nada sensible en notas sin autorización expresa.</p></div>
+</section>
+
+<!-- 10 -->
+<section class="slide" aria-label="Lo que corregimos">
+  <p class="eyebrow">Revisión de la demo actual</p>
+  <h2>Lo que el modelo nuevo obliga a corregir</h2>
+  <p class="lead">29 correcciones de flujo en los planes. Estas son errores o contradicciones que ya existen hoy:</p>
+  <div class="grid g2 mt">
+    <div class="card"><h3><span class="x">✕</span> Privacidad promete algo falso</h3><p>Dice «sin esto solo accedes a recursos de tu entidad», pero Buscar deja pedir en toda la red. El permiso controla quién ve tu itinerario.</p></div>
+    <div class="card"><h3><span class="x">✕</span> «Inscripción» dice «Confirma plaza»</h3><p>Pero se aprueba sola. La confirmación real pasa a ser la del ciudadano por fecha.</p></div>
+    <div class="card"><h3><span class="x">✕</span> La nota interna se pierde</h3><p>El conector la escribe al registrar y no se muestra en ningún lado.</p></div>
+    <div class="card"><h3><span class="x">✕</span> Solicitudes sin fecha ni familia</h3><p>Apuntarse, postular y asignar no saben cuándo ni con quién; las plazas se cuentan mal.</p></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" aria-label="Cómo entra">
+  <p class="eyebrow">Cómo entra a la demo</p>
+  <h2>Cinco olas, cada una mostrable</h2>
+  <p class="lead">Cada ola toca todos los roles a la vez, para que la demo nunca quede a medias.</p>
+  <div class="olas mt">
+    <div class="ola"><div class="n">1</div><h3>Recurso como evento</h3><p>Todo tiene fecha; agenda del ciudadano; editor por catálogo.</p><div class="roles"><span class="tag acc">Ciu</span><span class="tag">Con</span><span class="tag t">Ent</span></div></div>
+    <div class="ola"><div class="n">2</div><h3>Familia</h3><p>Inscribirse con familia; fichas por verificar.</p><div class="roles"><span class="tag acc">Ciu</span><span class="tag">Con</span><span class="tag t">Ent</span></div></div>
+    <div class="ola"><div class="n">3</div><h3>Panel y asistencia</h3><p>Confirmar «Voy»; pasar lista; uso por persona.</p><div class="roles"><span class="tag acc">Ciu</span><span class="tag">Con</span><span class="tag t">Ent</span></div></div>
+    <div class="ola"><div class="n">4</div><h3>Comunicados y perfil</h3><p>Avisos con aprobación; notas internas.</p><div class="roles"><span class="tag acc">Ciu</span><span class="tag">Con</span><span class="tag t">Ent</span></div></div>
+    <div class="ola"><div class="n">5</div><h3>Red</h3><p>Rol nuevo; selector de entidad; firma de la red.</p><div class="roles"><span class="tag">Con</span><span class="tag t">Ent</span><span class="tag" style="background:var(--ink);color:#fff">Red</span></div></div>
+  </div>
+  <p class="mt" style="color:var(--mut);font-size:16px">Cada ola cierra con datos nuevos, pantallas, casos guiados, escenas del recorrido y revisión en móvil y escritorio.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide" aria-label="Por validar">
+  <p class="eyebrow">Por validar con el cliente</p>
+  <h2>Lo que asumimos y conviene confirmar</h2>
+  <div class="grid g2 mt">
+    <div class="card"><h3>Plaza sin confirmar</h3><p>¿Pasa a la lista de espera al vencer el plazo de confirmación?</p></div>
+    <div class="card"><h3>Catálogo estándar</h3><p>La lista final de tipos de recurso (taller, curso, comedor, alojamiento, asesoría…).</p></div>
+    <div class="card"><h3>Alcance del gestor de red</h3><p>¿Solo agrupa o también crea entidades? ¿Escribe a nombre de una entidad sin su aprobación?</p></div>
+    <div class="card"><h3>Una red por entidad</h3><p>Asumimos que una entidad pertenece a una sola red.</p></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide dark" aria-label="Cierre">
+  <img class="logo" src="../../shared/img/marca-brujula-horizontal-oscuro.svg" alt="Brújula Ciudadana">
+  <div class="grow"></div>
+  <p class="eyebrow">En una frase</p>
+  <h1 style="max-width:1050px">Una red de entidades que publica <span style="color:#FDBA8C">actividades con fecha</span>, a las que cada persona va con su familia, y donde todo queda registrado.</h1>
+  <div class="grow"></div>
+  <div class="foot"><span>Detalle en docs/specs y docs/planes</span><span>Brújula Ciudadana · Naowee</span></div>
+</section>
+
+</div></div>
+
+<div class="ui" role="toolbar" aria-label="Controles de la presentación">
+  <button type="button" id="prev" aria-label="Anterior">←</button>
+  <button type="button" id="next" aria-label="Siguiente">→</button>
+  <span id="count" aria-live="polite"></span>
+  <span class="sp"></span>
+  <span>← → espacio · F pantalla completa</span>
+  <button type="button" id="full">Pantalla completa</button>
+</div>
+
+<script>
+(() => {
+  const deck = document.getElementById("deck"), slides = [...deck.querySelectorAll(".slide")];
+  const bar = document.getElementById("bar"), count = document.getElementById("count");
+  let i = Math.min(Math.max((parseInt(location.hash.slice(1), 10) || 1) - 1, 0), slides.length - 1);
+  const fit = () => { const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.96; deck.style.transform = "scale(" + s + ")"; };
+  const show = (n) => {
+    i = Math.min(Math.max(n, 0), slides.length - 1);
+    slides.forEach((s, k) => { s.classList.toggle("on", k === i); s.classList.toggle("prev", k < i); s.setAttribute("aria-hidden", String(k !== i)); });
+    bar.style.width = ((i + 1) / slides.length * 100) + "%";
+    count.textContent = (i + 1) + " / " + slides.length;
+    history.replaceState(null, "", "#" + (i + 1));
+  };
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === "Home") show(0);
+    else if (e.key === "End") show(slides.length - 1);
+    else if (e.key.toLowerCase() === "f") full();
+  });
+  const full = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) { /* sin pantalla completa */ } };
+  document.getElementById("prev").onclick = () => show(i - 1);
+  document.getElementById("next").onclick = () => show(i + 1);
+  document.getElementById("full").onclick = full;
+  document.querySelector(".stage").addEventListener("click", (e) => { show(e.clientX > innerWidth / 2 ? i + 1 : i - 1); });
+  /* La primera diapositiva aparece sin animación; las demás sí. */
+  deck.classList.add("quieto");
+  addEventListener("resize", fit); fit(); show(i);
+  requestAnimationFrame(() => requestAnimationFrame(() => deck.classList.remove("quieto")));
+})();
+</script>
+</body>
+</html>
