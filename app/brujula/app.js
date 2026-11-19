@@ -1217,7 +1217,15 @@
     conector: () => [con(YO).nombre, "Conector · " + ent(ENT).nombre, "LR", "blue"],
     entidad: () => ["Coordinación", ent(ENT).nombre, "AP", "teal"]
   };
-  const selEnt = (corto) => MIS_ENT.length < 2 ? "" : '<label class="bc-ent' + (corto ? " bc-ent--c" : "") + '"><span>' + (corto ? "Entidad" : "Trabajas en") + '</span><select data-ent aria-label="Entidad en la que trabajas">' + MIS_ENT.map((id) => '<option value="' + id + '"' + (id === ENT ? " selected" : "") + ">" + esc(ent(id).nombre) + "</option>").join("") + "</select></label>";
+  /* Selector de entidad propio (no <select> nativo): nombre completo, zona y la activa marcada. */
+  let entOp = false;
+  const selEnt = (corto) => {
+    if (MIS_ENT.length < 2) return "";
+    const k = corto ? "c" : "s", ab = entOp === k;
+    return '<div class="bc-ent' + (corto ? " bc-ent--c" : "") + '">' + (corto ? "" : '<span class="bc-ent__l">Trabajas en</span>') +
+      '<button type="button" class="bc-ent__b" data-act="ent-pop" data-k="' + k + '" aria-haspopup="menu" aria-expanded="' + ab + '" aria-label="Entidad en la que trabajas: ' + esc(ent(ENT).nombre) + '">' + ic("building") + '<span class="bc-ent__n">' + esc(ent(ENT).nombre) + "</span>" + ic(ab ? "chevron-up" : "chevron-down") + "</button>" +
+      (ab ? '<div class="bc-ent__m" role="menu" aria-label="Entidades">' + MIS_ENT.map((id) => '<button type="button" role="menuitemradio" aria-checked="' + (id === ENT) + '" data-act="ent-set" data-v="' + id + '"><span class="grow"><b>' + esc(ent(id).nombre) + "</b><small>" + esc(ent(id).zona) + "</small></span>" + (id === ENT ? ic("check") : "") + "</button>").join("") + "</div>" : "") + "</div>";
+  };
   function shell(activo, body) {
     const m = MENU[ROL](), [n, sub, i, col] = QUIEN[ROL]();
     const badge = (c, neutro) => c ? '<span class="bc-badge' + (neutro ? " bc-badge--n" : "") + '" aria-label="' + c + (neutro ? " en total" : " pendientes") + '">' + c + "</span>" : "";
@@ -1312,9 +1320,9 @@
     const t = "Toca «" + b.textContent.trim() + "» 2 veces";
     return b.dataset.act === "con-1" ? t + " y prueba otro número." : t + " y se rellena.";
   }
-  document.addEventListener("click", (e) => { if ((popOp || conOp) && !e.target.closest(".ez-popw")) { popOp = false; conOp = false; render(); } });
+  document.addEventListener("click", (e) => { if ((popOp || conOp) && !e.target.closest(".ez-popw")) { popOp = false; conOp = false; render(); } if (entOp && !e.target.closest(".bc-ent")) { entOp = false; render(); } });
   document.addEventListener("change", (e) => { const id = e.target.dataset && e.target.dataset.fcon; if (!id) return; fCons = e.target.checked ? fCons.concat(id) : fCons.filter((x) => x !== id); render(); const n = document.querySelector('[data-fcon="' + id + '"]'); if (n) n.focus(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (asignando || popOp || conOp)) { asignando = null; popOp = false; conOp = false; render(); } });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (asignando || popOp || conOp || entOp)) { asignando = null; popOp = false; conOp = false; entOp = false; render(); } });
   /* Navegar no es instantáneo en un servicio real: esqueleto breve y entrada escalonada, igual en todas las vistas. */
   const ESPERA_VISTA = 480, ESPERA_ACC = 800, ASIST = /^#\/regist\w+\//;
   let cargaT = 0, hashPrev = location.hash;
@@ -1568,6 +1576,13 @@
     "cm-dev-no": () => { cmDev = null; render(); },
     "cm-devolver": (b) => { const c = S.comunicados.find((x) => x.id === b.dataset.id), t = (document.getElementById("dev-" + c.id) || {}).value || ""; if (!t.trim()) return toast("Dile qué tiene que cambiar."); c.estado = "Devuelto"; c.comentario = t.trim(); cmDev = null; guardar(); toast("Devuelto a " + c.autorNombre + " con tu comentario."); render(); },
     "nota-add": (b) => { const p = per(b.dataset.p), t = (document.getElementById("f-nota-" + p.id) || {}).value || ""; if (!t.trim()) return toast("Escribe la nota."); p.notas = notasDe(p).concat({ texto: t.trim(), autor: ROL === "conector" ? YO : "entidad", entidad: ENT, fecha: ahora() }); guardar(); toast("Nota guardada. Solo la ve tu entidad."); render(); },
+    "ent-pop": (b) => { entOp = entOp === b.dataset.k ? false : b.dataset.k; render(); const n = document.querySelector(entOp ? '.bc-ent__m [aria-checked="true"]' : '[data-act="ent-pop"][data-k="' + b.dataset.k + '"]'); if (n) n.focus(); },
+    "ent-set": (b) => {
+      entOp = false; if (b.dataset.v === ENT) return render();
+      ENT = b.dataset.v; try { localStorage.setItem("brujula.ent." + ROL, ENT); } catch (x) { /* sin almacenamiento */ }
+      D = null; cm = null; toast("Ahora trabajas en " + ent(ENT).nombre + ".");
+      if (location.hash === INICIO[ROL]) render(); else location.hash = INICIO[ROL];
+    },
     "r-firma": (b) => { cm = null; cmFirma0 = b.dataset.v; ir("#/comunicados/nuevo"); },
     "aprobar-ab": (b) => { popOp = false; aprobando = b.dataset.s; render(); },
     "aprobar-no": () => { aprobando = null; render(); },
@@ -1658,7 +1673,6 @@
     if (t.hasAttribute("data-busca")) { busca = t.value; const pos = t.selectionStart; render(); const n = $("#f-busca"); n.focus(); n.setSelectionRange(pos, pos); }
   });
   document.addEventListener("change", (e) => {
-    if (e.target.hasAttribute("data-ent")) { ENT = e.target.value; try { localStorage.setItem("brujula.ent." + ROL, ENT); } catch (x) { /* sin almacenamiento */ } D = null; cm = null; toast("Ahora trabajas en " + ent(ENT).nombre + "."); if (location.hash === INICIO[ROL]) render(); else location.hash = INICIO[ROL]; return; }
     if (e.target.dataset.f) D.datos[e.target.dataset.f] = e.target.value; if (e.target.hasAttribute("data-ez-r")) ezRe("#" + e.target.id); });
   /* El rechazo no se confirma sin motivo: el botón se habilita al elegirlo. */
   document.addEventListener("change", (e) => { const id = e.target.dataset && e.target.dataset.mot; if (!id) return; const b = document.querySelector('[data-act="rechazar"][data-s="' + id + '"]'); if (b) b.disabled = !e.target.value; });
