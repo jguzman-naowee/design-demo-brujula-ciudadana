@@ -63,3 +63,12 @@ quién lo marcó.
 | Conector | Panel completo de los recursos de su entidad activa |
 | Entidad | Panel completo y configuración |
 | Ciudadano | Sin panel. Confirma «Voy» por fecha y con quiénes; ve su uso en «Mis recursos» (`usoBloque`) |
+
+## En la demo (ola 3)
+
+- Panel en `#/panel/:id[/:pestaña][/:fecha]`, igual para el conector («Recursos de mi entidad») y
+  la coordinación (nombre del recurso en Mis recursos). Editar sigue en `#/recurso/:id`.
+- Se confirma asistencia solo en recursos con plazas (`cupo`) y que no son estadía: donde no hay
+  plazas que liberar, confirmar no aporta.
+- «Voy» lleva a los mismos acompañantes de la solicitud; elegir otros por fecha queda para después.
+- `S.usos` reemplaza `solicitudes[].usos`; el consumo de cada acompañante se cuenta aparte.

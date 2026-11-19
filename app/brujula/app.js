@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v5";
+  const CAT = window.BC_CATALOGO, KEY = "brujula.demo.v6";
   const qs = new URLSearchParams(location.search);
   const ROL = ["ciudadano", "conector", "entidad"].includes(qs.get("rol")) ? qs.get("rol") : "ciudadano";
   document.body.classList.add("rol-" + ROL);
@@ -224,13 +224,28 @@
     czOrd().map((e, i) => { const q = CZ_PIN[i % 3]; return '<span class="cz-pin' + (D.entidad === e.id ? " on" : "") + '" style="left:' + (q[0] / 3.5).toFixed(1) + "%;top:" + (q[1] / 1.68).toFixed(1) + '%" aria-hidden="true">' + (i + 1) + "</span>"; }).join("") + "</div>" +
     '<div class="cz-ents" role="radiogroup" aria-label="Entidad">' + czOrd().map((e, i) => '<button type="button" role="radio" class="cz-ent" aria-checked="' + (D.entidad === e.id) + '" data-act="ent" data-e="' + e.id + '"><span class="cz-en">' + (i + 1) + '</span><span class="cz-et"><b>' + esc(e.nombre) + "</b><span>" + esc(e.zona) + "</span></span>" + (czCp() && i === 0 ? '<span class="cz-near">' + (+e.cp === czCp() ? "En tu zona" : "Más cerca") + "</span>" : "") + "</button>").join("") + "</div>";
   /* Fechas de los recursos aprobados de la persona, de hoy a «dias» adelante. */
+  /* Confirmar asistencia solo donde hay plazas que liberar; plazo: config.confirmarAntes horas (24). */
+  const pideConf = (r) => !!r.cupo && (r.tiempo || {}).forma !== "estadia";
+  const confAntes = (r) => (r.config || {}).confirmarAntes || 24;
+  const limiteConf = (r, f) => { const d = new Date(f + "T" + ((r.tiempo || {}).hora || "00:00")); d.setHours(d.getHours() - confAntes(r)); return d; };
+  const limiteTxt = (d) => DNOM[DSEM[d.getDay()]].toLowerCase() + " " + d.getDate() + " a las " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  const asisDe = (pid, rid, f) => (S.asistencias || []).find((a) => a.persona === pid && a.recurso === rid && a.fecha === f);
+  const usoEn = (pid, rid, f) => (S.usos || []).find((u) => u.persona === pid && u.recurso === rid && u.fecha === f);
+  function czConf(o) {
+    if (!pideConf(o.r) || o.s.persona !== S.ciudadano || o.f < hoy()) return "";
+    const a = asisDe(o.s.persona, o.r.id, o.f), lim = limiteConf(o.r, o.f), con = (o.s.acompanantes || []).length ? " con " + o.s.acompanantes.map((x) => per(x).nombre).join(" y ") : "";
+    const b = (t, e, on) => '<button type="button" class="cz-voy' + (on ? " on" : "") + '" data-act="c-voy" data-r="' + o.r.id + '" data-f="' + o.f + '" data-e="' + e + '" aria-pressed="' + !!on + '">' + esc(t) + "</button>";
+    if (a) return '<span class="cz-conf">' + b("Voy" + con, "Confirmada", a.estado === "Confirmada") + b("No voy", "No va", a.estado === "No va") + "</span>";
+    if (new Date() > lim) return '<span class="cz-conf__x">Sin confirmar: la plaza de ese día se ofreció a la lista de espera</span>';
+    return '<span class="cz-conf">' + b("Voy" + con, "Confirmada") + b("No voy", "No va") + "<small>Confirma antes del " + limiteTxt(lim) + "</small></span>";
+  }
   function agendaDe(pid, dias) {
     const lim = new Date(); lim.setDate(lim.getDate() + dias); const tope = isoDe(lim), out = [];
     solsDe(pid).filter((x) => x.estado === "Aprobada").forEach((x) => { const r = rec(x.recurso); proximas(r, 40, x.desde && x.desde > hoy() ? x.desde : hoy()).filter((f) => f <= tope).forEach((f) => out.push({ f, r, s: x })); });
     return out.sort((a, b) => (a.f + (a.r.tiempo.hora || "")).localeCompare(b.f + (b.r.tiempo.hora || "")));
   }
   const czDia = (f) => { const m = new Date(); m.setDate(m.getDate() + 1); return f === hoy() ? "Hoy" : f === isoDe(m) ? "Mañana" : fCorta(f); };
-  const czFila = (o, conDia) => '<div class="cz-ag"><time>' + (conDia ? "<small>" + czDia(o.f) + "</small>" : "") + esc(o.r.tiempo.hora || "") + '</time><span class="cz-ri">' + ic(CZ_CAT[o.r.cat] || "hands-heart") + '</span><div class="grow"><b>' + esc(o.r.nombre) + "</b><span>" + esc(ent(o.r.entidad).nombre) + "</span></div></div>";
+  const czFila = (o, conDia) => '<div class="cz-ag"><time>' + (conDia ? "<small>" + czDia(o.f) + "</small>" : "") + esc(o.r.tiempo.hora || "") + '</time><span class="cz-ri">' + ic(CZ_CAT[o.r.cat] || "hands-heart") + '</span><div class="grow"><b>' + esc(o.r.nombre) + "</b><span>" + esc(ent(o.r.entidad).nombre) + "</span>" + czConf(o) + "</div></div>";
   function cFamilia() {
     const p = yoP(); if (!p) return cBienvenida();
     const gs = gruposDe(p.id), at = ent(p.entidad).nombre;
@@ -303,7 +318,7 @@
         const r = rec(s.recurso), [fin, n, k] = CZ_ST[s.estado];
         return '<article class="cz-rec cz-e-' + k + '"><div class="cz-rh"><span class="cz-ri">' + ic(CZ_CAT[r.cat] || "hands-heart") + '</span><div class="grow"><b>' + esc(r.nombre) + "</b><span>" + esc(ent(r.entidad).nombre) + " · " + esc(cuandoTxt(r)) + "</span></div>" + czSt(s.estado) + "</div>" +
           '<div class="cz-etapas" role="img" aria-label="' + esc(r.nombre) + ": " + s.estado.toLowerCase() + '"><div class="cz-barra"><i></i><i class="' + (n >= 2 ? "" : "off") + '"></i><i class="' + (n >= 3 ? "" : "off") + '"></i></div><div class="cz-et3"><span>Solicitado</span><span>Revisión</span><span class="' + (n >= 3 ? "fin" : "") + '">' + (n >= 3 ? fin : "Resultado") + "</span></div></div>" +
-          (s.estado === "Aprobada" && proxTxt(r) ? '<div class="cz-prox">' + ic("calendar") + "<span>Próxima: <b>" + esc(proxTxt(r)) + "</b></span></div>" : "") +
+          (s.estado === "Aprobada" && proxTxt(r) ? '<div class="cz-prox">' + ic("calendar") + "<span>Próxima: <b>" + esc(proxTxt(r)) + "</b></span>" + (pideConf(r) && ["recurrente", "sesiones"].includes(r.tiempo.forma) ? btn("Voy a las próximas 4", { v: "quiet", size: "small", act: "c-voy-lote", a: { "data-r": r.id } }) : "") + "</div>" : "") +
           (s.estado === "Rechazada" && s.motivo ? '<p class="cz-mot">' + esc(s.motivo) + "</p>" : "") + ((s.acompanantes || []).length ? '<div class="cz-prox">' + ic("users") + "<span>Va con: <b>" + esc(vaCon(s)) + "</b></span></div>" : "") + usoBloque(s) + "</article>";
       }).join("") : '<p class="cz-vacio">' + (sols.length ? "Nada en esta lista." : "Aún no tienes recursos. Búscalos en «Buscar».") + "</p>") + "</div></div>";
   }
@@ -842,6 +857,53 @@
       '<p class="mut">Familiares que agregaron las personas que atiende tu entidad. Hasta que los verifiques no pueden acompañarlas a ningún recurso.</p>' +
       '<div class="bc-tbl"><div class="bc-tr bc-th ez-tr ez-vf"><span>Familiar</span><span>Titular</span><span>Agregado</span><span></span></div>' + (fs.length ? fs.map(fila).join("") : '<div class="bc-tr ez-tr"><span class="mut">No hay fichas por verificar.</span></div>') + "</div></div>";
   }
+  /* ── Panel del recurso (spec 04): lo abre el equipo de la entidad dueña ── */
+  const inscritosDe = (r, f) => S.solicitudes.filter((s) => s.recurso === r.id && s.estado === "Aprobada" && (!f || !s.desde || s.desde <= f));
+  function pasadas(r, n) { const t = r.tiempo || {}; if (!t.forma || t.forma === "estadia") return []; const d = new Date(); d.setDate(d.getDate() - 60); const i = isoDe(d) < t.inicio ? t.inicio : isoDe(d); return proximas(r, 200, i).filter((f) => f <= hoy()).slice(-n); }
+  const pnKpi = (k, v) => '<div class="pn-kpi"><span>' + k + "</span><b>" + v + "</b></div>";
+  const pnTabla = (cols, rows, vacio) => '<div class="pn-tbl" style="--cols:' + cols.length + '"><div class="pn-tr pn-th">' + cols.map((c) => "<span>" + c + "</span>").join("") + "</div>" + (rows.length ? rows.map((rw) => '<div class="pn-tr">' + rw.map((c, i) => '<span data-l="' + esc(cols[i]) + '">' + c + "</span>").join("") + "</div>").join("") : '<div class="pn-tr pn-vacio"><span class="mut">' + vacio + "</span></div>") + "</div>";
+  const PN_TABS = [["resumen", "Resumen"], ["inscritos", "Inscritos"], ["fechas", "Fechas"], ["lista", "Pasar lista"]];
+  function pRecurso(id, tab, fq) {
+    const r = rec(id); if (!r || r.entidad !== ENT) return '<div class="bc-page"><p class="mut">Este recurso no es de tu entidad.</p></div>';
+    const T = tab || "resumen", est = (r.tiempo || {}).forma === "estadia", u = usoRec(r), ins = inscritosDe(r), prox = proximas(r, 6), pas = pasadas(r, 4);
+    const base = "#/panel/" + r.id, uniq = (x, i, a) => a.indexOf(x) === i;
+    const conf = (f) => { let si = 0, no = 0, tot = 0; inscritosDe(r, f).forEach((s) => { tot += plazasDe(s); const a = asisDe(s.persona, r.id, f); if (a && a.estado === "Confirmada") si += 1 + (a.acompanantes || []).length; else if (a) no += plazasDe(s); }); return { si, no, sin: tot - si - no }; };
+    const listaHecha = (f) => inscritosDe(r, f).some((s) => usoEn(s.persona, r.id, f));
+    const sinLista = pas.filter((f) => inscritosDe(r, f).length && !listaHecha(f));
+    let cuerpo = "";
+    if (T === "resumen") {
+      const c0 = prox[0] && pideConf(r) ? conf(prox[0]) : null;
+      cuerpo = (sinLista.length ? alerta("<b>Falta pasar lista</b> del " + sinLista.map(fCorta).join(", ") + '. <a href="' + base + "/lista/" + sinLista[sinLista.length - 1] + '">Pasar lista</a>', "warning") : "") +
+        '<div class="pn-kpis">' + pnKpi("Plazas ocupadas", u.activas + (r.cupo ? " / " + r.cupo : "")) + pnKpi("Inscritos", ins.length) + pnKpi("En lista de espera", u.espera) + (c0 ? pnKpi("Confirmados · " + fCorta(prox[0]), c0.si + (c0.sin ? " <small>· " + c0.sin + " sin confirmar</small>" : "")) : pnKpi("Próxima fecha", est ? "Estadía" : prox[0] ? fCorta(prox[0]) : "—")) + "</div>" +
+        card('<h2 class="pn-h">Cómo funciona</h2><p class="mut">' + esc(cuandoTxt(r)) + " · " + esc(MODO_T[r.modo]) + ((r.config || {}).acompanantes ? " · admite acompañantes" : "") + (r.limite ? " · " + r.limite + " usos por persona" : "") + "</p>" + (pideConf(r) ? '<p class="mut">Las personas confirman «Voy» hasta ' + confAntes(r) + " h antes; sin confirmar, la plaza de ese día se ofrece a la lista de espera.</p>" : ""));
+    } else if (T === "inscritos") {
+      cuerpo = pnTabla(["Persona", "Va con", "Desde", "Uso"], ins.map((s) => [esc(nom(per(s.persona))), esc(vaCon(s)) || "—", s.desde ? fCorta(s.desde) : "—", usosDe(s.persona, r.id).length + (r.limite ? " de " + r.limite : " usos")]), "Nadie inscrito todavía.");
+    } else if (T === "fechas") {
+      cuerpo = est ? card('<p class="mut">Es una estadía: cada persona entra y sale en sus fechas. Ocupación actual: ' + u.activas + (r.cupo ? " de " + r.cupo : "") + " plazas.</p>")
+        : pnTabla(["Fecha", "Confirmados", "No van", "Sin confirmar", "Lista"], pas.concat(prox).filter(uniq).map((f) => { const c = conf(f); return [czDia(f) + (r.tiempo.hora ? " · " + r.tiempo.hora : ""), pideConf(r) ? c.si : "—", pideConf(r) ? c.no : "—", pideConf(r) ? c.sin : "—", f <= hoy() ? '<a href="' + base + "/lista/" + f + '">' + (listaHecha(f) ? "Ver lista" : "Pasar lista") + "</a>" : '<span class="mut">—</span>']; }), "Sin fechas.");
+    } else if (T === "lista" && !est) {
+      const fL = fq || (pas.length ? pas[pas.length - 1] : prox[0]), filas = [];
+      inscritosDe(r, fL).forEach((s) => { const a = asisDe(s.persona, r.id, fL); [s.persona].concat(s.acompanantes || []).forEach((pid, i) => filas.push({ pid, s, tit: i === 0, conf: !pideConf(r) ? "" : !a ? "Sin confirmar" : a.estado === "Confirmada" && (i === 0 || (a.acompanantes || []).includes(pid)) ? "Confirmó" : "No va" })); });
+      const vinieron = filas.filter((x) => (usoEn(x.pid, r.id, fL) || {}).estado === "Usó").length;
+      cuerpo = '<div class="kz-fechas pn-fechas" role="group" aria-label="Fecha">' + pas.concat(prox.slice(0, 1)).concat(fL ? [fL] : []).filter(uniq).sort().map((f) => '<a class="bc-chip" aria-pressed="' + (f === fL) + '" href="' + base + "/lista/" + f + '">' + czDia(f) + "</a>").join("") + "</div>" +
+        (fL && fL > hoy() ? alerta("Esta fecha todavía no llegó: la lista se pasa ese día.", "informative") : "") +
+        '<p class="pn-cuenta"><b>' + vinieron + "</b> de " + filas.length + " vinieron · " + (fL ? czDia(fL) : "") + "</p>" +
+        '<div class="pn-lista">' + (filas.length ? filas.map((x) => { const p = per(x.pid), us = (usoEn(x.pid, r.id, fL) || {}).estado;
+          return '<div class="pn-fila' + (x.tit ? "" : " pn-fila--a") + '"><div class="grow"><b>' + esc(nom(p)) + "</b>" + (x.tit ? "" : "<span>con " + esc(per(x.s.persona).nombre) + "</span>") + (x.conf ? '<span class="pn-conf pn-conf--' + (x.conf === "Confirmó" ? "v" : x.conf === "No va" ? "r" : "n") + '">' + x.conf + "</span>" : "") + '</div><div class="pn-bt" role="group" aria-label="Asistencia de ' + esc(p.nombre) + '">' + ["Usó", "No vino"].map((e) => '<button type="button" aria-pressed="' + (us === e) + '" data-act="p-uso" data-r="' + r.id + '" data-p="' + x.pid + '" data-f="' + fL + '" data-e="' + e + '">' + e + "</button>").join("") + "</div></div>"; }).join("")
+          : '<p class="mut">Nadie inscrito para esta fecha.</p>') + "</div>";
+    }
+    const tabs = PN_TABS.concat(typeof pnComunicados === "function" ? [["comunicados", "Comunicados"]] : []).filter(([k]) => !(est && k === "lista"));
+    if (T === "comunicados" && typeof pnComunicados === "function") cuerpo = pnComunicados(r);
+    return '<div class="bc-page stack pn"><a class="bc-back" href="' + (ROL === "entidad" ? "#/recursos" : "#/mis-recursos") + '">← ' + (ROL === "entidad" ? "Mis recursos" : "Recursos de mi entidad") + "</a>" +
+      '<div class="pn-head">' + ezIco(r.cat) + '<div class="grow"><h1>' + esc(r.nombre) + '</h1><p class="mut">' + esc(cuandoTxt(r)) + (proxTxt(r) ? " · próxima " + esc(proxTxt(r)) : "") + "</p></div>" + (ROL === "entidad" ? btn("Editar", { v: "quiet", size: "small", icon: "edit", href: "#/recurso/" + r.id }) : "") + "</div>" +
+      '<div class="nwt-tabs bc-subtabs pn-tabs"><div class="nwt-tabs__list" role="tablist" aria-label="Panel del recurso">' + tabs.map(([k, t]) => '<a class="nwt-tabs__tab' + (k === T ? " nwt-tabs__tab--active" : "") + '" role="tab" aria-selected="' + (k === T) + '" href="' + base + "/" + k + '"><span class="nwt-tabs__label"><span class="nwt-tabs__label-text">' + t + "</span></span></a>").join("") + "</div></div>" + cuerpo + "</div>";
+  }
+  function kMisRecursos() {
+    const rs = S.recursos.filter((r) => r.entidad === ENT && !r.pausado).sort((a, b) => (proximas(a, 1)[0] || "9").localeCompare(proximas(b, 1)[0] || "9"));
+    return '<div class="bc-page kz-page stack"><div class="kz-head"><div><span class="kz-eyebrow">' + esc(ent(ENT).nombre) + "</span><h1>Recursos de mi entidad</h1></div></div>" +
+      rs.map((r) => { const p = proximas(r, 1)[0], u = usoRec(r), hoyEs = p === hoy();
+        return '<a class="kz-card pn-rec" href="#/panel/' + r.id + (hoyEs ? "/lista/" + p : "") + '" data-recurso="' + r.id + '">' + ezIco(r.cat) + '<span class="grow"><b>' + esc(r.nombre) + "</b><span>" + esc(cuandoTxt(r)) + "</span><span>" + u.activas + (r.cupo ? " / " + r.cupo : "") + " plazas" + (p ? " · " + (hoyEs ? "<b>hoy</b>" : "próxima " + fCorta(p)) : "") + "</span></span>" + (hoyEs ? tag("Pasar lista", "warning", "small") : ic("chevron-right")) + "</a>"; }).join("") + "</div>";
+  }
   function eRecursos() {
     const rs = S.recursos.filter((r) => r.entidad === ENT), activos = rs.filter((r) => !r.pausado).length;
     return '<div class="bc-page stack"><div class="bc-head"><div class="stack-s"><h1>Mis recursos</h1><p class="mut">' + activos + " de " + rs.length + " activos en la red</p></div>" + btn("Nuevo recurso", { icon: "plus", href: "#/recurso/nuevo", a: { id: "btn-nuevo-rec" } }) + "</div>" +
@@ -850,7 +912,7 @@
         const estado = !on ? ["Pausado", ""] : u.pend ? [u.pend + " por decidir", "ez-uso__e--a"] : lleno ? ["Completo", ""] : ["Al día", "ez-uso__e--v"];
         return card('<div class="ez-rec__h">' + ezIco(r.cat) + '<span class="grow"></span><a class="ez-edit" href="#/recurso/' + esc(r.id) + '" aria-label="Editar ' + esc(r.nombre) + '">' + ic("edit") + "</a>" +
           '<button type="button" role="switch" class="ez-sw" aria-checked="' + on + '" aria-label="' + (on ? "Pausar " : "Reactivar ") + esc(r.nombre) + '" data-act="rec-pausa" data-r="' + esc(r.id) + '"><i></i></button></div>' +
-          "<div><h2>" + esc(r.nombre) + '</h2><p class="ez-sub">' + esc(ezCat(r.cat).n) + " · " + esc(cuandoTxt(r)) + "</p>" + (proxTxt(r) ? '<p class="ez-cuando">Próxima: ' + esc(proxTxt(r)) + "</p>" : "") + "</div>" +
+          '<div><h2><a class="bc-plain" href="#/panel/' + esc(r.id) + '">' + esc(r.nombre) + '</a></h2><p class="ez-sub">' + esc(ezCat(r.cat).n) + " · " + esc(cuandoTxt(r)) + "</p>" + (proxTxt(r) ? '<p class="ez-cuando">Próxima: ' + esc(proxTxt(r)) + "</p>" : "") + "</div>" +
           '<div class="row ez-chips"><span class="ez-chip">' + esc(MODO_T[r.modo] || r.modo) + '</span><span class="ez-chip' + (urg ? " ez-chip--a" : "") + '">' + (urg ? "24 h" : "5 días") + "</span></div>" +
           '<div class="ez-uso"><div class="ez-uso__r"><span class="ez-uso__n">' + u.activas + "<small>" + (r.cupo ? " / " + r.cupo : (u.activas === 1 ? " persona" : " personas")) + '</small></span><span class="ez-uso__e ' + estado[1] + '">' + estado[0] + '</span></div><div class="bc-bar' + (lleno || !on ? " ez-lleno" : "") + '" aria-hidden="true"><i style="width:' + (r.cupo ? Math.min(100, Math.round((u.activas / r.cupo) * 100)) : 100) + '%"></i></div></div>', { cls: "ez-rec" + (on ? "" : " ez-off"), a: { "data-recurso": r.id } });
       }).join("") + "</div></div>";
@@ -974,12 +1036,14 @@
   /* Postular es una pantalla propia (no un modal): elegir el recurso y confirmar en la barra inferior. */
   let postSel = null, postDesde = null, postAcomp = [];
   /* Consumo de un beneficio recurrente (diario o semanal): cuánto lleva y cuándo lo usó. */
+  const usosDe = (pid, rid) => (S.usos || []).filter((u) => u.persona === pid && u.recurso === rid && u.estado === "Usó").map((u) => u.fecha).sort();
   const usoBloque = (s) => {
     const r = rec(s.recurso), t = r.tiempo || {}; if (t.forma !== "recurrente" || !r.limite || s.estado !== "Aprobada") return "";
     const fr = { dia: "Diario", semana: "Semanal", mes: "Mensual" }[t.cada] || "Recurrente";
-    const u = (s.usos || []).slice().sort(), n = u.length, m = r.limite, un = t.cada === "dia" ? (n === 1 ? "día" : "días") : (n === 1 ? "vez" : "veces");
+    const u = usosDe(s.persona, s.recurso), n = u.length, m = r.limite, un = t.cada === "dia" ? (n === 1 ? "día" : "días") : (n === 1 ? "vez" : "veces");
     return '<div class="uso"><div class="uso__h"><b>Usó ' + n + (m ? " de " + m : "") + " " + un + "</b><span>" + fr + (n ? " · Último: " + fecha(u[n - 1]) : " · Aún sin usos") + "</span></div>" +
       (m ? '<div class="uso__b" role="img" aria-label="' + n + " de " + m + ' usos"><i style="width:' + Math.min(100, Math.round(n / m * 100)) + '%"></i></div>' : "") +
+      (s.acompanantes || []).map((a) => { const f = per(a); return f ? '<div class="uso__a"><span>' + esc(f.nombre) + "</span><b>" + usosDe(a, s.recurso).length + (m ? " de " + m : "") + "</b></div>" : ""; }).join("") +
       (n ? '<details class="uso__d"><summary>Ver usos</summary><ul>' + u.slice().reverse().map((x) => "<li>" + fecha(x) + "</li>").join("") + "</ul></details>" : "") + "</div>";
   };
   /* Postular · cuándo empieza: primera fecha (o entrada, en una estadía) y aviso si se cruza con otro recurso. */
@@ -1023,10 +1087,10 @@
   const MENU = {
     ciudadano: () => yoP() ? [["inicio", "Mi expediente", "home", "#/inicio"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["agenda", "Agenda", "calendar", "#/agenda"], ["buscar", "Buscar ayuda", "search", "#/buscar"], ["mapa", "Mi Mapa de Vida", "clipboard-list", "#/mapa"], ["privacidad", "Privacidad", "shield-check", "#/privacidad"]]
       : [["inicio", "Inicio", "home", "#/inicio"], ["registro", "Registrarme", "user-plus", "#/registro/1"]],
-    conector: () => [["personas", "Mis personas", "users", "#/personas"], ["registrar", "Registrar persona", "user-plus", "#/registrar/1"], ["red", "Recursos de entidades", "building", "#/red"]],
+    conector: () => [["personas", "Mis personas", "users", "#/personas"], ["registrar", "Registrar persona", "user-plus", "#/registrar/1"], ["mis-recursos", "Recursos de mi entidad", "calendar", "#/mis-recursos"], ["red", "Recursos de entidades", "building", "#/red"]],
     entidad: () => { const mis = S.personas.filter((p) => p.entidad === ENT).length, asig = S.personas.filter((p) => p.entidad === ENT && !p.conector).length, sol = entrantesDe().length; return [["resumen", "Resumen", "home", "#/resumen"], ["recursos", "Mis recursos", "hands-heart", "#/recursos"], ["conectores", "Conectores", "handshake", "#/conectores"], ["personas", "Personas", "users", "#/personas", 0, [["personas", "Mis personas", "#/personas", mis, true], ["solicitudes", "Recursos solicitados", "#/personas/solicitudes", sol], ["asignar", "Asignar conector", "#/personas/asignar", asig], ["verificar", "Por verificar", "#/personas/verificar", porVerificar().length]]]]; }
   };
-  const CORTO = { "Agenda": "Agenda", "Mi expediente": "Inicio", "Mis recursos": "Recursos", "Mi Mapa de Vida": "Mapa", "Mis personas": "Personas", "Registrar persona": "Registrar", "Recursos de entidades": "Recursos", "Buscar ayuda": "Buscar" };
+  const CORTO = { "Recursos de mi entidad": "Mi entidad", "Agenda": "Agenda", "Mi expediente": "Inicio", "Mis recursos": "Recursos", "Mi Mapa de Vida": "Mapa", "Mis personas": "Personas", "Registrar persona": "Registrar", "Recursos de entidades": "Recursos", "Buscar ayuda": "Buscar" };
   const QUIEN = {
     ciudadano: () => { const p = yoP(); return p ? [nom(p), "Ciudadano", ini(nom(p)), "orange"] : ["Invitado", "Ciudadano", "?", "orange"]; },
     conector: () => [con(YO).nombre, "Conector · " + ent(ENT).nombre, "LR", "blue"],
@@ -1063,6 +1127,9 @@
   };
   RUTAS.ciudadano.unshift([/^#\/familia$/, () => ["inicio", cFamilia()]], [/^#\/familia\/nuevo$/, () => ["inicio", famNuevo(S.ciudadano, "#/familia")]]);
   ["conector", "entidad"].forEach((r) => RUTAS[r].unshift([/^#\/persona\/([^/]+)\/familiar$/, (m) => ["personas", famNuevo(decodeURIComponent(m[1]), "#/persona/" + m[1])]]));
+  const PANEL = [/^#\/panel\/([^/]+)(?:\/([a-z]+))?(?:\/(\d{4}-\d{2}-\d{2}))?$/, (m) => [ROL === "entidad" ? "recursos" : "mis-recursos", pRecurso(m[1], m[2], m[3])]];
+  RUTAS.conector.unshift(PANEL, [/^#\/mis-recursos$/, () => ["mis-recursos", kMisRecursos()]]);
+  RUTAS.entidad.unshift(PANEL);
   RUTAS.entidad.unshift([/^#\/personas\/verificar$/, () => ["verificar", eVerificar()]]);
   const INICIO = { ciudadano: "#/inicio", conector: "#/personas", entidad: "#/resumen" };
   /* Las franjas bajo la barra de estado y la de gesto toman el color de la pantalla que queda justo detrás. */
@@ -1331,6 +1398,22 @@
       s.acompanantes = (s.acompanantes || []).slice(0, caben - 1); s.estado = "Aprobada"; s.decidida = hoy(); s.parcial = true;
       S.accesos.push({ persona: s.persona, quien: "Coordinación", entidad: ENT, cuando: ahora(), para: "Decidir la solicitud a " + rec(s.recurso).nombre });
       guardar(); toast("Aprobada para " + caben + (caben === 1 ? " persona" : " personas") + ". La persona confirma quién va."); render();
+    },
+    "p-uso": (b) => {
+      const { r, p, f, e } = b.dataset, x = usoEn(p, r, f), por = ROL === "conector" ? YO : "entidad";
+      if (x && x.estado === e) S.usos.splice(S.usos.indexOf(x), 1); else if (x) Object.assign(x, { estado: e, por }); else S.usos.push({ id: "u" + Date.now(), recurso: r, persona: p, fecha: f, estado: e, por });
+      guardar(); render(); const n = document.querySelector('[data-act="p-uso"][data-p="' + p + '"][data-e="' + e + '"]'); if (n) n.focus();
+    },
+    "c-voy": (b) => {
+      const p = yoP(), r = rec(b.dataset.r), f = b.dataset.f, s = S.solicitudes.find((x) => x.persona === p.id && x.recurso === r.id && x.estado === "Aprobada") || {};
+      let a = asisDe(p.id, r.id, f); if (!a) { a = { id: "a" + Date.now(), recurso: r.id, fecha: f, persona: p.id }; S.asistencias.push(a); }
+      a.estado = b.dataset.e; a.acompanantes = a.estado === "Confirmada" ? (s.acompanantes || []).slice() : []; a.cuando = ahora();
+      guardar(); toast(a.estado === "Confirmada" ? "Confirmado: vas el " + fCorta(f) + "." : "Avisado: no vas el " + fCorta(f) + ". Tu plaza de ese día queda para otra persona."); render();
+    },
+    "c-voy-lote": (b) => {
+      const p = yoP(), r = rec(b.dataset.r), s = S.solicitudes.find((x) => x.persona === p.id && x.recurso === r.id && x.estado === "Aprobada") || {}; let n = 0;
+      proximas(r, 4, s.desde && s.desde > hoy() ? s.desde : undefined).forEach((f) => { if (asisDe(p.id, r.id, f) || new Date() > limiteConf(r, f)) return; S.asistencias.push({ id: "a" + Date.now() + f, recurso: r.id, fecha: f, persona: p.id, estado: "Confirmada", acompanantes: (s.acompanantes || []).slice(), cuando: ahora() }); n++; });
+      guardar(); toast(n ? "Confirmaste " + n + (n === 1 ? " fecha" : " fechas") + " de " + r.nombre + "." : "Ya tenías confirmadas las próximas fechas."); render();
     },
     "aprobar-ab": (b) => { popOp = false; aprobando = b.dataset.s; render(); },
     "aprobar-no": () => { aprobando = null; render(); },

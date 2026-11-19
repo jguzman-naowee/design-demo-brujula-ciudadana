@@ -310,5 +310,14 @@ window.BC_SEMILLA = () => {
   };
   /* Cada recurso hereda de su formato si admite acompañantes (spec 07); la entidad lo cambia en el editor. */
   S0.recursos.forEach((r) => { const f = window.BC_CATALOGO.formatos.find((x) => x.id === r.formato) || {}; if (!r.config) r.config = { acompanantes: !!f.acompanantes, maxAcompanantes: f.maxAcompanantes || (f.acompanantes ? 3 : undefined) }; });
+  /* Uso por persona y fecha (spec 04): lo marca el equipo al pasar lista; también el de cada acompañante. */
+  S0.usos = [];
+  S0.solicitudes.forEach((x) => {
+    (x.usos || []).forEach((f, i) => S0.usos.push({ id: "u-" + x.id + "-" + i, recurso: x.recurso, persona: x.persona, fecha: f, estado: "Usó", por: "c1" }));
+    (x.acompanantes || []).forEach((pid) => (x.usos || []).slice(-4).forEach((f, i) => S0.usos.push({ id: "u-" + x.id + "-" + pid + "-" + i, recurso: x.recurso, persona: pid, fecha: f, estado: "Usó", por: "c1" })));
+    delete x.usos;
+  });
+  /* «Voy» / «No voy» por fecha: lo confirma la persona antes del evento. */
+  S0.asistencias = [];
   return S0;
 };
