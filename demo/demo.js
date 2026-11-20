@@ -262,6 +262,65 @@
   $("planaBtn").addEventListener("click", () => setSolo(!isSolo()));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && isSolo()) setSolo(false); });
 
+  /* ── «¿Qué estoy viendo?»: contexto de la vista por rol + #ruta; el contenido vive en contexto.js ── */
+  const ctx = $("ctx"), ctxBtn = $("ctxBtn"), ctxVelo = $("ctxVelo");
+  let ctxClave = null, ctxT = 0, ctxPoll = 0;
+  const ctxAbierto = () => ctxBtn.getAttribute("aria-expanded") === "true";
+  function ctxResolver() {
+    const lista = (window.CONTEXTO || {})[S.app && S.app.id] || [];
+    let h = "", d = null;
+    try { h = frame.contentWindow.location.hash; d = frame.contentDocument; } catch (e) { /* app aún sin cargar */ }
+    const hay = (sel) => { try { return !!(d && d.querySelector(sel)); } catch (e) { return false; } };
+    const i = lista.findIndex((c) => !c.generico && (!c.ruta || c.ruta.test(h)) && (!c.si || hay(c.si)));
+    const j = i >= 0 ? i : lista.findIndex((c) => c.generico);
+    return { c: lista[j], clave: (S.app && S.app.id) + ":" + j + ":" + h, h, gen: i < 0 };
+  }
+  /* Solo repinta si cambió la vista: así el lector de pantalla no repite el panel en cada render de la app. */
+  function ctxPintar(forzar) {
+    const r = ctxResolver(); if (!forzar && r.clave === ctxClave) return;
+    ctxClave = r.clave;
+    const c = r.c || { titulo: (S.app && S.app.nombre) || "Demo", que: "Sin descripción para esta vista." };
+    const sec = (t, xs) => xs && xs.length ? '<section class="ctx-sec"><h3>' + t + "</h3><ul>" + xs.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></section>" : "";
+    $("ctxCu").innerHTML = '<p class="ctx-rol">' + esc((S.app && S.app.nombre) || "") + (r.h ? ' · <code>' + esc(r.h) + "</code>" : "") + "</p>" +
+      '<h2 id="ctxT">' + esc(c.titulo) + '</h2><p class="ctx-que">' + esc(c.que) + "</p>" +
+      (r.gen ? '<p class="ctx-gen">Vista general del rol: esta pantalla aún no tiene su propia descripción.</p>' : "") +
+      sec("Para qué sirve", c.para) + sec("Qué mirar / qué probar", c.mirar) +
+      (c.spec ? '<p class="ctx-spec"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 2.5h7l3.5 3.5v11.5H5z M12 2.5V6h3.5M7.5 10h5M7.5 13h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>Ver la spec · <code>docs/specs/' + esc(c.spec) + "</code></span></p>" : "");
+  }
+  const ctxFoco = () => [...ctx.querySelectorAll('button,[href],[tabindex]:not([tabindex="-1"])')].filter((x) => !x.disabled && x.getClientRects().length);
+  function ctxAbrir() {
+    clearTimeout(ctxT); ctxPintar(true);
+    ctx.hidden = false; ctxVelo.hidden = false; void ctx.offsetWidth;
+    ctx.classList.add("on"); ctxVelo.classList.add("on");
+    ctxBtn.setAttribute("aria-expanded", "true"); $("ctxX").focus();
+    /* Respaldo barato: hay vistas que no avisan al marco (alta-entidad, cambios sin #hash). */
+    clearInterval(ctxPoll); ctxPoll = setInterval(() => ctxPintar(false), 500);
+  }
+  function ctxCerrar() {
+    if (!ctxAbierto()) return;
+    ctx.classList.remove("on"); ctxVelo.classList.remove("on");
+    ctxBtn.setAttribute("aria-expanded", "false"); clearInterval(ctxPoll);
+    /* Con un temporizador y no transitionend: con movimiento reducido no hay transición que termine. */
+    ctxT = setTimeout(() => { ctx.hidden = true; ctxVelo.hidden = true; }, RM ? 0 : 260);
+    ctxBtn.focus();
+  }
+  ctxBtn.addEventListener("click", () => (ctxAbierto() ? ctxCerrar() : ctxAbrir()));
+  $("ctxX").addEventListener("click", ctxCerrar);
+  ctxVelo.addEventListener("click", ctxCerrar);
+  /* En captura: con el panel abierto, Esc lo cierra y no saca además de la vista plana. */
+  window.addEventListener("keydown", (e) => {
+    if (!ctxAbierto()) return;
+    if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); ctxCerrar(); return; }
+    if (e.key !== "Tab") return;
+    const fs = ctxFoco(), a = fs[0], z = fs[fs.length - 1];
+    if (!fs.length) return;
+    if (!ctx.contains(document.activeElement)) { e.preventDefault(); a.focus(); }
+    else if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+    else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+  }, true);
+  window.addEventListener("message", (e) => { if (e.data && e.data.type === "demo-ruta" && e.source === frame.contentWindow && ctxAbierto()) ctxPintar(false); });
+  frame.addEventListener("load", () => { if (ctxAbierto()) ctxPintar(false); });
+
   /* `estatus` (app.json): color de las franjas de estado e indicador de inicio; el texto se vuelve claro u oscuro según el fondo. */
   function setEstatus(c, bot) {
     const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c || "#fff"), hex = m ? (m[1].length === 3 ? m[1].replace(/./g, "$&$&") : m[1]) : "ffffff";

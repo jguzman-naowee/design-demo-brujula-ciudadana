@@ -10,7 +10,7 @@
 <body>
 <header class="top" id="top">
   <div class="brand">
-    <a class="zb home" href="../" aria-label="Volver a elegir rol" title="Volver a elegir rol"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="zb home" href="../index.html#demo" aria-label="Volver a elegir rol" title="Volver a elegir rol"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <img class="logo" src="../shared/logos/naowee.svg" alt="Naowee" width="106" height="20">
     <span class="sep" aria-hidden="true"></span>
     <div class="ttl"><h1 id="appNombre">Demo móvil</h1><span class="sub" id="appSub">Demo móvil</span></div>
@@ -24,6 +24,10 @@
     </div>
     <button type="button" class="pill" id="planaBtn" role="switch" aria-checked="false" title="Mostrar solo la app, sin teléfono (Esc para salir)">
       <span>Vista plana</span><span class="track" aria-hidden="true"><span class="knob"></span></span>
+    </button>
+    <button type="button" class="pill ctx-btn" id="ctxBtn" aria-expanded="false" aria-controls="ctx" aria-haspopup="dialog" title="Qué estoy viendo">
+      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 9v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="10" cy="6.2" r="1.15" fill="currentColor"/></svg>
+      <span class="sr">Qué estoy viendo</span>
     </button>
     <button type="button" class="pill" id="casosBtn" aria-expanded="false" aria-controls="panel">
       <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -98,7 +102,16 @@
     </section>
   </aside>
 </main>
+<div class="ctx-velo" id="ctxVelo" hidden></div>
+<aside class="ctx" id="ctx" role="dialog" aria-modal="true" aria-labelledby="ctxT" hidden>
+  <div class="ctx-hd">
+    <span class="k">QUÉ ESTOY VIENDO</span>
+    <button type="button" class="zb" id="ctxX" aria-label="Cerrar el panel de contexto"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="ctx-cu" id="ctxCu" aria-live="polite"></div>
+</aside>
 <script src="apps/index.js"></script>
+<script src="contexto.js"></script>
 <script src="demo.js"></script>
 </body>
 </html>
