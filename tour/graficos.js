@@ -27,7 +27,7 @@
       var base = M.vecinas.slice(1).map(function (v) { return [v.lat, v.lng]; }).concat(Object.keys(M.entidades).map(function (k) { return [M.entidades[k].lat, M.entidades[k].lng]; }));
       base.forEach(function (ll, k) { ts.push(setTimeout(function () { pin(ll); }, 300 + k * 80)); });
       var nueva = [M.vecinas[0].lat, M.vecinas[0].lng];
-      ts.push(setTimeout(function () { pin(nueva, "gf-pin--n"); mapa.setView(nueva, 13, { animate: true }); }, 2200));
+      ts.push(setTimeout(function () { pin(nueva, "gf-pin--n"); }, 2200));
       [[0.004, 0.006], [-0.003, 0.009], [0.006, -0.004], [-0.005, -0.005]].forEach(function (o, k) {
         ts.push(setTimeout(function () { pin([nueva[0] + o[0], nueva[1] + o[1]], "gf-pin--r"); }, 3000 + k * 200));
       });

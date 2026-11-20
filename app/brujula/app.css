@@ -40,7 +40,7 @@ h1,h2,h3,p{margin:0}
 .bc-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--bc-ink);text-decoration:none}
 .bc-brand .nwt-icon{color:var(--bc-acc);font-size:24px}
 /* Barra superior: solo en móvil (y en el registro de entidad), sobre el suelo y sin borde. */
-.bc-top{position:sticky;top:var(--bc-safe-top,0px);z-index:5;display:none;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:10px 16px;background:rgba(242,243,247,.92);backdrop-filter:saturate(1.4) blur(12px)}
+.bc-top{position:sticky;top:var(--bc-safe-top,0px);z-index:5;display:none;align-items:center;justify-content:space-between;gap:8px;min-height:60px;padding:10px 16px;background:rgba(242,243,247,.92);backdrop-filter:saturate(1.4) blur(12px)}
 .bc-who{margin-left:auto;display:flex;align-items:center;gap:10px;text-align:right;font-size:13px;line-height:1.3}
 .bc-who b{display:block;font-size:14px}
 .bc-tabbar{display:none}
@@ -67,7 +67,7 @@ h1,h2,h3{min-height:0}
 .bc-page h2{font-size:17px;line-height:1.3;font-weight:600}
 .bc-page h3{font-size:15px;font-weight:600}
 /* Las tarjetas-enlace (.pn-rec, .rd-ent) quedan fuera: su título va en tinta, no en el naranja de enlace. */
-.bc-page a:not(.nwt-button):not(.bc-tr):not(.nwt-stat-card):not(.bc-plain):not(.bc-chip):not(.pn-rec):not(.rd-ent){color:var(--bc-acc)}
+.bc-page a:not(.nwt-button):not(.bc-tr):not(.nwt-stat-card):not(.bc-plain):not(.bc-chip):not(.pn-rec):not(.rd-ent):not(.bc-atras){color:var(--bc-acc)}
 .bc-eyebrow{font-size:13px;font-weight:500;color:var(--bc-mut)}
 
 /* ── Superficies: blancas, sin borde; la jerarquía la da el fondo, no la línea ── */
@@ -139,7 +139,6 @@ h1,h2,h3{min-height:0}
 .bc-dim h3{font-size:16px;margin-bottom:2px}
 .bc-dim .stack-s{margin-top:12px}
 .bc-err{color:var(--bc-r);font-size:13px}
-.bc-ejemplo{margin-bottom:-4px}
 
 /* ── Semáforo ── */
 .bc-mini{display:inline-flex;gap:2px;width:72px;height:8px;border-radius:4px;overflow:hidden;vertical-align:middle;flex:none}
@@ -190,7 +189,10 @@ body{--bc-chip-line:var(--naotech-neutral-color-600,#8788ab);--bc-chip-line-h:va
 .bc-plain{color:inherit;text-decoration:none}
 .bc-subtabs .nwt-tabs__tab--active{box-shadow:inset 0 -2px 0 var(--bc-acc)}
 .bc-subtabs{overflow-x:auto}
-.bc-back{display:inline-flex;align-items:center;gap:6px;color:var(--bc-acc);text-decoration:none;font-weight:600;font-size:14px}
+.bc-lnk{display:inline-flex;align-items:center;gap:6px;color:var(--bc-acc);text-decoration:none;font-weight:600;font-size:14px}
+.bc-page a.bc-atras{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px 0 10px;border-radius:22px;background:var(--bc-surface);color:var(--bc-ink);text-decoration:none;font-weight:600;font-size:14px}
+.bc-atras .nwt-icon{font-size:20px}
+@media (max-width:820px){.bc-page a.bc-atras{width:44px;padding:0;justify-content:center}.bc-atras span{display:none}.kz-red__e{display:none}}
 .bc-lock{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:16px;background:var(--bc-inset)}
 .bc-lock .nwt-icon{font-size:22px;color:var(--bc-mut)}
 .bc-id{font-family:ui-monospace,Menlo,monospace;font-weight:600;font-size:13px}
@@ -205,7 +207,9 @@ body{--bc-chip-line:var(--naotech-neutral-color-600,#8788ab);--bc-chip-line-h:va
 :focus-visible{outline:3px solid var(--bc-acc);outline-offset:2px}
 /* ── Carga y movimiento: mismos tiempos en los tres roles ── */
 main.bc-carga>:not(.bc-skel){display:none!important}
-.bc-skel{display:flex;flex-direction:column;gap:12px;padding:24px 20px;max-width:1080px}
+.bc-skel{display:flex;flex-direction:column;gap:12px;width:100%;max-width:1120px;margin:0 auto;padding:40px 40px 80px}
+body.rol-ciudadano .bc-skel{max-width:600px}
+@media (max-width:820px){.bc-skel{padding:8px 16px 112px}}
 .bc-skel .sk-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bc-skel .sk{display:block;border-radius:16px;background:linear-gradient(90deg,#E2E4EC 0%,#F1F2F6 45%,#E2E4EC 90%);background-size:220% 100%;animation:bc-brillo 1.1s linear infinite}
 .bc-skel .sk-h{width:58%;height:34px;border-radius:12px}
@@ -248,7 +252,11 @@ main.bc-in :is(.cz-tiles,.cz-lista,.ez-lista,.kz-list,.kz-reclist,.kz-tiles,.sp-
 body{position:relative;padding-top:var(--bc-safe-top,0px)}
 #bc-safe{position:absolute;top:0;left:0;right:0;height:var(--bc-safe-top,0px);pointer-events:none}
 body .bc-main{padding-bottom:var(--bc-safe-bot,0px)}
-body .cz-pie,body .kz-foot,body .kz-wizwrap .bc-wiz-f{bottom:var(--bc-safe-bot,0px)}
+/* Los pies de botones bajan hasta el borde y pintan la franja de gesto con su propio fondo (padding con --bc-safe-bot). */
+body .bc-main:has(.cz-pie,.kz-foot,.kz-wizwrap .bc-wiz-f,.bc-page > .ez-bar){padding-bottom:0}
+body .cz-pie,body .kz-foot,body .kz-wizwrap .bc-wiz-f{bottom:0}
+/* En móvil van fijos; --bc-pie-h (lo mide render() en app.js) deja el último campo encima del pie. */
+@media (max-width:820px){body .bc-main:has(.cz-pie,.kz-foot,.kz-wizwrap .bc-wiz-f){padding-bottom:var(--bc-pie-h,120px)}}
 .kz-fab{margin-bottom:var(--bc-safe-bot,0px)}
 
 /* Radar del Mapa de Vida: un eje por bloque, colores por bloque como en la presentación. */
@@ -305,8 +313,9 @@ body .cz-pie,body .kz-foot,body .kz-wizwrap .bc-wiz-f{bottom:var(--bc-safe-bot,0
 /* Ciudadano sin expediente: flujo autoasistido a pantalla completa, sin panel. */
 .bc-shell--solo{grid-template-columns:minmax(0,1fr)}
 
-.bc-gi{width:36px;height:36px;border-radius:11px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(145deg,#3E4066 0%,#16172B 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
-.bc-gi .nwt-icon{font-size:20px;color:inherit}
+.bc-gi{--gc:#3E4066;width:36px;height:36px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;background:none}
+.bc-gi[data-b=b1]{--gc:#EF9F27}.bc-gi[data-b=b2]{--gc:#D4537E}.bc-gi[data-b=b3]{--gc:#378ADD}.bc-gi[data-b=b4]{--gc:#1D9E75}
+.bc-em{font-size:18px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .bc-dh{display:flex;align-items:center;gap:10px}
 
 /* Encabezado móvil: su fondo cubre también la franja de la barra de estado, así el scroll no se ve pasar por arriba de él. */
@@ -494,14 +503,16 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .bc-ent__m b{display:block;font-size:14px;font-weight:600}
 .bc-ent__m small{display:block;font-size:12px;color:var(--bc-mut)}
 .bc-ent__m .nwt-icon{font-size:18px;color:var(--bc-acc)}
-.bc-ent--c{flex:0 1 auto;min-width:0;max-width:140px;margin:0 8px 0 auto}
+/* Selector y avatar van juntos a la derecha; el nombre usa el ancho que deje el logo. */
+.bc-ent--c{flex:0 1 auto;min-width:0;margin:0 0 0 auto}
 .bc-ent--c .bc-ent__b{min-height:38px;padding:0 10px;border-radius:999px;font-size:13px}
 .bc-ent--c .bc-ent__m{top:calc(100% + 6px);bottom:auto;left:auto;right:0;width:250px}
 
 /* Código postal por ubicación o por mapa (registro del ciudadano). */
 .cz-cpacc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .cz-cpacc>span{grid-column:1/-1;font-size:13px;color:var(--bc-mut)}
-.cz-cpacc .nwt-button{width:100%;justify-content:center}
+.cz-cpacc .nwt-button{width:100%;justify-content:center;gap:6px;min-height:40px;padding:0 10px;white-space:nowrap;font-size:14px;font-weight:600;background:#fff;border:1px solid var(--bc-line);color:var(--bc-ink)}
+.cz-cpacc .nwt-button .nwt-icon{font-size:18px;color:var(--bc-acc)}
 .cz-cpok{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#E7F6EE;font-size:14px;color:#05603A}
 .cz-cpok .nwt-icon{font-size:18px;color:#067647}
 .cz-cpm{max-width:480px}

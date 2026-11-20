@@ -203,14 +203,14 @@ window.BC_CATALOGO.recursos = [
 /* «¿Cómo estás hoy?»: cuestionario modo persona del doc 04 (8 preguntas, 4 sistemas).
    Cada respuesta alimenta dimensiones del Mapa de Vida del doc 03; si dos caen en la misma, manda la peor. */
 window.BC_CATALOGO.autoevaluacion = [
-  { id: "a1", sistema: "Económico", icono: "banknote", d: ["ingresos"], q: "¿Tienes trabajo o alguna fuente de ingresos?", o: ["Sí, tengo ingresos estables", "Algo ocasional o irregular", "No tengo ingresos"] },
-  { id: "a2", sistema: "Económico", icono: "basket", d: ["alimentacion"], q: "¿Puedes cubrir tus necesidades básicas (comida, luz, ropa)?", o: ["Sí, puedo cubrirlas", "Con mucha dificultad", "No puedo, necesito apoyo"] },
-  { id: "a3", sistema: "Social", icono: "home", d: ["vivienda"], q: "¿Tienes un lugar seguro y estable donde vivir?", o: ["Sí, tengo vivienda estable", "Temporal o muy inestable", "No o está en riesgo"] },
-  { id: "a4", sistema: "Social", icono: "favorite", d: ["salud"], q: "¿Puedes ir al médico o al centro de salud cuando lo necesitas?", o: ["Sí, sin problema", "Con dificultad", "No tengo acceso"] },
-  { id: "a5", sistema: "Relacional", icono: "users", d: ["red"], q: "¿Tienes personas cercanas con quienes contar?", o: ["Sí, tengo apoyo cercano", "Tengo alguna persona pero poca ayuda", "Estoy solo/a"] },
-  { id: "a6", sistema: "Relacional", icono: "handshake", d: ["comunidad"], q: "¿Te sientes parte de algún grupo, entidad o comunidad?", o: ["Sí, me siento parte", "Poco o de forma irregular", "No, estoy aislado/a"] },
-  { id: "a7", sistema: "Legal", icono: "file-text", d: ["documentacion"], q: "¿Cuál es tu situación con la documentación personal?", o: ["Todo en regla (DNI, NIE, nacionalidad…)", "Documentación parcial o temporal", "Sin documentos o en trámite inicial"] },
-  { id: "a8", sistema: "Legal", icono: "shield-check", d: ["documentacion"], q: "¿Sientes que conoces tus derechos y puedes ejercerlos?", o: ["Sí, conozco mis derechos", "Conozco algunos pero no sé cómo usarlos", "No, me siento desprotegido/a"] }
+  { id: "a1", sistema: "Económico", icono: "banknote", emoji: "💼", d: ["ingresos"], q: "¿Tienes trabajo o alguna fuente de ingresos?", o: ["Sí, tengo ingresos estables", "Algo ocasional o irregular", "No tengo ingresos"] },
+  { id: "a2", sistema: "Económico", icono: "basket", emoji: "🍎", d: ["alimentacion"], q: "¿Puedes cubrir tus necesidades básicas (comida, luz, ropa)?", o: ["Sí, puedo cubrirlas", "Con mucha dificultad", "No puedo, necesito apoyo"] },
+  { id: "a3", sistema: "Social", icono: "home", emoji: "🏠", d: ["vivienda"], q: "¿Tienes un lugar seguro y estable donde vivir?", o: ["Sí, tengo vivienda estable", "Temporal o muy inestable", "No o está en riesgo"] },
+  { id: "a4", sistema: "Social", icono: "favorite", emoji: "🏥", d: ["salud"], q: "¿Puedes ir al médico o al centro de salud cuando lo necesitas?", o: ["Sí, sin problema", "Con dificultad", "No tengo acceso"] },
+  { id: "a5", sistema: "Relacional", icono: "users", emoji: "🤝", d: ["red"], q: "¿Tienes personas cercanas con quienes contar?", o: ["Sí, tengo apoyo cercano", "Tengo alguna persona pero poca ayuda", "Estoy solo/a"] },
+  { id: "a6", sistema: "Relacional", icono: "handshake", emoji: "👥", d: ["comunidad"], q: "¿Te sientes parte de algún grupo, entidad o comunidad?", o: ["Sí, me siento parte", "Poco o de forma irregular", "No, estoy aislado/a"] },
+  { id: "a7", sistema: "Legal", icono: "file-text", emoji: "🆔", d: ["documentacion"], q: "¿Cuál es tu situación con la documentación personal?", o: ["Todo en regla (DNI, NIE, nacionalidad…)", "Documentación parcial o temporal", "Sin documentos o en trámite inicial"] },
+  { id: "a8", sistema: "Legal", icono: "shield-check", emoji: "🔑", d: ["documentacion"], q: "¿Sientes que conoces tus derechos y puedes ejercerlos?", o: ["Sí, conozco mis derechos", "Conozco algunos pero no sé cómo usarlos", "No, me siento desprotegido/a"] }
 ];
 window.BC_DERIVAR = (resp) => {
   const peso = { v: 0, a: 1, r: 2 }, m = {};

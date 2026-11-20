@@ -336,7 +336,11 @@
   /* ── Superficie: el mismo caso en el teléfono o en una ventana de escritorio ── */
   let SUP = "movil";
   function setSup(sup, recargar) {
+    /* Una app puede limitar sus superficies (Red solo es de escritorio, DC-316); con una sola, sin selector. */
+    const ok = S.app.superficies || ["movil", "escritorio"];
     SUP = sup === "escritorio" ? "escritorio" : "movil";
+    if (!ok.includes(SUP)) SUP = ok[0];
+    document.querySelector(".supsel").hidden = ok.length < 2;
     if (SUP === "escritorio") { holder.style.setProperty("--w", 1280); holder.style.setProperty("--h", 800); holder.dataset.dev = "desk"; }
     else { holder.style.setProperty("--w", 390); holder.style.setProperty("--h", 844); holder.dataset.dev = "ios"; }
     document.querySelectorAll("[data-sup]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sup === SUP)));

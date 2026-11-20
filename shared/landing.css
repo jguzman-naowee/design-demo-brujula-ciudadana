@@ -230,6 +230,7 @@ body.lp{font-size:18px;line-height:1.55;color:var(--lp-ink);background:var(--lp-
 @media (max-width:700px){.lp-chips-wrap .lp-chips{margin-right:0;padding-right:48px;--fd:72px}.lp-chips-wrap .lp-conm{position:static;transform:none;box-shadow:none;margin-top:8px}}
 @media (min-width:600px){.lp-cta{flex-wrap:nowrap}}
 .lp-franja--f .lp-w>div{padding:40px 28px;gap:12px}
+.lp-hero .lp-franja .lp-w{align-items:stretch}
 .lp-franja--f .lp-w>div:first-child{padding-left:0}
 .lp-fi{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.1);color:#FFB58A}
 .lp-fi svg{width:26px;height:26px}

@@ -23,7 +23,7 @@
       '<g transform="rotate(40 100 100)"><g class="sp-aguja"><path d="M100 156L82 100H118Z" stroke="#f49a2d" stroke-width="11"/><path d="M100 44L118 100H82Z" stroke="#ed722e" stroke-width="11"/></g></g></svg>' +
       '<img class="sp-palabra" src="' + IMG + 'palabra-brujula-oscuro.svg" alt="Brújula Ciudadana">' +
       '<p class="sp-lema">Ayuda y actividades <b>cerca de cada persona</b></p>' +
-      '<span class="sp-pres">' + (cfg.pres || "Presentación del concepto") + '</span></div>' +
+      (cfg.pres === "" ? "" : '<span class="sp-pres">' + (cfg.pres || "Presentación del concepto") + "</span>") + '</div>' +
       '<span class="sp-barra" aria-hidden="true"><i></i></span>' +
       '<button type="button" class="sp-saltar">Entrar</button>';
     document.body.insertBefore(sp, document.body.firstChild);

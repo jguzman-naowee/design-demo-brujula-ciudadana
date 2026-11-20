@@ -10,7 +10,8 @@ window.CASOS = [
     falta: "El correo de verificación no se envía. Diseño mínimo con componentes del SDK.",
     steps: [
       { t: "goto", url: APP + "alta-entidad.html", body: "El formulario base del flujo 09." },
-      SI("#ejemplo", "Se completa con datos de ejemplo."),
+      SI("#enviar", "Sin completar, el formulario marca lo que falta."),
+      SI("#enviar", "Al insistir se completa con datos de ejemplo."),
       SI("#enviar", "Envía el registro."),
       VE("#ok", "Queda pendiente de verificación por correo.")
     ]

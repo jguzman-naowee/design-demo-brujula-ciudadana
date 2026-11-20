@@ -1,7 +1,7 @@
 # 03 · Plan Entidad
 
-Superficie: **escritorio**. Menú hoy: Resumen · Mis recursos · Personas (Solicitudes, Por
-asignar) · Conectores (`MENU.entidad`). Lenguaje visual `ez-*`/`sp-*` sobre `nwt-sidebar`.
+Superficie: **escritorio**. Menú hoy: Resumen · Mis recursos · Comunicados · Personas (Mis personas,
+Solicitudes, Asignar, Por verificar, Conectores) (`MENU.entidad`). Conectores vive en `#/personas/conectores`. Lenguaje visual `ez-*`/`sp-*` sobre `nwt-sidebar`.
 
 ## Correcciones de flujo
 

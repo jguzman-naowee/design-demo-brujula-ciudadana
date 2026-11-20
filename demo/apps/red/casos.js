@@ -20,7 +20,8 @@ window.CASOS = [
       { t: "goto", url: APP + "index.html?rol=red#/red/e1", body: "Un festivo afecta a una entidad de la red." },
       SI("#btn-r-firma", "La red escribe a nombre de esa entidad."),
       VE("#cm-nuevo", "Elige la firma (la red o una entidad) y a quién llega; los casos protegidos y quien no autorizó comunicados quedan fuera."),
-      SI("#btn-cm-ej", "Completa el mensaje con un ejemplo."),
+      SI("#btn-cm", "Sin mensaje, pide escribirlo."),
+      SI("#btn-cm", "Al insistir se completa con un ejemplo."),
       SI("#btn-cm", "Y lo envía por app y correo."),
       SI('a[href="#/comunicados/enviados"]', "Queda registrado; la entidad lo ve en su historial como «enviado por la red».")
     ]

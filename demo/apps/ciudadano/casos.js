@@ -7,7 +7,7 @@ const NAV = (k) => "[data-nav=\"" + k + "\"]";
 window.CASOS = [
   {
     id: "1.1", titulo: "Registrarme",
-    falta: "El marco no escribe en los campos: se completan con «datos de ejemplo». El aviso por WhatsApp no se envía.",
+    falta: "El marco no escribe en los campos: se completan con datos de ejemplo al insistir en «Continuar». El aviso por WhatsApp no se envía.",
     steps: [
       { t: "goto", url: APP + "index.html?rol=ciudadano&sinsesion=1#/inicio", body: "El ciudadano entra a Brújula Ciudadana." },
       VE(".bc-hero", "Se registra una sola vez; registrarse solo es una decisión nueva frente a los docs del MVP."),
@@ -16,9 +16,11 @@ window.CASOS = [
       SI('[data-c="tratamiento"]', "Autoriza el tratamiento de datos (obligatorio)."),
       SI('[data-c="entidades"]', "Opcional: permite que otras entidades vean su itinerario, nunca su diagnóstico."),
       SI("#btn-sig", "Continúa."),
-      SI('[data-act="ejemplo"]', "Sus datos: el perfil básico del doc 03, sin dirección exacta."),
+      SI("#btn-sig", "Sus datos: el perfil básico del doc 03, sin dirección exacta. Sin completar, marca lo que falta."),
+      SI("#btn-sig", "Al insistir se completa con datos de ejemplo."),
       SI("#btn-sig", "Continúa."),
-      SI('[data-act="ejemplo"]', "¿Cómo estás hoy?: las 8 preguntas del Mapa de Vida en modo persona (doc 04), una por pantalla."),
+      SI("#btn-sig", "¿Cómo estás hoy?: las 8 preguntas del Mapa de Vida en modo persona (doc 04), una por pantalla."),
+      SI("#btn-sig", "Al insistir se responden todas con datos de ejemplo."),
       VE('[data-q="a1"]', "Cada respuesta es un semáforo: estable, en proceso o necesita apoyo."),
       SI("#btn-sig", "Económico: necesidades básicas."),
       SI("#btn-sig", "Social: vivienda."),
@@ -42,7 +44,8 @@ window.CASOS = [
       VE("#mi-conector", "Ve quién la acompaña y sus próximos pasos."),
       SI(NAV("recursos"), "Sus recursos en cualquier entidad de la red."),
       VE("#mis-recursos", "Cada uno con su estado."),
-      SI(NAV("privacidad"), "Privacidad."),
+      SI(NAV("perfil"), "Su perfil."),
+      SI('a[href="#/privacidad"]', "Privacidad."),
       VE("#accesos", "Quién vio sus datos, cuándo y para qué."),
       SI('[data-act="consent"][data-c="entidades"]', "Puede retirar el permiso de compartir con otras entidades."),
       VE("#consentimientos", "Desde ese momento, las otras entidades dejan de ver su itinerario.")
@@ -54,8 +57,9 @@ window.CASOS = [
       { t: "goto", url: APP + "index.html?rol=ciudadano&sinsesion=1#/inicio", body: "Cada recurso es un evento con fecha: la persona sabe cuándo le toca." },
       SI("#btn-ejemplo", "Entra con su expediente."),
       VE("#proximas", "En su inicio, sus próximas fechas."),
-      SI(NAV("agenda"), "La agenda junta las dos próximas semanas de todos sus recursos, de cualquier entidad."),
-      SI(NAV("recursos"), "Y cada recurso dice cuándo ocurre y cuál es la próxima fecha."),
+      SI(NAV("recursos"), "Sus recursos, en cualquier entidad de la red."),
+      SI('[data-vt="agenda"]', "La agenda junta las dos próximas semanas de todos sus recursos, de cualquier entidad."),
+      SI('[data-vt="lista"]', "Y cada recurso dice cuándo ocurre y cuál es la próxima fecha."),
       SI(NAV("buscar"), "Al buscar ayuda también ve cuándo ocurre cada recurso y cuántas plazas quedan para la próxima fecha.")
     ]
   },

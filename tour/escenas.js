@@ -2,6 +2,8 @@
 // animados (tipo "grafico", tour/graficos.js) y las vistas reales aparecen donde hay que ver la app.
 // Los asistentes validan con insistir(): 1.er Continuar marca, 2.º rellena, 3.º avanza.
 var SIG = { t: "click", sel: "#btn-sig", espera: 250 };
+// Ritmo pausado para que se lea cada estado del asistente (marcado, relleno, siguiente).
+var SIGL = { t: "click", sel: "#btn-sig", espera: 1000 };
 var EJEMPLO = [ { t: "esperar", sel: "#btn-ejemplo" }, { t: "click", sel: "#btn-ejemplo", espera: 600 } ];
 
 window.ESCENAS = [
@@ -28,12 +30,12 @@ window.ESCENAS = [
   { id: "permisos", tipo: "grafico", grafico: "permisos", rol: "Ciudadano", duracion: 9000,
     titulo: "Decide qué comparte",
     texto: "Antes de contar nada elige sus permisos, y después ve quién consultó sus datos y para qué." },
-  { id: "ciudadano-hoy", tipo: "vista", rol: "Ciudadano", sup: "movil", duracion: 8000,
+  { id: "ciudadano-hoy", tipo: "vista", rol: "Ciudadano", sup: "movil", duracion: 13000,
     url: "app/brujula/index.html?rol=ciudadano&sinsesion=1#/inicio",
     titulo: "Cuenta cómo está hoy",
     texto: "Desde su teléfono, con unas pocas preguntas sencillas.",
-    acciones: [ { t: "esperar", sel: "#btn-registrarme" }, { t: "click", sel: "#btn-registrarme", espera: 400 },
-      SIG, SIG, SIG, SIG, SIG, SIG ] },
+    acciones: [ { t: "esperar", sel: "#btn-registrarme" }, { t: "click", sel: "#btn-registrarme", espera: 1200 },
+      SIGL, SIGL, SIGL, SIGL, SIGL, SIGL, SIGL, SIGL, SIGL ] },
   { id: "mapavida", tipo: "grafico", grafico: "mapavida", rol: "Ciudadano", duracion: 9000,
     titulo: "Su Mapa de Vida",
     texto: "Dieciséis áreas de su vida en un vistazo, con lo que más pesa primero." },
@@ -71,7 +73,7 @@ window.ESCENAS = [
     url: "app/brujula/index.html?rol=ciudadano&sinsesion=1#/inicio",
     titulo: "Sabe cuándo le toca y avisa que va",
     texto: "Su agenda junta lo de todas las entidades. Si no confirma a tiempo, su plaza sirve a otra persona.",
-    acciones: EJEMPLO.concat([ { t: "click", sel: ".bc-tabbar [data-nav=\"agenda\"]", espera: 600 } ]) },
+    acciones: EJEMPLO.concat([ { t: "click", sel: ".bc-tabbar [data-nav=\"recursos\"]", espera: 600 }, { t: "click", sel: ".cz-seg [data-vt=\"agenda\"]", espera: 600 } ]) },
   { id: "lista", tipo: "grafico", grafico: "lista", rol: "Equipo", duracion: 9000,
     titulo: "El equipo pasa lista",
     texto: "Así se ve el uso real de cada persona. «No vino» queda a la vista, pero no da de baja a nadie." },

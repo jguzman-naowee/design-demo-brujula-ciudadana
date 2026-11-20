@@ -89,6 +89,8 @@
         '<div class="lp-rc__p"><button type="button" class="lp-enlace" data-ver="' + p.id + '">Ver en el mapa →</button>' + (p.real ? "" : '<span class="lp-ej">Ejemplo</span>') + "</div></div></article>";
     };
     $("#tarjetas").innerHTML = v.slice(0, tope).map(tarjeta).join("") || '<p class="lp-mas">No hay recursos de esta necesidad en la zona.</p>';
+    /* El botón solo existe en mapa.html; la landing enlaza a la página completa. */
+    var mas = $("#tarjetas-mas"); if (mas) { mas.hidden = v.length <= tope; mas.textContent = "Ver " + Math.min(9, v.length - tope) + " más"; }
   }
 
   /* Mapa (Leaflet), encerrado en la zona: no se puede arrastrar ni alejar fuera de ella. */

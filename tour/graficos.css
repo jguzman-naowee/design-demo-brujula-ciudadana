@@ -155,3 +155,4 @@
 .gf-leaf .gf-fondo{filter:grayscale(.85) contrast(.92) brightness(1.04)}
 .gf-leaf .gf-pin{position:static;box-sizing:border-box}
 .gf-leaf .gf-pin--r{background:#FF9A5C;border-width:2px}
+.gf-mapa{z-index:0}

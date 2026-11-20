@@ -221,12 +221,6 @@
         raiz.style.setProperty('--bc-safe-bot', movil ? '16px' : '0px');
         if (el.frame.contentWindow.__tintSafe) el.frame.contentWindow.__tintSafe();
       } catch (err) { /* sin acceso */ }
-      /* El relleno de ejemplo es una ayuda de la demo: en el recorrido no se muestra. */
-      try {
-        var st = el.frame.contentDocument.createElement('style');
-        st.textContent = '.bc-ejemplo,div:has(> #ejemplo){display:none!important}';
-        el.frame.contentDocument.head.appendChild(st);
-      } catch (err) { /* sin acceso */ }
       correr(e, tok).then(function () { listo(tok); }, function () { listo(tok); });
     }
     el.frame.addEventListener('load', alCargar);

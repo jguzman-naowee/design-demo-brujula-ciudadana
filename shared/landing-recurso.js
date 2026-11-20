@@ -13,7 +13,7 @@
     var bl = pasos[n].dataset.bl;
     sec.querySelectorAll(".lr-bl").forEach(function (b) { b.classList.toggle("on", b.dataset.bl === bl); });
     var on = sec.querySelector(".lr-bl.on");
-    if (pant && on) pant.scrollTo({ top: Math.max(on.offsetTop - 70, 0), behavior: quieto ? "auto" : "smooth" });
+    if (pant && on) pant.scrollTo({ top: n === 0 ? 0 : Math.max(on.offsetTop - 70, 0), behavior: quieto ? "auto" : "smooth" });
   }
   function seguir() { clearInterval(timer); if (tocado || quieto) return; timer = setInterval(function () { marcar((i + 1) % pasos.length); }, 3800); }
   pasos.forEach(function (p, k) { p.addEventListener("click", function () { tocado = true; clearInterval(timer); marcar(k); }); });

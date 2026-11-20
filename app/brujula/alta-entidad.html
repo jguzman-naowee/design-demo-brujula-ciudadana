@@ -54,7 +54,9 @@
   .ae-pasos{flex-direction:row;gap:12px}
   .ae-pasos li{flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:6px;min-height:0;font-size:13px}
   .ae-salir{margin-top:0}
-  .ae-main{padding:20px 16px 48px}
+  .ae-main{padding:20px 16px calc(112px + var(--bc-safe-bot,0px) + env(safe-area-inset-bottom))}
+  /* Pie fijo al borde, como en los asistentes: su padding cubre la franja de gesto con su fondo. */
+  .ae-pie{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:12px 16px calc(12px + var(--bc-safe-bot,0px) + env(safe-area-inset-bottom));background:var(--bc-surface);border-top:1px solid var(--bc-line)}
   .ae-sec{padding:18px 16px}
   .ae-rec{grid-template-columns:1fr 1fr}.ae-rec > :first-child{grid-column:1/-1}
   .ae-pie .nwt-button{width:100%}
@@ -72,7 +74,6 @@
 </aside>
 <main class="ae-main">
   <div id="formWrap" class="stack bc-entra">
-    <div><button type="button" class="nwt-button" nwt-variant="quiet" nwt-size="small" id="ejemplo"><span class="nwt-button__content"><div class="nwt-icon nwt-button__icon"><i class="naotech-icon-sparkles"></i></div>Completar con datos de ejemplo</span></button></div>
     <form id="form" novalidate class="stack"></form>
     <div id="error"></div>
     <div class="ae-pie"><button type="submit" form="form" class="nwt-button" nwt-variant="loud" nwt-size="medium" id="enviar"><span class="nwt-button__content">Registrar entidad<div class="nwt-icon nwt-button__icon"><i class="naotech-icon-arrow-right"></i></div></span></button></div>
@@ -144,7 +145,6 @@
     filas().forEach((f, i) => { const ej = EJ_RECS[i % EJ_RECS.length]; ["nombre", "cat", "modo", "cupo"].forEach((k) => { const el = f.querySelector('[id$="-' + k + '"]'); if (!el.value.trim()) el.value = ej[k]; }); });
     pasos();
   };
-  $("ejemplo").addEventListener("click", () => { fallo = false; rellenar(); });
   /* Enviar tarda como en un servicio real: el botón muestra que trabaja y no admite otro clic. */
   form.addEventListener("submit", (e) => {
     e.preventDefault(); if (document.body.classList.contains("bc-ocupado")) return;
