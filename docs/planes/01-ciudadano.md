@@ -27,7 +27,8 @@ Lo que hoy hace la demo y que el modelo nuevo rompe o contradice.
 | Mi expediente (`cInicio`) | Bloque **«Próximas fechas»** (3 siguientes) debajo del conector |
 | Mis recursos (`cRecursos`) | Cada recurso dice **cuándo ocurre**; aprobados muestran próxima fecha |
 | Buscar ayuda (`cBuscar`) | Fecha y plazas de la próxima fecha en cada tarjeta (C5) |
-| **Agenda** (nueva, `#/agenda`) | Entra al menú entre Mis recursos y Buscar |
+| **Agenda** (`#/agenda`) | Vista de Mis recursos, con el conmutador Lista / Agenda (ya no es pestaña del menú) |
+| **Perfil** (nueva, `#/perfil`) | Cuarta pestaña: agrupa Mi Mapa de Vida, Privacidad y Mi familia. Menú: Inicio · Mis recursos · Buscar · Perfil |
 | Registro y Privacidad | Textos C1 y C2 |
 
 ## Ola 2 · Familia
@@ -76,3 +77,22 @@ No ve las notas internas.
 ## Recorrido
 
 Escenas nuevas tras «Y la persona llega a sus recursos»: agenda, ir con la familia, aviso.
+
+## Ola 6 · Registro único ([spec 10](../specs/10-registro-unico.md))
+
+El registro del ciudadano y el del conector pasan a ser un solo formulario. Del lado del
+ciudadano casi todo se ve igual: lo que cambia es que el conector adopta su forma.
+
+| # | Dónde | Hoy | Cómo queda |
+|---|---|---|---|
+| C9 | Registro, paso 2 «Sobre ti» (`czDatos`) | Sin número de documento | Campo opcional «Número de documento» bajo «¿Tienes documento nacional?» |
+| C10 | Registro, al continuar el paso 2 (`yo-2`) | Crea expediente aunque el teléfono ya exista | Comprueba el teléfono. Si existe: alerta «Ya hay un expediente con este teléfono. Tu entidad te contactará.», sin datos de la otra persona; no avanza; el intento queda en la Privacidad de esa persona |
+| C11 | Registro, toda la plantilla (`czWiz`) | Plantilla propia del rol | La misma plantilla que el conector, con textos de `T.yo` |
+
+| Pantalla | Estructura | Componentes | Estados |
+|---|---|---|---|
+| Paso 2 | Como hoy + número de documento (opcional) | `fld()` | Duplicado: `nwt-alert` warning arriba del pie con el texto de mínima revelación y el foco en el teléfono |
+| Paso 3 | Una pregunta por pantalla, como hoy | Tarjeta de pregunta con caritas (componente común) | Sin cambios |
+
+Rutas sin cambios: `#/registro/1..4` y `#/registro/3/1..8`. Caso 1.1: se agrega una nota en el
+paso 2 sobre la comprobación de duplicado.

@@ -10,6 +10,7 @@ coherente entre roles (comparten `localStorage`) y cada ola sea un commit que se
 | 3 | [04 Panel del recurso](../specs/04-panel-del-recurso.md) | El ciudadano confirma «Voy» y con quiénes; el equipo pasa lista | ● | ● | ● | |
 | 4 | [05 Comunicados](../specs/05-comunicados.md) + [06 Perfil](../specs/06-perfil.md) | Avisos con aprobación; notas internas | ● | ● | ● | |
 | 5 | [01 Red de entidades](../specs/01-red-de-entidades.md) | Rol Red nuevo; selector de entidad | | ● | ● | ● |
+| 6 | [10 Registro único](../specs/10-registro-unico.md) | Ciudadano y conector registran con el mismo formulario; el autorregistro no duplica | ● | ● | | |
 
 ● cambia
 

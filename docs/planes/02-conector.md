@@ -69,3 +69,27 @@ Selector de entidad en la cabecera si su equipo está en varias (K7). Hoy `const
 - **2.3 Pasar lista:** abrir el comedor de hoy, marcar quién vino, ver el contador de una persona.
 - **2.4 Avisar un cambio:** el taller pasa a las 18:00 → aviso a los inscritos; un comunicado
   queda Por aprobar.
+
+## Ola 6 · Registro único ([spec 10](../specs/10-registro-unico.md))
+
+Registrar persona adopta el formulario del ciudadano, en tercera persona. Se conservan la
+búsqueda al inicio, «Cancelar» en los permisos y el cierre con recursos y nota interna.
+
+| # | Dónde | Hoy | Cómo queda |
+|---|---|---|---|
+| K9 | Permisos (`kRegistrarWiz` paso 2, `vConsent`) | Texto legal largo con etiqueta Obligatorio/Opcional | Mismas etiquetas cortas que el ciudadano, con ayuda «Léelos con la persona…»; «Cancelar» se queda |
+| K10 | Perfil básico (`vDatos`) | 4 grupos, selects, idioma único, orden propio | Los campos y el orden del ciudadano: documento segmentado, canal con fichas, idiomas con chips (varios), ayuda «En el mapa» para el CP. Sin «Mi ubicación» |
+| K11 | Mapa de Vida (`vMapa`, pasos 4–7) | Radios con semáforo | Tarjeta de pregunta con caritas, 4 áreas por pantalla; `cuidados` y `autonomia` siguen opcionales |
+| K12 | Cabecera (`kzTop`) | 5 segmentos y contador «n/5» | Cabecera común: cerrar en la búsqueda, atrás después; un segmento por pantalla, sin números |
+| K13 | Datos con teléfono cambiado | No se vuelve a comprobar | Si el teléfono del paso 2 ya existe, vuelve al resultado de la búsqueda |
+
+| Pantalla | Estructura | Componentes | Estados |
+|---|---|---|---|
+| Paso 3 (datos) | Igual que el paso 2 del ciudadano, con `T.con` | `fld()`, segmentado, fichas, chips | Teléfono prellenado desde la búsqueda |
+| Pasos 4–7 (Mapa) | Eyebrow «Mapa de Vida · {bloque}», instrucción, 4 tarjetas | Tarjeta con caritas (componente común) | Falta una: «Falta marcar: {áreas}.» |
+
+Rutas sin cambios: `#/registrar/1..8` y `#/listo/:id`.
+
+**Caso 2.1:** hoy se detiene en el paso 2, porque `#btn-registrar` no existe (el menú solo pinta
+`data-nav="registrar"`). Se da ese id a un botón visible de Mis personas, o el caso pasa a usar
+`NAV("registrar")`. Las notas de los bloques del Mapa pasan a hablar de caritas.

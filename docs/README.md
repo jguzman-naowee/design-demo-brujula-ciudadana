@@ -19,6 +19,7 @@
 | 07 | [Catálogo estándar](specs/07-catalogo.md) | En la demo | 02 |
 | 08 | [Landing](specs/08-landing.md) | En la demo | 02 |
 | 09 | [Recorrido](specs/09-recorrido.md) | En la demo | 01–08 |
+| 10 | [Registro único](specs/10-registro-unico.md) | Spec cerrada, pendiente de UI (ola 6) | 03, 06 |
 
 **En la demo** = implementada en las olas 1–5 (19-nov-2026); las decisiones siguen sin validar con el cliente. Cada spec cierra con «En la demo» cuando la implementación simplificó algo.
 Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
@@ -27,7 +28,7 @@ Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
 
 | Plan | Qué |
 |---|---|
-| [00 Orden](planes/00-orden.md) | Las 5 olas de entrada a la UI y qué cierra cada una |
+| [00 Orden](planes/00-orden.md) | Las olas de entrada a la UI (5 en la demo, la 6 pendiente) y qué cierra cada una |
 | [01 Ciudadano](planes/01-ciudadano.md) | Agenda, Mi familia, inscribirse con familia, avisos |
 | [02 Conector](planes/02-conector.md) | Postular con fecha y familia, pasar lista, avisos, notas |
 | [03 Entidad](planes/03-entidad.md) | Crear recurso por catálogo, verificar fichas, panel, aprobar comunicados |
