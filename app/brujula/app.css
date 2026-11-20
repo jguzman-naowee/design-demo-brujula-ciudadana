@@ -511,6 +511,7 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 /* Código postal por ubicación o por mapa (registro del ciudadano). */
 .cz-cpacc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .cz-cpacc>span{grid-column:1/-1;font-size:13px;color:var(--bc-mut)}
+.cz-cpacc--1{grid-template-columns:1fr}
 .cz-cpacc .nwt-button{width:100%;justify-content:center;gap:6px;min-height:40px;padding:0 10px;white-space:nowrap;font-size:14px;font-weight:600;background:#fff;border:1px solid var(--bc-line);color:var(--bc-ink)}
 .cz-cpacc .nwt-button .nwt-icon{font-size:18px;color:var(--bc-acc)}
 .cz-cpok{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#E7F6EE;font-size:14px;color:#05603A}

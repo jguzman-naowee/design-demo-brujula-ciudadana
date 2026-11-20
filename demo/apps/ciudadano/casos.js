@@ -18,6 +18,7 @@ window.CASOS = [
       SI("#btn-sig", "Continúa."),
       SI("#btn-sig", "Sus datos: el perfil básico del doc 03, sin dirección exacta. Sin completar, marca lo que falta."),
       SI("#btn-sig", "Al insistir se completa con datos de ejemplo."),
+      VE("#f-tel", "Al continuar se comprueba el teléfono: si ya tiene expediente, solo avisa «Tu entidad te contactará», sin mostrar datos de nadie."),
       SI("#btn-sig", "Continúa."),
       SI("#btn-sig", "¿Cómo estás hoy?: las 8 preguntas del Mapa de Vida en modo persona (doc 04), una por pantalla."),
       SI("#btn-sig", "Al insistir se responden todas con datos de ejemplo."),

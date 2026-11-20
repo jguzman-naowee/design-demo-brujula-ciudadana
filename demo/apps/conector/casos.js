@@ -17,11 +17,11 @@ window.CASOS = [
       VE(".nwt-alert", "…la red avisa y no se duplica a la persona."),
       SI('[data-act="probar"][data-v="nuevo"]', "Con un número nuevo no hay coincidencias."),
       SI("#btn-sig", "Continúa."),
-      SI('[data-c="privacidad"]', "Lee y marca los consentimientos obligatorios."),
+      SI('[data-c="privacidad"]', "Sus permisos: los mismos que ve el ciudadano. Lee y marca los necesarios."),
       SI('[data-c="tratamiento"]', "Sin estos dos, el proceso termina sin registrar nada."),
       SI("#btn-sig", "Continúa."),
-      ...INSISTE("Perfil básico."),
-      SI("#btn-sig", "Mapa de Vida completo: 16 dimensiones en 4 bloques."),
+      ...INSISTE("Sobre la persona: los mismos campos y en el mismo orden que el autorregistro."),
+      SI("#btn-sig", "Mapa de Vida completo: 16 áreas en 4 bloques, con las mismas caritas que el ciudadano."),
       ...INSISTE("Bloque 1 · Necesidades básicas."),
       SI("#btn-sig", "Siguiente bloque."),
       ...INSISTE("Bloque 2 · Entorno familiar."),
@@ -76,6 +76,24 @@ window.CASOS = [
       VE("#familia", "Su familia y el estado de cada ficha."),
       SI('#familia [data-act="fam-ver"]', "Como su entidad la atiende, el conector verifica a Omar."),
       VE("#notas", "Notas internas con autor y fecha: solo las ve su entidad.")
+    ]
+  },
+  {
+    id: "2.6", titulo: "Completar el Mapa de Vida",
+    falta: "Si ya se completó en otra corrida, «Restablecer datos» deja a Ibrahim otra vez con el Mapa corto.",
+    steps: [
+      { t: "goto", url: APP + "index.html?rol=conector#/persona/BC-2026-0207", body: "Ibrahim se autorregistró: su Mapa de Vida es la versión corta." },
+      VE("#mapa", "Su autoevaluación cubre 7 de las 16 áreas."),
+      SI("#btn-completar-mapa", "En la entrevista, el conector abre el mismo paso del registro."),
+      VE(".cz-q .bc-opt.on", "Lo que respondió al registrarse ya viene marcado."),
+      SI("#btn-sig", "El primer bloque ya está completo: sigue."),
+      ...INSISTE("Entorno familiar."),
+      SI("#btn-sig", "Siguiente bloque."),
+      ...INSISTE("Autonomía."),
+      SI("#btn-sig", "Siguiente bloque."),
+      ...INSISTE("Participación."),
+      SI("#btn-sig", "Guarda el Mapa de Vida."),
+      VE("#mapa", "Ahora tiene las 16 áreas.")
     ]
   }
 ];

@@ -66,8 +66,6 @@
     if (!c.r && !c.a && !c.v) return '<span class="bc-mini vacio">Sin evaluar</span>';
     return '<span class="bc-mini" role="img" aria-label="' + c.r + " necesitan apoyo, " + c.a + " en proceso, " + c.v + ' estables">' + ["r", "a", "v"].filter((k) => c[k]).map((k) => '<i class="' + k + '" style="flex:' + c[k] + '"></i>').join("") + "</span>";
   };
-  const stepper = (labels, pos) => '<div class="bc-prog"><div class="bc-prog__bar" role="progressbar" aria-valuemin="1" aria-valuemax="' + labels.length + '" aria-valuenow="' + (pos + 1) + '">' + labels.map((l, i) => '<i class="' + (i <= pos ? "on" : "") + '"></i>').join("") +
-    '</div><span>Paso ' + (pos + 1) + " de " + labels.length + " · <b>" + esc(labels[pos]) + "</b></span></div>";
   const selNative = (id, opts, val, extra) => '<select id="' + id + '" class="bc-sel"' + (extra || "") + ">" + opts + "</select>";
 
   /* Campos: misma estructura que NwtTextField / NwtSelect (nwt-input-box). */
@@ -90,7 +88,7 @@
   const nuevo = (tipo) => ({ tipo, consent: {}, datos: {}, mapa: {}, auto: {}, recursos: [], entidad: ENT, err: {}, busqueda: null, q: "", notas: "" });
   const EJEMPLO = {
     yo: { nombre: "Amina", apellidos: "Belkadi", nac: "1994-05-19", docTipo: "En trámite", doc: "", tel: "+34 612 448 901", email: "amina.belkadi@correo.es", municipio: "Madrid", cp: "28026", idioma: ["Árabe", "Español"], canal: "WhatsApp" },
-    con: { nombre: "Jorge Luis", apellidos: "Paredes", nac: "1990-08-07", docTipo: "No", doc: "", tel: "+34 600 123 456", email: "jl.paredes@correo.es", municipio: "Madrid", cp: "28041", idioma: "Español", canal: "Teléfono" }
+    con: { nombre: "Jorge Luis", apellidos: "Paredes", nac: "1990-08-07", docTipo: "No", doc: "", tel: "+34 600 123 456", email: "jl.paredes@correo.es", municipio: "Madrid", cp: "28041", idioma: ["Español"], canal: "Teléfono" }
   };
   const MAPA_EJ = { vivienda: "r", ingresos: "a", alimentacion: "a", salud: "v", documentacion: "r", red: "a", familia: "v", menores: "v", cuidados: "v", empleo: "r", formacion: "a", movilidad: "v", digital: "a", autonomia: "v", direccion: "a", comunidad: "a" };
   const REQ = ["nombre", "apellidos", "nac", "docTipo", "tel", "email", "municipio", "cp", "idioma", "canal"];
@@ -102,28 +100,19 @@
     return !Object.keys(D.err).length;
   };
 
-  const vDatos = (yo) =>
-    '<div class="stack">' +
-    '<fieldset class="bc-fs"><legend>Datos personales</legend><div class="grid2">' + fld("nombre", "Nombre") + fld("apellidos", "Apellidos") + fld("nac", "Fecha de nacimiento", { type: "date" }) + fld("docTipo", yo ? "¿Tienes documento nacional?" : "¿Tiene documento nacional?", { opts: CAT.documento }) + fld("doc", "DNI / NIE / Pasaporte", { opc: true, h: "No es necesario para empezar." }) + "</div></fieldset>" +
-    '<fieldset class="bc-fs"><legend>Contacto</legend><div class="grid2">' + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000", h: "Es el canal principal de contacto." }) + fld("email", "Email", { type: "email", ph: "nombre@correo.es" }) + "</div></fieldset>" +
-    '<fieldset class="bc-fs"><legend>Ubicación</legend><div class="grid2">' + fld("municipio", "Municipio") + fld("cp", "Código postal", { mode: "numeric", ph: "28000", h: (yo ? "No pedimos tu" : "No se pide la") + " dirección exacta." }) + "</div></fieldset>" +
-    '<fieldset class="bc-fs"><legend>Idioma y canal</legend><div class="grid2">' + fld("idioma", "Idioma preferente", { opts: CAT.idiomas }) + fld("canal", "Canal preferido", { opts: CAT.canales }) + "</div></fieldset></div>";
-
-  const vConsent = (yo) => '<div class="stack-s">' + CAT.consentimientos.map((c) =>
-    checkbox(c.id, !!D.consent[c.id], "<b>" + esc(c.txt) + "</b> " + (c.obligatorio ? tag("Obligatorio", "negative") : tag("Opcional", "neutral")), c.ayuda ? esc(c.ayuda) : "", "data-c")).join("") +
-    (D.err.consent ? alerta(esc(D.err.consent), "negative") : "") +
-    '<p class="mut" style="font-size:13px">' + (yo ? "Puedes retirar tu consentimiento cuando quieras. Cada vez que alguien vea tus datos, queda registrado." : "Lee los consentimientos con la persona. Los dos obligatorios son bloqueantes: sin ellos no se crea expediente.") + "</p></div>";
-
-  const vMapa = (dims) => dims.map((d) =>
-    '<div class="bc-dim" data-dim="' + d.id + '"><h3 class="bc-dh">' + gi(d) + "<span>" + esc(d.n) + (d.opcional ? ' <span class="mut" style="font-weight:400">(opcional)</span>' : "") + '</span></h3><p class="mut">' + esc(d.q) + '</p><div class="stack-s" role="radiogroup" aria-label="' + esc(d.n) + '">' +
-    d.o.map((t, i) => { const v = "var"[i]; return radio(D.mapa[d.id] === v, esc(t) + " " + sem(v), 'data-act="sem" data-d="' + d.id + '" data-v="' + v + '"'); }).join("") + "</div></div>").join("") +
-    (D.err.mapa ? '<div style="margin-top:12px">' + alerta(esc(D.err.mapa), "negative") + "</div>" : "");
-
-  const wiz = (o) =>
-    '<div class="bc-page narrow stack"><div class="stack-s"><span class="bc-eyebrow">' + esc(o.eyebrow) + "</span><h1>" + esc(o.titulo) + "</h1>" + (o.sub ? '<p class="mut">' + o.sub + "</p>" : "") + "</div>" +
-    stepper(o.pasos, o.pos) +
-    card(o.cuerpo) +
-    '<div class="bc-wiz-f">' + btn("Atrás", { v: "mute", href: o.atras }) + (o.extra || "") + btn(o.sig || "Continuar", { act: o.act, iconEnd: o.sigIcon || "arrow-right", a: { id: "btn-sig" } }) + "</div></div>";
+  /* Registro único (spec 10): un formulario para ciudadano y conector; cambia la voz, no los
+     campos ni el orden. Preguntas del Mapa y permisos no cambian: son la declaración de la persona. */
+  const T = {
+    yo: { permisos: "Tus permisos", ayPermisos: "Puedes retirar tu consentimiento cuando quieras. Cada vez que alguien vea tus datos, queda registrado.", errPermiso: "Faltan los permisos necesarios. Sin ellos no podemos crear tu expediente.", datos: "Sobre ti", doc: "¿Tienes documento nacional?", cp: "No pedimos tu dirección exacta.", cpNo: "¿No lo sabes?", canal: "¿Cómo te contactamos?", idioma: "Idiomas que hablas", cpmT: "¿Dónde vives?", cpmP: "Toca tu zona. Solo usamos el código postal para mostrarte las entidades más cercanas.", dup: "Ya hay un expediente con este teléfono. Tu entidad te contactará." },
+    con: { permisos: "Sus permisos", ayPermisos: "Léelos con la persona y marca lo que autoriza. Sin los dos necesarios no se crea el expediente.", errPermiso: "Faltan los consentimientos necesarios. Sin ellos no se crea el expediente.", datos: "Sobre la persona", doc: "¿Tiene documento nacional?", cp: "No se pide la dirección exacta.", cpNo: "¿No lo sabe?", canal: "¿Cómo prefiere que la contacten?", idioma: "Idiomas que habla", cpmT: "¿Dónde vive?", cpmP: "Toca su zona. Solo se usa el código postal para mostrar las entidades más cercanas.", instMapa: "Lee la pregunta y marca la respuesta de la persona." }
+  };
+  const tr = () => T[D && D.tipo === "yo" ? "yo" : "con"];
+  /* Pantallas de cada recorrido, una marca por pantalla en la barra de progreso. */
+  const PASOS_REG = { yo: ["permisos", "datos"].concat(CAT.autoevaluacion.map((q) => q.id), ["acompana"]), con: ["buscar", "permisos", "datos"].concat(CAT.bloques.map((b) => b.id), ["recursos"]), mapa: CAT.bloques.map((b) => b.id) };
+  const telN = (t) => String(t || "").replace(/\s/g, "");
+  const telDe = (t) => telN(t) ? S.personas.find((x) => telN(x.tel) === telN(t)) : null;
+  /* Un teléfono que nadie tiene: los datos se comparten entre corridas y roles. */
+  const telLibre = () => { const usados = new Set(S.personas.map((x) => telN(x.tel))); let n = 123456; while (usados.has("+34600" + n)) n++; return "+34 600 " + String(n).slice(0, 3) + " " + String(n).slice(3); };
 
   const bloquesMapa = (m, compacto) => CAT.bloques.map((b) => {
     const ds = CAT.dimensiones.filter((d) => d.b === b.id && m[d.id]);
@@ -172,34 +161,33 @@
       '<h2 class="cz-pasos-t" id="cz-como">Cómo funciona</h2><ul class="cz-pasos" aria-labelledby="cz-como">' + [["user-plus", "Cuéntanos tu situación", "5 min"], ["phone", "Un conector te orienta", "24–72 h"], ["map-pin", "Ves tus programas", "En tu zona"]].map(([i, t, n]) => '<li><span class="cz-pi">' + ic(i) + "</span><b>" + t + "</b>" + tag(n, "neutral", "small") + "</li>").join("") + "</ul>" +
       '<div class="cz-cta">' + btn("Empezar", { act: "empezar-yo", a: { id: "btn-registrarme" } }) + btn("Ya tengo expediente", { v: "quiet", act: "entrar-ejemplo", a: { id: "btn-ejemplo" } }) + "</div></div>";
   }
-  const PASOS_YO = ["Consentimiento", "Tus datos", "Cómo estás", "Quién te acompaña"];
   const AUTO = CAT.autoevaluacion;
   const AUTO_EJ = { a1: "a", a2: "a", a3: "r", a4: "v", a5: "a", a6: "a", a7: "r", a8: "a" };
   function cRegistro(paso, n) {
     if (!D || D.tipo !== "yo") D = nuevo("yo");
     /* Un segmento por pantalla real: permisos, datos, cada pregunta del Mapa y la entidad; sin números. */
-    const b = { pos: paso <= 2 ? paso - 1 : 2 + AUTO.length, total: 3 + AUTO.length };
-    if (paso === 1) return czWiz(Object.assign(b, { titulo: "Tus permisos", cuerpo: czConsent(), atras: "#/inicio", act: "yo-1" }));
-    if (paso === 2) return czWiz(Object.assign(b, { titulo: "Sobre ti", cuerpo: czDatos(), atras: "#/registro/1", act: "yo-2" }));
+    const b = { pos: paso <= 2 ? paso - 1 : PASOS_REG.yo.length - 1, total: PASOS_REG.yo.length };
+    if (paso === 1) return regWiz(Object.assign(b, { titulo: T.yo.permisos, cuerpo: regConsent(), atras: "#/inicio", act: "yo-1" }));
+    if (paso === 2) return regWiz(Object.assign(b, { titulo: T.yo.datos, cuerpo: regDatos(), atras: "#/registro/1", act: "yo-2" }));
     if (paso === 3) {
       const q = AUTO[Math.min(Math.max(n || 1, 1), AUTO.length) - 1], i = AUTO.indexOf(q);
       b.pos = 2 + i;
-      return czWiz(Object.assign(b, { titulo: q.q, icono: q.icono, emoji: q.emoji, sistema: q.sistema, eyebrow: "¿Cómo estás hoy? · " + q.sistema, cuerpo: czPregunta(q), atras: i ? "#/registro/3/" + i : "#/registro/2", act: "yo-3", sig: i < AUTO.length - 1 ? "Siguiente" : "Continuar" }));
+      return regWiz(Object.assign(b, { titulo: q.q, icono: q.icono, emoji: q.emoji, sistema: q.sistema, eyebrow: "¿Cómo estás hoy? · " + q.sistema, cuerpo: czPregunta(q), atras: i ? "#/registro/3/" + i : "#/registro/2", act: "yo-3", sig: i < AUTO.length - 1 ? "Siguiente" : "Continuar" }));
     }
     const urg = Object.values(D.auto).includes("r");
-    return czWiz(Object.assign(b, {
+    return regWiz(Object.assign(b, {
       titulo: "¿Quién te acompaña?", atras: "#/registro/3/" + AUTO.length, act: "yo-crear", sig: "Crear mi expediente", sigIcon: "check", cuerpo: czEntidades(),
       pie: '<div class="cz-plazo">' + ic("clock") + (urg ? "Te llamamos en menos de 24 h" : "Te llamamos en 5 días hábiles como máximo") + "</div>"
     }));
   }
-  /* Asistente del ciudadano: cabecera con atrás y progreso, cuerpo y botón fijo abajo. */
-  const czWiz = (o) => '<div class="bc-page cz-pg cz-wiz"><div class="cz-cab' + (o.eyebrow ? "" : " cz-cab--t") + '"><a class="cz-atras" href="' + o.atras + '" aria-label="Atrás">' + ic("chevron-left") + "</a>" + (o.eyebrow ? "" : '<h1 class="cz-tit">' + esc(o.titulo) + "</h1>") + '<div class="cz-prog" role="img" aria-label="Paso ' + (o.pos + 1) + ' de ' + o.total + '">' + Array.from({ length: o.total }, (x, i) => '<i class="' + (i <= o.pos ? "on" : "") + '"></i>').join("") + "</div></div>" +
+  /* Asistente del registro, igual en los dos roles: cabecera con atrás (o cerrar) y progreso, cuerpo y botón fijo abajo. */
+  const regWiz = (o) => '<div class="bc-page cz-pg cz-wiz"><div class="cz-cab' + (o.eyebrow ? "" : " cz-cab--t") + '"><a class="cz-atras" href="' + o.atras + '" aria-label="' + (o.cerrar ? "Cerrar" : "Atrás") + '">' + ic(o.cerrar ? "close" : "chevron-left") + "</a>" + (o.eyebrow ? "" : '<h1 class="cz-tit">' + esc(o.titulo) + "</h1>") + '<div class="cz-prog" role="img" aria-label="Paso ' + (o.pos + 1) + ' de ' + o.total + '">' + Array.from({ length: o.total }, (x, i) => '<i class="' + (i <= o.pos ? "on" : "") + '"></i>').join("") + "</div></div>" +
     '<div class="cz-cuerpo">' + (o.eyebrow ? '<div class="cz-hd"><div class="cz-hd__t"><h1>' + esc(o.titulo) + '</h1><span class="cz-qk">' + esc(o.eyebrow) + "</span></div>" + (o.emoji ? '<div class="cz-ico cz-ico--em" data-s="' + esc(o.sistema) + '" aria-hidden="true"><span class="bc-em">' + o.emoji + "</span></div>" : o.icono ? '<div class="cz-ico">' + ic(o.icono) + "</div>" : "") + "</div>" : (o.icono ? '<div class="cz-ico">' + ic(o.icono) + "</div>" : "")) +
-    o.cuerpo + "</div>" +
-    '<div class="cz-pie" data-tint="#ffffff">' + (o.pie || "") + btn(o.sig || "Continuar", { act: o.act, iconEnd: o.sigIcon || "arrow-right", a: { id: "btn-sig" } }) + "</div></div>";
+    (o.instr ? '<p class="cz-expl">' + esc(o.instr) + "</p>" : "") + o.cuerpo + "</div>" +
+    '<div class="cz-pie" data-tint="#ffffff">' + (o.pie || "") + btn(o.sig || "Continuar", { act: o.act, iconEnd: o.sigIcon || "arrow-right", a: { id: "btn-sig" } }) + (o.extra || "") + "</div></div>";
   const CZ_PERM = { privacidad: ["Política de privacidad", "Necesario"], tratamiento: ["Tratar mis datos", "Necesario"], entidades: ["Compartir mi itinerario", "Para que tus entidades vean tus recursos"], comunicaciones: ["Recibir comunicados", "Los avisos de tus recursos llegan siempre"] };
-  const czConsent = () => '<div class="cz-card cz-perm">' + CAT.consentimientos.map((c) => { const t = CZ_PERM[c.id] || [c.txt, c.obligatorio ? "Necesario" : ""]; return checkbox(c.id, !!D.consent[c.id], '<span class="cz-pt">' + esc(t[0]) + '</span><span class="cz-ps' + (c.obligatorio ? " req" : "") + '">' + esc(t[1]) + "</span>", "", "data-c"); }).join("") + "</div>" +
-    (D.err.consent ? alerta(esc(D.err.consent), "negative") : "");
+  const regConsent = () => '<div class="cz-card cz-perm">' + CAT.consentimientos.map((c) => { const t = CZ_PERM[c.id] || [c.txt, c.obligatorio ? "Necesario" : ""]; return checkbox(c.id, !!D.consent[c.id], '<span class="cz-pt">' + esc(t[0]) + '</span><span class="cz-ps' + (c.obligatorio ? " req" : "") + '">' + esc(t[1]) + "</span>", "", "data-c"); }).join("") + "</div>" +
+    (D.err.consent ? alerta(esc(D.err.consent), "negative") : "") + '<p class="cz-expl">' + esc(tr().ayPermisos) + "</p>";
   /* Opciones únicas (documento, canal, idioma): botones que escriben en D.datos igual que el select. */
   const czOpt = (k, v, cls, inner) => '<button type="button" role="radio" class="' + cls + '" aria-checked="' + (D.datos[k] === v) + '" data-act="c-set" data-k="' + k + '" data-v="' + esc(v) + '">' + (inner || esc(v)) + "</button>";
   const czGrupo = (k, label, cls, opts, inner) => '<div class="cz-grupo"><span class="cz-gl" id="g-' + k + '">' + label + '</span><div class="' + cls + '" role="radiogroup" aria-labelledby="g-' + k + '">' + opts.map((v) => czOpt(k, v, cls + "-o", inner && inner(v))).join("") + "</div>" + (D.err[k] ? '<p class="cz-err" id="e-' + k + '">' + esc(D.err[k]) + "</p>" : "") + "</div>";
@@ -207,15 +195,19 @@
   const czLista = (v) => (Array.isArray(v) ? v : v ? String(v).split(", ") : []);
   const czMulti = (k, label, cls, opts) => '<div class="cz-grupo"><span class="cz-gl" id="g-' + k + '">' + label + '</span><div class="' + cls + '" role="group" aria-labelledby="g-' + k + '">' + opts.map((v) => '<button type="button" role="checkbox" class="' + cls + '-o" aria-checked="' + czLista(D.datos[k]).includes(v) + '" data-act="c-multi" data-k="' + k + '" data-v="' + esc(v) + '">' + esc(v) + "</button>").join("") + "</div>" + (D.err[k] ? '<p class="cz-err" id="e-' + k + '">' + esc(D.err[k]) + "</p>" : "") + "</div>";
   const CZ_CANAL = { "WhatsApp": "message-circle", "Teléfono": "phone", "Email": "mail" };
-  const czDatos = () => '<div class="cz-card cz-datos"><div class="cz-g2">' + fld("nombre", "Nombre") + fld("apellidos", "Apellidos") + "</div>" + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000" }) +
-    '<div class="cz-g2">' + fld("nac", "Nacimiento", { type: "date" }) + fld("cp", "Código postal", { mode: "numeric", ph: "28000" }) + "</div>" +
-    '<div class="cz-cpacc"><span>¿No lo sabes?</span>' + btn(czGeo ? "Buscando…" : "Mi ubicación", { v: "quiet", size: "small", icon: "target", act: "c-geo", a: { id: "btn-geo" } }) + btn("En el mapa", { v: "quiet", size: "small", icon: "map-pin", act: "c-cpmapa", a: { id: "btn-cpmapa" } }) + "</div>" +
+  /* «Mi ubicación» solo para el ciudadano: en la entrevista daría la ubicación del conector. */
+  const regDatos = () => { const t = tr(), yo = D.tipo === "yo";
+    return (D.err.dup ? alerta(esc(t.dup), "warning") : "") +
+    '<div class="cz-card cz-datos"><div class="cz-g2">' + fld("nombre", "Nombre") + fld("apellidos", "Apellidos") + "</div>" + fld("tel", "Teléfono", { type: "tel", mode: "tel", ph: "+34 600 000 000" }) +
+    '<div class="cz-g2">' + fld("nac", "Nacimiento", { type: "date" }) + fld("cp", "Código postal", { mode: "numeric", ph: "28000", h: t.cp }) + "</div>" +
+    '<div class="cz-cpacc' + (yo ? "" : " cz-cpacc--1") + '"><span>' + esc(t.cpNo) + "</span>" + (yo ? btn(czGeo ? "Buscando…" : "Mi ubicación", { v: "quiet", size: "small", icon: "target", act: "c-geo", a: { id: "btn-geo" } }) : "") + btn("En el mapa", { v: "quiet", size: "small", icon: "map-pin", act: "c-cpmapa", a: { id: "btn-cpmapa" } }) + "</div>" +
     (D.datos.barrio && /^\d{5}$/.test(D.datos.cp || "") ? '<div class="cz-cpok">' + ic("map-pin") + "<span>" + esc(D.datos.barrio + " · " + D.datos.municipio + " · " + D.datos.cp) + "</span></div>" : "") + fld("municipio", "Municipio") + fld("email", "Email", { type: "email", ph: "nombre@correo.es" }) + "</div>" +
-    czGrupo("docTipo", "¿Documento nacional?", "cz-seg", ["Sí", "En trámite", "No"].filter((x) => CAT.documento.includes(x))) +
-    czGrupo("canal", "¿Cómo te contactamos?", "cz-fichas", CAT.canales, (v) => ic(CZ_CANAL[v] || "message-text") + "<span>" + esc(v) + "</span>") +
-    czMulti("idioma", "Idiomas que hablas", "cz-chips", CAT.idiomas);
-  /* Cada pregunta del Mapa de Vida: ícono, pregunta grande y tres respuestas con el color del semáforo. */
-  const czPreguntas = (dims) => '<div class="cz-qs">' + dims.map((d) => '<section class="bc-dim cz-q" data-dim="' + d.id + '"><div class="cz-qh"><div class="cz-qi">' + gi(d) + '</div><div><span class="cz-qk">' + esc(d.n) + "</span><h2>" + esc(d.q) + '</h2></div></div><div class="cz-qo" role="radiogroup" aria-label="' + esc(d.n) + '">' +
+    czGrupo("docTipo", t.doc, "cz-seg", ["Sí", "En trámite", "No"].filter((x) => CAT.documento.includes(x))) +
+    '<div class="cz-card cz-datos">' + fld("doc", "Número de documento", { opc: true, ph: "DNI, NIE o pasaporte", h: "No es necesario para empezar." }) + "</div>" +
+    czGrupo("canal", t.canal, "cz-fichas", CAT.canales, (v) => ic(CZ_CANAL[v] || "message-text") + "<span>" + esc(v) + "</span>") +
+    czMulti("idioma", t.idioma, "cz-chips", CAT.idiomas); };
+  /* Áreas del Mapa de Vida con caritas, las mismas tarjetas que la autoevaluación; el conector ve un bloque por pantalla. */
+  const regAreas = (dims) => '<div class="cz-qs">' + dims.map((d) => '<section class="bc-dim cz-q" data-dim="' + d.id + '"><div class="cz-qh"><div class="cz-qi">' + gi(d) + '</div><div><span class="cz-qk">' + esc(d.n) + (d.opcional ? " · opcional" : "") + "</span><h2>" + esc(d.q) + '</h2></div></div><div class="cz-qo" role="radiogroup" aria-label="' + esc(d.n) + '">' +
     d.o.map((t, i) => { const v = "var"[i]; return radio(D.mapa[d.id] === v, '<span class="cz-face cz-' + v + '" aria-hidden="true">' + CARA[v] + "</span>" + esc(t), 'data-act="sem" data-d="' + d.id + '" data-v="' + v + '"'); }).join("") + "</div></section>").join("") + "</div>" +
     (D.err.mapa ? alerta(esc(D.err.mapa), "negative") : "");
   /* Una pregunta por pantalla: la respuesta va a D.auto y se traduce al Mapa de Vida al crear el expediente. */
@@ -299,7 +291,7 @@
   function modalCpMapa() {
     const Z = ZONAS(), sel = Z.find((z) => z.id === czCpSel);
     const rio = '<path class="cz-cpm__rio" d="M150 0 C 140 60, 210 90, 180 150 S 240 230, 230 320"/><path class="cz-cpm__via" d="M0 210 C 90 200, 260 215, 360 196"/><path class="cz-cpm__via" d="M60 0 C 90 120, 60 220, 110 320"/>';
-    return '<div class="ez-mb" data-act="c-cpmapa-no"></div><div class="ez-modal cz-hoja cz-cpm" role="dialog" aria-modal="true" aria-labelledby="cz-cpm-t"><h2 id="cz-cpm-t">¿Dónde vives?</h2><p class="mut">Toca tu zona. Solo usamos el código postal para mostrarte las entidades más cercanas.</p>' +
+    return '<div class="ez-mb" data-act="c-cpmapa-no"></div><div class="ez-modal cz-hoja cz-cpm" role="dialog" aria-modal="true" aria-labelledby="cz-cpm-t"><h2 id="cz-cpm-t">' + esc(tr().cpmT) + '</h2><p class="mut">' + esc(tr().cpmP) + '</p>' +
       '<div class="cz-cpm__map"><svg viewBox="0 0 360 320" role="group" aria-label="Zonas de la red">' + rio + Z.map((z) => { const on = z.id === czCpSel;
         return '<g class="cz-cpm__z' + (on ? " on" : "") + '" data-act="c-cpzona" data-v="' + z.id + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="' + esc(z.barrio + ", código postal " + z.cp) + '"><circle class="cz-cpm__hit" cx="' + z.x + '" cy="' + z.y + '" r="26"/><circle class="cz-cpm__p" cx="' + z.x + '" cy="' + z.y + '" r="' + (on ? 10 : 7) + '"/><text x="' + z.x + '" y="' + (z.y - 14) + '">' + esc(z.barrio) + "</text></g>"; }).join("") + "</svg></div>" +
       (sel ? '<div class="cz-cpok">' + ic("map-pin") + "<span><b>" + esc(sel.barrio) + "</b> · " + esc(sel.municipio) + " · " + sel.cp + "</span></div>" : '<p class="cz-cpm__x">Mapa ilustrativo de la zona de la red.</p>') +
@@ -466,11 +458,9 @@
       '<label class="kz-search kz-search--s">' + ic("search") + '<span class="sr">Buscar persona</span><input id="f-busca" type="search" data-busca placeholder="Buscar" value="' + esc(busca) + '" autocomplete="off"></label>' +
       '<div class="kz-list">' + (lista.length ? lista.map(kFila).join("") : '<p class="kz-vacio">Nadie coincide con la búsqueda.</p>') + "</div></div>";
   }
-  const PASOS_CON = ["Búsqueda", "Consentimiento", "Perfil", "Mapa de Vida", "Recursos"];
-  /* Cabecera de app nativa del registro: cerrar o atrás, cinco segmentos y contador. */
-  const kzTop = (pos, atras) => '<div class="kz-top"><a class="kz-round" href="' + (pos ? atras : "#/personas") + '" aria-label="' + (pos ? "Atrás" : "Cerrar") + '">' + ic(pos ? "chevron-left" : "close") + "</a>" +
-    '<div class="kz-seg" role="img" aria-label="Paso ' + (pos + 1) + ' de 5">' + PASOS_CON.map((x, i) => '<i class="' + (i <= pos ? "on" : "") + '"></i>').join("") + '</div><span class="kz-cnt">' + (pos + 1) + "/5</span></div>";
-  const kzW = (paso, html) => '<div class="kz-wizwrap">' + kzTop(paso <= 3 ? paso - 1 : 3, "#/registrar/" + (paso - 1)) + html + "</div>";
+  /* Cabecera de la búsqueda y de los recursos: la misma barra de una marca por pantalla que el asistente común. */
+  const kzTop = (pos, atras) => { const n = PASOS_REG.con.length; return '<div class="kz-top"><a class="kz-round" href="' + (pos ? atras : "#/personas") + '" aria-label="' + (pos ? "Atrás" : "Cerrar") + '">' + ic(pos ? "chevron-left" : "close") + "</a>" +
+    '<div class="kz-seg" role="img" aria-label="Paso ' + (pos + 1) + " de " + n + '">' + PASOS_REG.con.map((x, i) => '<i class="' + (i <= pos ? "on" : "") + '"></i>').join("") + "</div></div>"; };
   function kzBuscar() {
     const r = D.busqueda, p = r && r.p;
     const res = !r ? "" : p
@@ -497,7 +487,7 @@
         (r.urg === "Urgente" ? "Urgente · 24 h" : esc(r.modo) + (r.modo === "Solicitud" ? " · 5 días" : "")) + " · " + (proxTxt(r) ? "Desde " + esc(proxTxt(r)) : esc(cuandoTxt(r))) + '</span><span class="sr">Necesidad: ' + esc(d.n) + "</span></span>" +
         '<div class="nwt-checkbox__control">' + ic("positive") + "</div></div></div>";
     };
-    return '<div class="kz-wizwrap kz-sugs">' + kzTop(4, "#/registrar/7") + "<h1>Recursos para " + esc(D.datos.nombre || "la persona") + "</h1>" +
+    return '<div class="kz-wizwrap kz-sugs">' + kzTop(PASOS_REG.con.length - 1, "#/registrar/7") + "<h1>Recursos para " + esc(D.datos.nombre || "la persona") + "</h1>" +
       (nec.length ? '<div class="kz-chips">' + nec.sort((x, y) => (x.v === "r" ? 0 : 1) - (y.v === "r" ? 0 : 1)).slice(0, 4).map((d) => '<span class="kz-chip kz-chip--' + d.v + '"><i></i>' + esc(d.n) + "</span>").join("") + (nec.length > 4 ? '<span class="kz-chip kz-chip--n">+' + (nec.length - 4) + "</span>" : "") + "</div>" : "") +
       '<div class="kz-reclist">' + (sug.length ? sug.map(tarjeta).join("") : '<p class="kz-vacio">Sin necesidades marcadas: no hay recursos.</p>') + "</div>" +
       '<details class="kz-det"><summary>Añadir nota interna</summary><div class="nwt-text-area" nwt-size="medium"><div class="nwt-input-box"><div class="nwt-input-box__content"><label class="nwt-input-box__label" for="f-notas">Solo la ve tu entidad</label><div class="nwt-input-box__control"><textarea id="f-notas" class="nwt-text-area__input" rows="2" data-notas>' + esc(D.notas) + "</textarea></div></div></div></div></details>" +
@@ -505,18 +495,22 @@
   }
   function kRegistrar(paso) {
     if (!D || D.tipo !== "con") D = nuevo("con");
-    return paso === 1 ? kzBuscar() : paso >= 8 ? kzRecursos() : kzW(paso, kRegistrarWiz(paso));
+    if (paso === 1) return kzBuscar();
+    if (paso >= 8) return kzRecursos();
+    const b = { pos: paso - 1, total: PASOS_REG.con.length, atras: "#/registrar/" + (paso - 1) };
+    if (paso === 2) return regWiz(Object.assign(b, { titulo: T.con.permisos, cuerpo: regConsent(), act: "con-2", extra: btn("Cancelar", { v: "quiet", theme: "negative", act: "no-acepta" }) }));
+    if (paso === 3) return regWiz(Object.assign(b, { titulo: T.con.datos, cuerpo: regDatos(), act: "con-3" }));
+    return regBloque(b, paso - 3, "con-mapa");
   }
-  function kRegistrarWiz(paso) {
-    const pos = paso <= 3 ? paso - 1 : paso <= 7 ? 3 : 4;
-    const b = { eyebrow: "Registrar persona", pasos: PASOS_CON, pos };
-    if (paso === 2) return wiz(Object.assign(b, { titulo: "Consentimientos", sub: "Sin los dos obligatorios el proceso termina y no se registra nada.", cuerpo: vConsent(false), atras: "#/registrar/1", act: "con-2", extra: btn("Cancelar", { v: "quiet", theme: "negative", act: "no-acepta" }) }));
-    if (paso === 3) return wiz(Object.assign(b, { titulo: "Perfil básico", sub: "El número de expediente, la fecha de alta, la entidad y el conector los pone el sistema.", cuerpo: vDatos(false), atras: "#/registrar/2", act: "con-3" }));
-    if (paso >= 4 && paso <= 7) {
-      const bl = CAT.bloques[paso - 4];
-      return wiz(Object.assign(b, { titulo: "Mapa de Vida · " + bl.nombre, sub: "Bloque " + (paso - 3) + " de 4. Lee la pregunta y marca la respuesta de la persona.", cuerpo: vMapa(CAT.dimensiones.filter((d) => d.b === bl.id)), atras: "#/registrar/" + (paso - 1), act: "con-mapa" }));
-    }
-    return "";
+  /* Un bloque del Mapa de Vida (4 áreas) por pantalla; lo usan el registro y «Completar Mapa de Vida». */
+  const regBloque = (b, n, act, sig) => { const bl = CAT.bloques[n - 1];
+    return regWiz(Object.assign(b, { eyebrow: "Mapa de Vida · Bloque " + n + " de " + CAT.bloques.length, titulo: bl.nombre, instr: T.con.instMapa + (D.tipo === "mapa" ? " Lo ya marcado viene de su autorregistro: revísalo con ella." : ""), cuerpo: regAreas(CAT.dimensiones.filter((d) => d.b === bl.id)), act, sig })); };
+  /* Completar el Mapa corto de un autorregistro en la entrevista (spec 10): mismo paso, con lo ya respondido cargado. */
+  function kMapaCompletar(id, n) {
+    const p = per(id); if (!p) return kPersonas();
+    if (!D || D.tipo !== "mapa" || D.pid !== id) D = Object.assign(nuevo("mapa"), { pid: id, mapa: Object.assign({}, p.mapa) });
+    const ficha = "#/persona/" + encodeURIComponent(id), ult = n === CAT.bloques.length;
+    return regBloque({ pos: n - 1, total: PASOS_REG.mapa.length, cerrar: n === 1, atras: n > 1 ? ficha + "/mapa/" + (n - 1) : ficha }, n, "mapa-sig", ult ? "Guardar Mapa de Vida" : "");
   }
   function sugeridos() {
     const out = [];
@@ -1166,7 +1160,7 @@
     const asig = !p.conector && ROL === "entidad" ? '<section class="kz-card kz-asig" aria-labelledby="asig-t"><div class="kz-asig__h">' + ic("user-plus", "kz-asig__ico") + '<div><h2 id="asig-t">Asignar conector</h2><p>Sin conector no empieza el acompañamiento.</p></div></div><div class="row kz-asig__row">' + selConector(p.id) + btn("Asignar", { act: "asignar", a: { "data-p": p.id } }) + "</div></section>" : "";
     const mapa = card('<div class="kz-card-h"><h2>Mapa de Vida</h2><span class="kz-mut">' + nEval + " de " + dims.length + "</span></div>" +
       '<div class="bc-rd bc-rd--ficha">' + mapaRadar(p.mapa) + '<div class="bc-mapa">' + bloquesMapa(p.mapa, true) + '</div></div><div class="bc-clave"><span><i class="bc-lg bc-lg--r"></i>Necesita apoyo</span><span><i class="bc-lg bc-lg--a"></i>En proceso</span><span><i class="bc-lg bc-lg--v"></i>Estable</span></div>' +
-      (p.mapaTipo === "corto" ? '<p class="kz-nota">Versión corta: el resto se completa en la entrevista.</p>' : "") +
+      (p.mapaTipo === "corto" ? '<p class="kz-nota">Versión corta: el resto se completa en la entrevista.</p>' + (ROL === "conector" ? '<div class="kz-post">' + btn("Completar Mapa de Vida", { v: "quiet", size: "small", icon: "clipboard-list", href: "#/persona/" + encodeURIComponent(p.id) + "/mapa/1", a: { id: "btn-completar-mapa" } }) + "</div>" : "") : "") +
       "", { id: "mapa", cls: "kz-card" });
     const itin = card('<div class="kz-card-h"><h2>Itinerario</h2><span class="kz-mut">' + prop.length + "</span></div>" +
       (prop.length ? prop.map((s) => { const r = rec(s.recurso); return '<div class="kz-it"><div class="grow"><b>' + esc(r.nombre) + "</b><span>" + (r.entidad === ENT ? "Tu entidad" : esc(ent(r.entidad).nombre)) + " · " + fecha(s.fecha) + "</span>" + usoBloque(s) + "</div>" + st(s.estado) + "</div>"; }).join("") : '<p class="kz-vacio">Sin recursos todavía.</p>') +
@@ -1281,7 +1275,7 @@
   /* ── rutas por rol ── */
   const RUTAS = {
     ciudadano: [[/^#\/inicio$/, () => ["inicio", cInicio()]], [/^#\/agenda$/, () => ["recursos", cAgenda()]], [/^#\/registro\/(\d)(?:\/(\d))?$/, (m) => ["registro", cRegistro(+m[1], +(m[2] || 1))]], [/^#\/recursos$/, () => ["recursos", cRecursos()]], [/^#\/buscar(?:\/(.+))?$/, (m) => { if (m[1]) { czNec = decodeURIComponent(m[1]); czQ = ""; history.replaceState(null, "", "#/buscar"); } return ["buscar", cBuscar()]; }], [/^#\/perfil$/, () => ["perfil", cPerfil()]], [/^#\/mapa$/, () => ["perfil", cMapa()]], [/^#\/privacidad$/, () => ["perfil", cPrivacidad()]]],
-    conector: [[/^#\/personas$/, () => ["personas", kPersonas()]], [/^#\/registrar\/(\d)$/, (m) => ["registrar", kRegistrar(+m[1])]], [/^#\/listo\/(.+)$/, (m) => ["registrar", kListo(m[1])]], [/^#\/red$/, () => ["red", kRed()]], [/^#\/persona\/([^/]+)\/postular$/, (m) => ["personas", kPostular(decodeURIComponent(m[1]))]], [/^#\/persona\/(.+)$/, (m) => ["personas", ficha(decodeURIComponent(m[1]))]]],
+    conector: [[/^#\/personas$/, () => ["personas", kPersonas()]], [/^#\/registrar\/(\d)$/, (m) => ["registrar", kRegistrar(+m[1])]], [/^#\/listo\/(.+)$/, (m) => ["registrar", kListo(m[1])]], [/^#\/red$/, () => ["red", kRed()]], [/^#\/persona\/([^/]+)\/postular$/, (m) => ["personas", kPostular(decodeURIComponent(m[1]))]], [/^#\/persona\/([^/]+)\/mapa\/([1-4])$/, (m) => ["personas", kMapaCompletar(decodeURIComponent(m[1]), +m[2])]], [/^#\/persona\/(.+)$/, (m) => ["personas", ficha(decodeURIComponent(m[1]))]]],
     entidad: [[/^#\/resumen$/, () => ["resumen", eResumen()]], [/^#\/personas$/, () => ["personas", ePersonas()]], [/^#\/personas\/conectores$/, () => ["conectores", eConectores()]], [/^#\/conectores$/, () => { location.replace("#/personas/conectores"); return ["conectores", ""]; }], [/^#\/personas\/(solicitudes|asignar)$/, (m) => [m[1], eBandeja(m[1])]], [/^#\/bandeja$/, () => { location.replace("#/personas/asignar"); return ["personas", ""]; }], [/^#\/recursos$/, () => ["recursos", eRecursos()]], [/^#\/recurso\/(.+)$/, (m) => ["recursos", eRecurso(m[1])]], [/^#\/persona\/([^/]+)\/postular$/, (m) => ["personas", kPostular(decodeURIComponent(m[1]))]], [/^#\/persona\/(.+)$/, (m) => ["personas", ficha(decodeURIComponent(m[1]))]]]
   };
   RUTAS.ciudadano.unshift([/^#\/familia$/, () => ["inicio", cFamilia()]], [/^#\/familia\/nuevo$/, () => ["inicio", famNuevo(S.ciudadano, "#/familia")]]);
@@ -1341,7 +1335,7 @@
     const h = location.hash, r = RUTAS[ROL].find(([re]) => re.test(h));
     if (!r) { location.replace(INICIO[ROL]); return; }
     const [activo, body] = r[1](h.match(r[0]));
-    $("#app").innerHTML = shell(activo, body) + (aprobando ? modalAprobar() : "") + (verMiCon ? modalMiConector() : "") + (czPedir && ROL === "ciudadano" ? modalPedir() : "") + (czCpMapa && ROL === "ciudadano" ? modalCpMapa() : "");
+    $("#app").innerHTML = shell(activo, body) + (aprobando ? modalAprobar() : "") + (verMiCon ? modalMiConector() : "") + (czPedir && ROL === "ciudadano" ? modalPedir() : "") + (czCpMapa && (ROL === "ciudadano" || ROL === "conector") ? modalCpMapa() : "");
     if (aprobando) { const h = $(".sp-sl__h"); if (h) h.focus(); }
     const pie = $(".cz-pie,.kz-wizwrap .kz-foot,.kz-wizwrap .bc-wiz-f");
     document.documentElement.style.setProperty("--bc-pie-h", pie ? pie.offsetHeight + 8 + "px" : "0px");
@@ -1352,7 +1346,7 @@
     try { parent.postMessage({ type: "demo-ruta", hash: h }, "*"); parent.postMessage({ type: "demo-pista", clave: h, texto: pista() }, "*"); } catch (e) { /* sin marco */ }
   }
   /* La pista del patrón de 3 clics va en el marco de la demo, fuera de la pantalla: no es parte del producto. */
-  const CON_RELLENO = ["fam-guardar", "yo-1", "yo-2", "yo-3", "con-1", "con-2", "con-3", "con-mapa", "rec-guardar"];
+  const CON_RELLENO = ["fam-guardar", "yo-1", "yo-2", "yo-3", "con-1", "con-2", "con-3", "con-mapa", "mapa-sig", "rec-guardar"];
   function pista() {
     const b = $("#btn-sig"); if (!b || !CON_RELLENO.includes(b.dataset.act)) return null;
     const t = "Toca «" + b.textContent.trim() + "» 2 veces";
@@ -1364,7 +1358,7 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && czCpMapa) { czCpMapa = false; render(); } });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (asignando || popOp || conOp || entOp)) { asignando = null; popOp = false; conOp = false; entOp = false; render(); } });
   /* Navegar no es instantáneo en un servicio real: esqueleto breve y entrada escalonada, igual en todas las vistas. */
-  const ESPERA_VISTA = 480, ESPERA_ACC = 800, ASIST = /^#\/regist\w+\//;
+  const ESPERA_VISTA = 480, ESPERA_ACC = 800, ASIST = /^#\/(regist\w+|persona\/[^/]+\/mapa)\//;
   let cargaT = 0, hashPrev = location.hash;
   const LISTAS = ":is(.cz-tiles,.cz-lista,.ez-lista,.kz-list,.kz-reclist,.kz-tiles,.sp-lista,.ez-cells,.bc-list)>*";
   function velo(conEsqueleto) {
@@ -1396,9 +1390,16 @@
     if (D.fallo === clave) { rellenar(); D.err = {}; D.fallo = null; render(); return false; }
     D.fallo = clave; render(); return false;
   }
-  const rellenarDatos = () => { const ej = EJEMPLO[D.tipo]; REQ.forEach((k) => { if (!String(D.datos[k] || "").trim() || (k === "cp" && !/^\d{5}$/.test(D.datos.cp)) || (k === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(D.datos.email).trim()))) D.datos[k] = k === "tel" && D.tipo === "con" && D.q ? D.q : ej[k]; }); };
+  const rellenarDatos = () => { const ej = EJEMPLO[D.tipo]; REQ.forEach((k) => { if (!String(D.datos[k] || "").trim() || (k === "cp" && !/^\d{5}$/.test(D.datos.cp)) || (k === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(D.datos.email).trim()))) D.datos[k] = k === "tel" ? (D.tipo === "con" && D.q ? D.q : telDe(ej.tel) ? telLibre() : ej.tel) : ej[k]; }); };
+  /* Mínima revelación (spec 10): el ciudadano solo sabe que el teléfono ya tiene expediente; el intento queda en la Privacidad de esa persona. */
+  const duplicadoYo = () => {
+    const p = telDe(D.datos.tel); if (!p) return false;
+    D.err = { tel: "Este teléfono ya tiene un expediente.", dup: true };
+    if (!(D.avisados || (D.avisados = [])).includes(p.id)) { D.avisados.push(p.id); S.accesos.push({ persona: p.id, quien: "Sistema", entidad: p.entidad, cuando: ahora(), para: "Intento de autorregistro con su teléfono" }); guardar(); }
+    render(); const n = $("#f-tel"); if (n) n.focus(); return true;
+  };
   const rellenarMapa = (dims) => dims.forEach((d) => { if (!D.mapa[d.id]) D.mapa[d.id] = MAPA_EJ[d.id]; });
-  const okConsent = () => { if (D.consent.privacidad && D.consent.tratamiento) return true; D.err = { consent: "Faltan los consentimientos obligatorios. Sin ellos no se crea el expediente." }; return false; };
+  const okConsent = () => { if (D.consent.privacidad && D.consent.tratamiento) return true; D.err = { consent: tr().errPermiso }; return false; };
   const okMapa = (dims) => { const f = faltanMapa(dims); if (!f.length) return true; D.err = { mapa: "Falta responder: " + f.join(", ") + "." }; return false; };
   const ACC = {
     salir,
@@ -1421,7 +1422,7 @@
     },
     ent: (b) => { D.entidad = b.dataset.e; D.entTocada = true; render(); },
     "yo-1": () => { if (insistir("yo-1", okConsent, () => { D.consent.privacidad = D.consent.tratamiento = true; })) { D.err = {}; ir("#/registro/2"); } },
-    "yo-2": () => { if (insistir("yo-2", validarDatos, rellenarDatos)) ir("#/registro/3"); },
+    "yo-2": () => { if (insistir("yo-2", validarDatos, rellenarDatos) && !duplicadoYo()) ir("#/registro/3"); },
     "yo-3": () => {
       const n = +((location.hash.match(/^#\/registro\/3\/(\d)$/) || [])[1] || 1), q = AUTO[n - 1];
       const ok = () => { if (D.auto[q.id]) return true; D.err = { auto: "Elige la respuesta que más se parece a tu situación." }; return false; };
@@ -1484,7 +1485,7 @@
     probar: (b) => {
       /* «Nuevo» genera un teléfono que nadie tiene: los datos se comparten entre corridas y roles. */
       let v = b.dataset.v;
-      if (v === "nuevo") { const usados = new Set(S.personas.map((x) => x.tel.replace(/\s/g, ""))); let n = 123456; while (usados.has("+34600" + n)) n++; v = "+34 600 " + String(n).slice(0, 3) + " " + String(n).slice(3); }
+      if (v === "nuevo") v = telLibre();
       D.q = v; ACC.buscar();
     },
     buscar: () => {
@@ -1502,7 +1503,22 @@
     "k-ir": (b) => { const n = document.getElementById(b.dataset.to); if (n) { n.scrollIntoView({ block: "center" }); n.focus({ preventScroll: true }); } },
     "no-acepta": () => { D = null; toast("Proceso terminado. No se registró ningún dato."); ir("#/personas"); },
     "con-2": () => { if (insistir("con-2", okConsent, () => { D.consent.privacidad = D.consent.tratamiento = true; })) { D.err = {}; ir("#/registrar/3"); } },
-    "con-3": () => { if (insistir("con-3", validarDatos, rellenarDatos)) ir("#/registrar/4"); },
+    "con-3": () => {
+      if (!insistir("con-3", validarDatos, rellenarDatos)) return;
+      /* Si cambió el teléfono de la búsqueda por uno que ya existe, vuelve al resultado: no se duplica. */
+      const otra = telN(D.datos.tel) !== telN(D.q) && telDe(D.datos.tel);
+      if (otra) { D.q = D.datos.tel; D.busqueda = { q: telN(D.q), p: otra }; toast("Ese teléfono ya tiene expediente: no se duplica."); return ir("#/registrar/1"); }
+      ir("#/registrar/4");
+    },
+    "mapa-sig": () => {
+      const n = +location.hash.match(/(\d)$/)[1], dims = CAT.dimensiones.filter((d) => d.b === CAT.bloques[n - 1].id);
+      if (!insistir("mapa-" + n, () => okMapa(dims), () => rellenarMapa(dims))) return;
+      D.err = {};
+      if (n < CAT.bloques.length) return ir("#/persona/" + encodeURIComponent(D.pid) + "/mapa/" + (n + 1));
+      const p = per(D.pid); p.mapa = Object.assign({}, D.mapa); p.mapaTipo = "completo";
+      S.accesos.push({ persona: p.id, quien: con(YO).nombre, entidad: ENT, cuando: ahora(), para: "Completar el Mapa de Vida en la entrevista" });
+      guardar(); D = null; toast("Mapa de Vida completo: " + CAT.dimensiones.filter((d) => p.mapa[d.id]).length + " de " + CAT.dimensiones.length + " áreas."); ir("#/persona/" + encodeURIComponent(p.id));
+    },
     "con-mapa": () => {
       const paso = +location.hash.match(/(\d)$/)[1], dims = CAT.dimensiones.filter((d) => d.b === CAT.bloques[paso - 4].id);
       if (insistir("con-mapa-" + paso, () => okMapa(dims), () => rellenarMapa(dims))) { D.err = {}; ir("#/registrar/" + (paso + 1)); }

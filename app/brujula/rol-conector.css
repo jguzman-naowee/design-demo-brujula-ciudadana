@@ -105,6 +105,7 @@ body.rol-conector .kz-wizwrap .bc-opt:not(.kz-rec) + .bc-opt:not(.kz-rec){border
 body.rol-conector .kz-wizwrap .stack-s:has(> .bc-opt:not(.kz-rec)){gap:0}
 @media (max-width:820px){
   body.rol-conector:has(.kz-wizwrap) .bc-top,body.rol-conector:has(.kz-wizwrap) .bc-tabbar{display:none}
+  body.rol-conector:has(.cz-wiz) .bc-top,body.rol-conector:has(.cz-wiz) .bc-tabbar{display:none}
   .kz-wizwrap{min-height:100vh}
 }
 @media (min-width:821px){.kz-wizwrap{padding-top:40px}}
@@ -309,3 +310,8 @@ body.rol-conector .kz-wizwrap .kz-foot{align-self:stretch;width:auto;margin-left
 .kz-fecha input{min-height:44px;padding:0 12px;border:1px solid #D5D7E2;border-radius:12px;background:#fff;font:inherit;font-size:15px;color:var(--bc-ink)}
 /* Móvil: pie del asistente fijo al borde; su padding inferior cubre la franja de gesto con el mismo fondo. */
 @media (max-width:820px){body.rol-conector .kz-wizwrap .bc-wiz-f,body.rol-conector .kz-wizwrap .kz-foot{position:fixed;left:0;right:0;bottom:0;margin:0;padding-inline:max(16px,calc(50% - 264px))}}
+/* Registro único (spec 10): los botones del asistente se ven como en el ciudadano, solo texto en 16px. */
+body.rol-conector .cz-wiz .nwt-button,body.rol-conector .cz-wiz .nwt-button .nwt-button__content{font-size:16px}
+body.rol-conector .cz-wiz .nwt-button .nwt-button__icon{display:none}
+/* En escritorio hay barra lateral: la franja del pie no la tapa, se queda en la columna del asistente. */
+@media (min-width:821px){body.rol-conector .cz-pie::before{left:-24px;right:-24px;width:auto;transform:none}}

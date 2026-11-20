@@ -118,7 +118,7 @@ D = { tipo, consent, datos, auto /* solo yo */, mapa /* solo con */, entidad, re
 - **Opcionales del Mapa:** el conector puede dejar sin marcar `cuidados` y `autonomia`; el
   ciudadano responde las 8.
 - **Mapa corto:** el autorregistro sigue creando `mapaTipo: "corto"`; las 9 áreas que faltan se
-  completan con el conector (ver Abierto).
+  completan con el conector desde su ficha («Completar Mapa de Vida»).
 - La regla de «no se pide lo mismo en dos lugares» del cierre del conector no cambia.
 - Ninguna validación cambia: los obligatorios y formatos son los de hoy (`REQ`, `validarDatos`).
 
@@ -135,7 +135,6 @@ D = { tipo, consent, datos, auto /* solo yo */, mapa /* solo con */, entidad, re
 - Que la persona confirme el consentimiento asistido por un enlace (pendiente legal).
 - Que el ciudadano compruebe duplicados por documento (solo teléfono).
 - Agregar familiares dentro del registro: sigue siendo después (spec [03](03-familia.md)).
-- Un flujo para que el conector complete el Mapa corto de un autorregistro (ver Abierto).
 
 ## Criterios de aceptación
 
@@ -166,12 +165,22 @@ D = { tipo, consent, datos, auto /* solo yo */, mapa /* solo con */, entidad, re
 - El conector ve el Mapa por bloques y no una pregunta por pantalla porque en la entrevista se
   avanza más rápido y se conservan los 4 bloques del Mapa.
 
+## En la demo (ola 6)
+
+- Un solo asistente (`regWiz`) con textos de `T.yo` y `T.con`; las reglas `cz-*` del registro llevan
+  también `body.rol-conector`. La búsqueda y los recursos del conector siguen con su pantalla propia
+  (`kz-*`), con la misma barra de progreso sin números.
+- El conector ve cada bloque del Mapa con título del bloque y eyebrow «Mapa de Vida · Bloque n de 4».
+- **Completar el Mapa corto** entra: botón «Completar Mapa de Vida» en la ficha del conector cuando
+  el Mapa es corto, ruta `#/persona/:id/mapa/1..4`, mismo paso con lo ya respondido marcado. Al
+  guardar queda `mapaTipo: "completo"` y un acceso «Completar el Mapa de Vida en la entrevista».
+  Caso guiado 2.6.
+- El relleno de la demo (insistir en «Continuar») usa un teléfono libre si el de ejemplo ya existe,
+  para no chocar con la comprobación de duplicado.
+
 ## Abierto
 
 - **Pendiente legal:** confirmación del consentimiento asistido por la persona, por enlace.
-- **Completar el Mapa corto:** la app promete «En la entrevista con tu conector completas las
-  áreas que faltan», pero no existe la pantalla. Este mismo paso 3, abierto por el conector con
-  las 7 áreas ya cargadas, lo resolvería; queda por decidir si entra en esta spec.
 - **Email obligatorio:** hoy lo es en los dos roles; para personas sin correo puede ser una
   barrera.
 - **Anotar el intento bloqueado en la Privacidad** de la persona existente es transparente, pero
