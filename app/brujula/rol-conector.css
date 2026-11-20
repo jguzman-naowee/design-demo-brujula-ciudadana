@@ -208,7 +208,7 @@ body.rol-conector .kz-wizwrap .bc-wiz-f{margin-top:auto}
 .kz-perfil[open]{padding-bottom:16px}
 .kz-perfil .bc-kv{margin-bottom:12px}
 @media (max-width:820px){
-  .kz-hero{border-radius:0 0 32px 32px}
+  .kz-hero{border-radius:0 0 32px 32px;margin-top:calc(-1 * var(--bc-safe-top,0px));padding-top:calc(20px + var(--bc-safe-top,0px))}
   body.rol-conector:has(.kz-hero) .bc-top{display:none}
 }
 @media (min-width:821px){

@@ -619,8 +619,10 @@ body.rol-entidad{--sp-r-tx:#B42318;--sp-r-bg:#FDE3E1;--sp-a-tx:#93370D;--sp-a-bg
 .ez-kat--propio{border-style:dashed;border-color:#C9CBD9;background:transparent}
 .ez-fmts{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .ez-dias{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.ez-dias button{min-height:44px;border:2px solid transparent;border-radius:12px;background:var(--bc-inset);color:#3E4157;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.ez-dias button[aria-checked=true]{border-color:var(--bc-acc);background:var(--bc-acc-soft);color:var(--bc-acc)}
+.ez-dias button{min-height:44px;border:1px solid var(--bc-chip-line);border-radius:12px;background:var(--bc-surface);color:var(--bc-ink);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.ez-dias button:hover:not([aria-checked=true]){border-color:var(--bc-chip-line-h);background:var(--bc-chip-hover)}
+.ez-dias button[aria-checked=true]{border-color:var(--bc-chip-on);background:var(--bc-chip-on);color:var(--bc-chip-on-tx);font-weight:600}
+.ez-dias button:focus-visible{outline:2px solid var(--bc-chip-on);outline-offset:2px}
 .ez-fechas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .ez-campo{display:flex;flex-direction:column;gap:6px}
 .ez-campo span{font-size:13px;color:var(--bc-mut)}

@@ -94,8 +94,10 @@ body.rol-ciudadano .cz-fichas-o{display:flex;flex-direction:column;align-items:c
 body.rol-ciudadano .cz-fichas-o .nwt-icon{font-size:22px}
 body.rol-ciudadano .cz-fichas-o[aria-checked=true]{background:var(--bc-acc-soft);border-color:var(--bc-acc);color:var(--bc-acc)}
 body.rol-ciudadano .cz-chips{display:flex;flex-wrap:wrap;gap:8px}
-body.rol-ciudadano .cz-chips-o{min-height:44px;padding:0 16px;border:0;border-radius:22px;background:var(--bc-surface);font:inherit;font-size:14px;font-weight:600;color:#4A4D63;cursor:pointer}
-body.rol-ciudadano .cz-chips-o[aria-checked=true]{background:var(--bc-ink);color:#fff}
+body.rol-ciudadano .cz-chips-o{min-height:44px;padding:0 16px;border:1px solid var(--bc-chip-line);border-radius:22px;background:var(--bc-surface);font:inherit;font-size:14px;font-weight:500;color:var(--bc-ink);cursor:pointer}
+body.rol-ciudadano .cz-chips-o:hover:not([aria-checked=true]){border-color:var(--bc-chip-line-h);background:var(--bc-chip-hover)}
+body.rol-ciudadano .cz-chips-o[aria-checked=true]{border-color:var(--bc-chip-on);background:var(--bc-chip-on);color:var(--bc-chip-on-tx);font-weight:600}
+body.rol-ciudadano .cz-chips-o:focus-visible{outline:2px solid var(--bc-chip-on);outline-offset:2px}
 
 /* Mapa de Vida (registro): una tarjeta por pregunta. */
 body.rol-ciudadano .cz-qs{display:flex;flex-direction:column;gap:14px}

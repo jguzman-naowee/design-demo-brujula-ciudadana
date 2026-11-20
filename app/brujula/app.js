@@ -84,7 +84,7 @@
 
   function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 3200); }
   const ir = (h) => { if (location.hash === h) { render(); velo(true); } else location.hash = h; };
-  const salir = () => { try { top.location.href = new URL("../../index.html", location.href).href; } catch (e) { location.href = "../../index.html"; } };
+  const salir = () => { try { top.location.href = new URL("../../index.html#demo", location.href).href; } catch (e) { location.href = "../../index.html#demo"; } };
 
   /* ── borrador de registro ── */
   const nuevo = (tipo) => ({ tipo, consent: {}, datos: {}, mapa: {}, auto: {}, recursos: [], entidad: ENT, err: {}, busqueda: null, q: "", notas: "" });
@@ -966,9 +966,8 @@
       (base.firmas ? grupo("Firma", base.firmas.map(([k, t]) => chip("cm-firma", k, t, cm.firma === k)).join("")) : "") +
       '<label class="ez-campo"><span>Asunto</span><input data-cm="asunto" value="' + esc(cm.asunto) + '"></label><label class="ez-campo"><span>Mensaje</span><textarea class="cm-txt" data-cm="cuerpo" rows="3">' + esc(cm.cuerpo) + "</textarea></label>" +
       grupo("Canales", [["app", "App"], ["correo", "Correo"]].map(([k, t]) => chip("cm-canal", k, t, cm.canales.includes(k))).join("")) +
-      '<div class="cm-n">' + ic("users") + "<span>Llegará a <b>" + dest.length + (dest.length === 1 ? " persona" : " personas") + "</b>" + (aviso ? " inscritas" : " · sin casos protegidos ni quien no autorizó comunicados") + "</span></div>" +
       (aprob ? '<p class="mut cm-x">Los comunicados del conector los aprueba la coordinación antes de salir. Los avisos de una fecha salen directo.</p>' : "") +
-      '<div class="row fam-pie">' + btn(aprob ? "Enviar a aprobación" : "Enviar", { icon: "megaphone", act: "cm-enviar", a: { id: "btn-cm" } }) + "</div></div>", { id: "cm-nuevo" });
+      '<div class="row fam-pie cm-pie">' + '<div class="cm-n">' + ic("users") + "<span>Llegará a <b>" + dest.length + (dest.length === 1 ? " persona" : " personas") + "</b>" + (aviso ? " inscritas" : " · sin casos protegidos ni quien no autorizó comunicados") + "</span></div>" + btn(aprob ? "Enviar a aprobación" : "Enviar", { icon: "megaphone", act: "cm-enviar", a: { id: "btn-cm" } }) + "</div></div>", { id: "cm-nuevo" });
   }
   function cmLista(lista, conAprob) {
     if (!lista.length) return "";

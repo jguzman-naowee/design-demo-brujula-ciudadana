@@ -66,7 +66,8 @@ h1,h2,h3{min-height:0}
 .bc-page h1{font-size:clamp(26px,3.6vw,34px);line-height:1.15;font-weight:700;letter-spacing:-.02em}
 .bc-page h2{font-size:17px;line-height:1.3;font-weight:600}
 .bc-page h3{font-size:15px;font-weight:600}
-.bc-page a:not(.nwt-button):not(.bc-tr):not(.nwt-stat-card):not(.bc-plain){color:var(--bc-acc)}
+/* Las tarjetas-enlace (.pn-rec, .rd-ent) quedan fuera: su título va en tinta, no en el naranja de enlace. */
+.bc-page a:not(.nwt-button):not(.bc-tr):not(.nwt-stat-card):not(.bc-plain):not(.bc-chip):not(.pn-rec):not(.rd-ent){color:var(--bc-acc)}
 .bc-eyebrow{font-size:13px;font-weight:500;color:var(--bc-mut)}
 
 /* ── Superficies: blancas, sin borde; la jerarquía la da el fondo, no la línea ── */
@@ -171,8 +172,15 @@ a.bc-tr:hover{background:var(--bc-inset)}
 }
 .bc-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .bc-filters .nwt-searchbox{flex:1 1 220px;max-width:340px}
-.bc-chip{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:var(--bc-surface);cursor:pointer;font:inherit;font-size:14px;font-weight:500;color:var(--bc-ink)}
-.bc-chip[aria-pressed=true]{background:var(--bc-ink);color:#fff;font-weight:600}
+/* Chips de opción: elegido en primario Naowee; el resto neutro con borde gris-600 (3.4:1 sobre blanco) para leerse como botón.
+   Las variables van en body porque el SDK declara ahí la paleta primaria, no en :root. */
+body{--bc-chip-line:var(--naotech-neutral-color-600,#8788ab);--bc-chip-line-h:var(--naotech-neutral-color-700,#646587);--bc-chip-hover:var(--naotech-neutral-color-100,#f4f5f9);--bc-chip-on:var(--naotech-primary-color-700,#d74009);--bc-chip-on-h:var(--naotech-primary-color-800,#b83100);--bc-chip-on-tx:var(--naotech-primary-font-color,#fff)}
+.bc-chip{min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--bc-chip-line);background:var(--bc-surface);cursor:pointer;font:inherit;font-size:14px;font-weight:500;color:var(--bc-ink);text-decoration:none}
+.bc-chip:hover:not(:disabled):not([aria-disabled=true]):not([aria-pressed=true]){border-color:var(--bc-chip-line-h);background:var(--bc-chip-hover)}
+.bc-chip[aria-pressed=true]{border-color:var(--bc-chip-on);background:var(--bc-chip-on);color:var(--bc-chip-on-tx);font-weight:600}
+.bc-chip[aria-pressed=true]:hover:not(:disabled):not([aria-disabled=true]){border-color:var(--bc-chip-on-h);background:var(--bc-chip-on-h)}
+.bc-chip:focus-visible{outline:2px solid var(--bc-chip-on);outline-offset:2px}
+.bc-chip:disabled,.bc-chip[aria-disabled=true]{opacity:.45;cursor:not-allowed}
 .bc-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px 20px}
 .bc-kv span{display:block;font-size:12px;color:var(--bc-mut);margin-bottom:2px}
 .bc-kv b{font-weight:600;font-size:14px}
@@ -415,8 +423,10 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .pn-bt button{min-height:40px;padding:0 14px;border:2px solid transparent;border-radius:12px;background:var(--bc-inset,#F5F6F9);font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--bc-ink)}
 .pn-bt button[aria-pressed=true]{border-color:var(--bc-acc);background:var(--bc-acc-soft);color:var(--bc-acc)}
 .pn-bt button[data-e="No vino"][aria-pressed=true]{border-color:#B42318;background:#FEECEB;color:#B42318}
-.pn-rec{display:flex;align-items:center;gap:12px;padding:16px;text-decoration:none;color:inherit}
-.pn-rec .grow b{display:block;font-size:15px}
+/* `> b` y no `b`: el «hoy» en negrita dentro de las plazas debe seguir en su línea. */
+.pn-rec{display:flex;align-items:center;gap:12px;padding:16px;text-decoration:none;color:var(--bc-ink)}
+.pn-rec .grow > b{display:block;font-size:15px;color:var(--bc-ink)}
+.pn-rec > .nwt-icon{color:var(--bc-mut)}
 .pn-rec .grow span{display:block;font-size:13px;color:var(--bc-mut)}
 .cz-conf{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
 .cz-conf small{flex-basis:100%;font-size:12px;color:var(--bc-mut)}
@@ -427,7 +437,6 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .uso__a{display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:var(--bc-mut)}
 .uso__a b{color:var(--bc-ink)}
 @media (max-width:720px){.pn-tr{grid-template-columns:1fr 1fr}.pn-th{display:none}.pn-tr span[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--bc-mut)}.pn-fila{flex-wrap:wrap}.pn-bt{width:100%}.pn-bt button{flex:1}}
-.pn-fechas .bc-chip{color:var(--bc-ink)}.pn-fechas .bc-chip[aria-pressed=true]{color:#fff}
 
 /* Comunicados y notas (ola 4). */
 .cm-lista{display:flex;flex-direction:column;gap:12px}
@@ -443,6 +452,7 @@ body.rol-ciudadano .cz-marca{color:#fff}body.rol-ciudadano .cz-marca .bc-pal{hei
 .cm-txt{width:100%;min-height:72px;padding:10px 12px;border:1px solid #D5D7E2;border-radius:12px;background:#fff;font:inherit;font-size:14px;color:var(--bc-ink);resize:vertical}
 .cm-form .ez-campo input{min-height:44px;padding:0 12px;border:1px solid #D5D7E2;border-radius:12px;font:inherit;font-size:15px}
 .cm-n{display:flex;align-items:center;gap:8px;font-size:14px}
+.cm-pie{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .cm-n .nwt-icon{font-size:18px;color:var(--bc-acc)}
 .cm-x{margin:0;font-size:13px}
 .cz-bell{position:relative;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;margin-left:auto;margin-right:8px;border-radius:50%;background:#fff;color:var(--bc-ink);text-decoration:none}
