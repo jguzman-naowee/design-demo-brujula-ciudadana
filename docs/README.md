@@ -17,6 +17,8 @@
 | 05 | [Comunicados](specs/05-comunicados.md) | En la demo | 01, 04 |
 | 06 | [Perfil](specs/06-perfil.md) | En la demo | 03, 05 |
 | 07 | [Catálogo estándar](specs/07-catalogo.md) | En la demo | 02 |
+| 08 | [Landing](specs/08-landing.md) | En la demo | 02 |
+| 09 | [Recorrido](specs/09-recorrido.md) | En la demo | 01–08 |
 
 **En la demo** = implementada en las olas 1–5 (19-nov-2026); las decisiones siguen sin validar con el cliente. Cada spec cierra con «En la demo» cuando la implementación simplificó algo.
 Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
@@ -30,3 +32,4 @@ Fuera de alcance: voluntariado y certificados (no se hacen), empleo (fase 2).
 | [02 Conector](planes/02-conector.md) | Postular con fecha y familia, pasar lista, avisos, notas |
 | [03 Entidad](planes/03-entidad.md) | Crear recurso por catálogo, verificar fichas, panel, aprobar comunicados |
 | [04 Red](planes/04-red.md) | Rol nuevo: resumen de la red y comunicados con firma |
+| [05 Landing y recorrido](planes/05-landing-y-recorrido.md) | La portada como landing con mapa y el recorrido de 19 escenas |

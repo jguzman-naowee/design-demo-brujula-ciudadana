@@ -2,7 +2,7 @@
 
 Showroom del concepto de **Brújula Ciudadana** (Naowee). Estático: HTML, CSS y JS planos, sin build. Los datos son de ejemplo. Funciona en GitHub Pages.
 
-La portada (`index.html`) pide el **rol**. Cada rol abre su propia demo, con su sesión, su menú y solo sus casos guiados: no se cambia de usuario ni se mezclan casos. Dentro de la demo se elige la **superficie**: Móvil (teléfono) o Escritorio (ventana de navegador).
+La portada (`index.html`) es la **landing**: mapa de recursos (Leaflet, abre en Madrid con la semilla y grupos de ejemplo en otras ciudades), seguridad, participación y alta de entidades. Su última sección, `#demo`, pide el **rol**. Cada rol abre su propia demo, con su sesión, su menú y solo sus casos guiados: no se cambia de usuario ni se mezclan casos. Dentro de la demo se elige la **superficie**: Móvil (teléfono) o Escritorio (ventana de navegador).
 
 | Rol | Puede | Casos | Superficie por defecto |
 |---|---|---|---|
@@ -18,10 +18,11 @@ Los datos se comparten entre roles (mismo `localStorage`): lo que registra el Ci
 
 ## Recorrido guiado
 
-Presentación de unos dos minutos que recorre las vistas reales de la app. Se entra desde la franja oscura «Ver el recorrido» de la portada o en `tour/index.html` (`#5` abre la escena 5). Vive en `tour/`: `escenas.js` es el guion y `tour.js` el motor.
+Presentación de menos de tres minutos (19 escenas) que empieza en el mapa de la landing y recorre las vistas reales de la app. Se entra desde la franja oscura «Ver el recorrido» de la portada o en `tour/index.html` (`#5` abre la escena 5). Vive en `tour/`: `escenas.js` es el guion y `tour.js` el motor.
 
 - Agregar o editar una escena: cambiar un objeto de `window.ESCENAS` en `tour/escenas.js`.
-- Campos: `tipo` (`vista` o `hero`), `url`, `titulo`, `texto`, `acciones`, `resalta`, `duracion`.
+- Campos: `tipo` (`vista`, `grafico` o `hero`), `url`, `grafico`, `titulo`, `texto`, `acciones`, `resalta`, `duracion`.
+- Gráficos animados: `tour/graficos.js` (una función por id) y `tour/graficos.css`. Cuentan los conceptos; las vistas reales quedan para lo que hay que ver funcionando.
 - Cada escena de vista carga con `semilla=1`: **restablece los datos de ejemplo**, así que el recorrido pisa lo que hayas registrado.
 
 ## Cómo está armado
@@ -30,6 +31,7 @@ Presentación de unos dos minutos que recorre las vistas reales de la app. Se en
 - `app/brujula/`: **la app, una sola copia**. `index.html?rol=ciudadano|conector|entidad`, `alta-entidad.html`, `datos.js` (catálogo y semilla), `app.js` (rutas por hash y marcado `nwt-*`), `app.css` (solo distribución).
 - Estilos: SDK Naowee (`sdk-frontend-foundations`) en `app/brujula/_sdk/`, con los íconos de `design-demo-digitacion`.
 - Fuente de campos y reglas: `design-avivla-research` (docs 01, 03, 09 y 11).
+- Landing: `index.html` con `shared/landing.css`, `shared/landing.js` y los datos del mapa en `shared/mapa-ejemplo.js`.
 - Specs, planes de UI y entregables: `docs/` (índice en `docs/README.md`).
 
 ```bash
