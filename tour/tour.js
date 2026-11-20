@@ -13,7 +13,7 @@
     card: $('trCard'), rol: $('trRol'), titulo: $('trTitulo'), texto: $('trTexto'), cnt: $('trCnt'),
     stage: $('trStage'), dev: $('trDev'), screen: $('trScreen'), frame: $('trFrame'),
     hero: $('trHero'), heroRol: $('trHeroRol'), heroTitulo: $('trHeroTitulo'), heroTexto: $('trHeroTexto'),
-    cta: $('trCta'), prev: $('trPrev'), play: $('trPlay'), next: $('trNext'), prog: $('trProg')
+    cta: $('trCta'), prev: $('trPrev'), play: $('trPlay'), next: $('trNext'), prog: $('trProg'), graf: $('trGraf')
   };
   if (!el.frame || !el.dev || !el.prog) return;
 
@@ -45,6 +45,10 @@
     el.dev.style.setProperty('--w', d.w + 'px');
     el.dev.style.setProperty('--h', d.h + 'px');
     el.dev.style.setProperty('--k', String(S.k));
+    if (el.graf) {
+      var sh2 = el.stage.clientHeight < 160 ? Math.round(window.innerHeight * 0.6) : el.stage.clientHeight;
+      el.graf.style.setProperty('--gk', String(Math.max(0.3, Math.min(1.15, (sw - MARGEN) / 780, (sh2 - MARGEN - 40) / 540))));
+    }
   }
 
   /* Acciones dentro del iframe */
@@ -154,6 +158,25 @@
     el.next.disabled = n === ESC.length - 1;
     try { history.replaceState(null, '', '#' + (n + 1)); } catch (err) { /* sin historial */ }
 
+    if (window.limpiarGraf) { try { window.limpiarGraf(); } catch (err) { /* nada */ } window.limpiarGraf = null; }
+    if (el.graf) { el.graf.hidden = true; el.graf.classList.remove('on'); }
+    /* Gráfico: lienzo animado propio en vez de una vista de la app (tour/graficos.js). */
+    if (e.tipo === 'grafico' && el.graf && window.GRAFICOS && window.GRAFICOS[e.grafico]) {
+      el.dev.hidden = true;
+      el.hero.hidden = true;
+      el.card.hidden = false;
+      document.body.classList.remove('tr--movil');
+      try { el.frame.contentWindow.location.replace('about:blank'); } catch (err) { /* nada */ }
+      el.graf.innerHTML = window.GRAFICOS[e.grafico]();
+      el.graf.hidden = false;
+      ajustar();
+      if (window.GRAFICOS_POST && window.GRAFICOS_POST[e.grafico]) window.limpiarGraf = window.GRAFICOS_POST[e.grafico]();
+      void el.graf.offsetWidth;
+      el.graf.classList.add('on');
+      listo(tok);
+      return;
+    }
+
     if (e.tipo === 'hero') {
       el.dev.hidden = true;
       el.card.hidden = true;
@@ -248,5 +271,7 @@
   });
 
   marcarPausa();
-  ir(desdeHash());
+  /* Con splash, la primera escena arranca cuando se va, para no perder su tiempo detrás. */
+  if (document.documentElement.classList.contains('sp-on')) window.addEventListener('splash-fin', function () { ir(desdeHash()); }, { once: true });
+  else ir(desdeHash());
 })();
