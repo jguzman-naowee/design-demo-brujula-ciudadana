@@ -1,0 +1,47 @@
+/* Vista dedicada del mapa (mapa.html): barra, opciones y el mapa ocupando el resto de la pantalla. */
+body.mv{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#fff}
+
+/* Barra superior */
+.mv-nav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:0 20px;border-bottom:1px solid var(--lp-line);background:#fff}
+.mv-marca img{height:34px;display:block}
+.mv-sep{width:1px;height:28px;background:var(--lp-line)}
+.mv-izq,.mv-der{display:flex;align-items:center;gap:16px}
+.mv-der{gap:28px}
+.mv-tit{display:flex;flex-direction:column-reverse;align-items:flex-end;gap:2px;margin:0;font-size:22px;line-height:1.1;white-space:nowrap}
+.mv-tit__l{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--lp-mut)}
+.mv-links{display:flex;align-items:center;gap:14px}
+.mv-links a:not(.lp-btn){color:var(--lp-ink);text-decoration:none;font-size:16px;font-weight:500;white-space:nowrap}
+.mv-links a:not(.lp-btn):hover{text-decoration:underline}
+
+/* Opciones: cifras, conmutador y chips */
+.mv-opc{flex:none;padding:12px 20px 0;border-bottom:1px solid var(--lp-line);background:var(--lp-bg)}
+.mv-opc__fila{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.mv-cifras{margin:0;font-size:16px;color:var(--lp-mut)}
+.mv-cifras b{color:var(--lp-ink)}
+.mv-volver{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--lp-line);background:#fff;color:var(--lp-ink)}
+.mv-volver:hover{border-color:var(--lp-ink)}
+.mv-volver svg{width:20px;height:20px}
+.mv .lp-conm{background:#fff;margin-left:auto}
+.mv .lp-conm button{min-height:40px}
+.mv #mapa .mv-chips{max-width:none;margin:10px 0 0;padding-bottom:12px}
+
+/* Cuerpo: el mapa toma todo lo que queda */
+.mv-cuerpo{flex:1;min-height:0;position:relative}
+.mv-vista{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) 320px}
+.mv-vista[hidden],.mv-tarjetas[hidden]{display:none}
+.mv-lienzo{min-height:0!important;height:100%;border:0;border-radius:0}
+.mv-lista{max-height:none!important;height:100%;border-radius:0;border-left:1px solid var(--lp-line);background:var(--lp-bg)}
+.mv-leyenda{position:absolute;right:12px;bottom:34px;z-index:500;display:flex;gap:14px;background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;color:var(--lp-mut);box-shadow:0 1px 6px rgba(22,23,43,.18)}
+.mv-leyenda i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.mv-tarjetas{position:absolute;inset:0;overflow:auto;padding:24px 20px 40px;background:var(--lp-bg)}
+.mv-tarjetas .lp-tarjetas{max-width:1320px;margin:0 auto;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+
+@media(max-width:900px){
+  .mv-sep,.mv-links a:not(.lp-btn){display:none}
+  .mv-tit{font-size:18px}
+  .mv-tit__l{display:none}
+  .mv-cifras{display:none}
+  .mv-vista{grid-template-columns:minmax(0,1fr)}
+  .mv-lista{display:none}
+  .mv-leyenda{display:none}
+}

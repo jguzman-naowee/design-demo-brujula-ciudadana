@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mapa de recursos · Brújula Ciudadana</title>
+<meta name="description" content="Mapa y tarjetas de los recursos y actividades de las entidades del sur de Madrid. Presentación del concepto con datos de ejemplo.">
+<link rel="stylesheet" href="shared/base.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<link rel="stylesheet" href="shared/landing.css">
+<link rel="stylesheet" href="shared/mapa.css">
+</head>
+<body class="lp mv">
+<a class="lp-salto" href="#mapa">Saltar al mapa</a>
+
+<header class="mv-nav">
+  <div class="mv-izq">
+    <a class="mv-marca" href="index.html" aria-label="Brújula Ciudadana, volver a la presentación"><img src="shared/img/marca-brujula-horizontal.svg" alt="Brújula Ciudadana"></a>
+  </div>
+  <div class="mv-der">
+    <h1 class="mv-tit"><span class="mv-tit__l">Mapa de recursos</span>Sur de Madrid</h1>
+  </div>
+</header>
+
+<div class="mv-opc" id="mapa">
+  <div class="mv-opc__fila">
+    <a class="mv-volver" href="index.html" aria-label="Volver a la presentación" title="Volver a la presentación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></a>
+    <p class="mv-cifras"><b data-cifra="recursos">–</b> recursos · <b data-cifra="semana">–</b> actividades esta semana · <b data-cifra="entidades">–</b> entidades</p>
+    <div class="lp-conm" role="group" aria-label="Cómo verlo">
+      <button type="button" data-vista="mapa" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Mapa</button>
+      <button type="button" data-vista="tarjetas" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tarjetas</button>
+    </div>
+  </div>
+  <div class="lp-chips mv-chips" id="mapa-chips" role="group" aria-label="Filtrar por necesidad"></div>
+</div>
+
+<main class="mv-cuerpo">
+  <div id="vista-mapa" class="mv-vista">
+    <div class="lp-lienzo mv-lienzo">
+      <div id="mapa-lienzo" role="region" aria-label="Mapa de recursos del sur de Madrid. La vista de tarjetas muestra la misma información."></div>
+      <div class="lp-zona">Sur de Madrid <button type="button" id="mapa-todo">Ver toda la zona</button></div>
+      <p class="lp-aviso" id="mapa-aviso" hidden>Sin conexión no se ve el fondo del mapa. Los puntos y las tarjetas siguen disponibles.</p>
+      <div class="mv-leyenda">
+        <span><i style="background:var(--lp-acc)"></i>Entidades de la demo</span>
+        <span><i style="background:var(--lp-azul)"></i>De ejemplo</span>
+        <span><i style="background:var(--lp-ink)"></i>Varios juntos</span>
+      </div>
+    </div>
+    <aside class="lp-lista mv-lista" id="mapa-lista" aria-label="Recursos por barrio"></aside>
+  </div>
+
+  <div id="vista-tarjetas" class="mv-tarjetas" hidden>
+    <div class="lp-tarjetas" id="tarjetas"></div>
+    <div class="lp-vermas"><button type="button" class="lp-btn lp-btn--2" id="tarjetas-mas">Ver más</button></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="app/brujula/datos.js"></script>
+<script src="shared/mapa-ejemplo.js"></script>
+<script src="shared/landing.js"></script>
+</body>
+</html>

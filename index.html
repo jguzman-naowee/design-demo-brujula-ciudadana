@@ -3,82 +3,306 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Brújula Ciudadana · Concepto · Naowee</title>
+<title>Brújula Ciudadana · Ayuda y actividades cerca de ti</title>
+<meta name="description" content="Brújula Ciudadana reúne en un mapa los recursos y actividades de las entidades de tu ciudad, con tus datos bajo tu control.">
 <link rel="stylesheet" href="shared/base.css">
-<style>
-/* Fondo de la portada: la ilustración nace abajo y se desvanece hacia arriba hasta quedar transparente. */
-body{position:relative;min-height:100vh}
-body::before{content:"";position:absolute;inset:auto 0 0 0;height:min(55vh,520px);z-index:0;pointer-events:none;background:url(shared/img/fondo-personas.jpg) center bottom/cover no-repeat;opacity:.06;-webkit-mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.75) 35%,transparent 100%);mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.75) 35%,transparent 100%)}
-main{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:clamp(24px,6vw,64px) 16px}
-.marca{margin:0 0 6px;text-align:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FF7500}
-h1{text-align:center;font-size:clamp(26px,4vw,38px);margin:0 0 8px;text-shadow:0 0 14px #F4F4F9,0 0 6px #F4F4F9}
-p.lead{text-align:center;color:var(--mut);margin:0 auto 32px;max-width:52ch;text-shadow:0 0 12px #F4F4F9,0 0 6px #F4F4F9}
-.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:14px}
-.opt{display:flex;flex-direction:column;gap:10px;padding:22px;border:1.5px solid var(--line);border-radius:var(--r);background:#fff;color:inherit;text-decoration:none;min-height:230px}
-.opt:hover{border-color:var(--v);box-shadow:0 8px 28px rgba(74,42,128,.14)}
-.opt svg{width:40px;height:40px;color:var(--v)}
-.opt h2{margin:0;font-size:20px}
-.opt p{margin:0;color:var(--mut);font-size:14px}
-.opt ul{margin:0;padding-left:18px;color:var(--ink);font-size:13.5px}
-.opt .tag{margin-top:auto;align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:4px 10px;background:var(--bg);color:var(--ink)}
-.opt .tag.w{color:#A34700;background:#FFE8D2}
-.tour{display:flex;align-items:center;gap:18px;margin:24px 0 14px;padding:18px 22px;border-radius:var(--r);background:#16172B;color:#fff;text-decoration:none;border:1.5px solid #16172B;position:relative;overflow:hidden}
-.tour::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#FF7500}
-.tour:hover{box-shadow:0 8px 28px rgba(22,23,43,.35);border-color:#FF7500}
-.tour:focus-visible{outline:3px solid #FF7500;outline-offset:3px}
-.tour .play{flex:none;width:52px;height:52px;border-radius:50%;background:#FF7500;color:#16172B;display:grid;place-items:center}
-.tour .play svg{width:24px;height:24px;margin-left:3px}
-.tour .txt{flex:1;min-width:0}
-.tour .kick{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#FF7500;margin-bottom:4px}
-.tour h2{margin:0 0 2px;font-size:20px}
-.tour p{margin:0;font-size:14px;color:#D9DAE8}
-@media(max-width:520px){.tour{align-items:flex-start;padding:16px 16px 16px 20px;gap:14px}.tour .play{width:44px;height:44px}}
-.pie{text-align:center;margin-top:28px;font-size:13px;color:var(--mut)}
-</style>
+<link rel="stylesheet" href="shared/splash.css">
+<script src="shared/splash.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<link rel="stylesheet" href="shared/landing.css">
+<link rel="stylesheet" href="shared/landing-anim.css">
+<link rel="stylesheet" href="shared/landing-recurso.css">
 </head>
-<body>
-<main>
-  <img src="shared/logos/naowee.svg" alt="Naowee" width="190" height="36" style="display:block;margin:0 auto 32px">
-  <p class="marca">Brújula Ciudadana</p>
-  <h1>¿En qué programa estoy?</h1>
-  <p class="lead"><b>Brújula Ciudadana</b> reúne los programas de distintas entidades para que cada persona sepa qué ayuda le corresponde.</p>
-  <div class="opts">
-    <a class="opt" href="demo/?app=red" id="rol-red">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.8 7.2 6.3 15.8M13.2 7.2l4.5 8.6M7.5 18h9"/></svg>
-      <h2>Red de entidades</h2>
-      <p>Ve cómo trabajan las entidades de la red y comunica a nombre de la red o de una entidad.</p>
-      <span class="tag">Solo agregados</span>
-    </a>
-    <a class="opt" href="demo/?app=alta-entidad" id="rol-alta">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15h6"/></svg>
-      <h2>Registro de entidad</h2>
-      <p>Da de alta una entidad en la red con los recursos que ofrece.</p>
-      <span class="tag w">Admin Only</span>
-    </a>
-    <a class="opt" href="demo/?app=entidad" id="rol-entidad">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>
-      <h2>Entidad</h2>
-      <p>Gestiona tus recursos, recibe personas y responde sus solicitudes.</p>
-      <span class="tag">Solo la entidad lo ve</span>
-    </a>
-    <a class="opt" href="demo/?app=conector&sup=movil" id="rol-conector">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a3 3 0 0 0-4.2 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5 5 0 0 1 6 0l.8.6"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></svg>
-      <h2>Conector</h2>
-      <p>Acompaña a las personas, completa su Mapa de Vida y derívalas a recursos.</p>
-      <span class="tag">Flujo asistido</span>
-    </a>
-    <a class="opt" href="demo/?app=ciudadano" id="rol-ciudadano">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
-      <h2>Ciudadano</h2>
-      <p>Regístrate, sigue tus recursos y mira quién consultó tus datos.</p>
-      <span class="tag w">Flujo autónomo</span>
+<body class="lp">
+<a class="lp-salto" href="#contenido">Saltar al contenido</a>
+
+<p class="lp-pres"><b>Presentación del concepto.</b> Todavía no está abierta al producción.</p>
+
+<header class="lp-top">
+  <div class="lp-w">
+    <a href="#inicio" aria-label="Brújula Ciudadana, inicio"><img src="shared/img/marca-brujula-horizontal.svg" alt="Brújula Ciudadana"></a>
+    <nav class="lp-nav" aria-label="Secciones">
+      <a href="#inicio">Inicio</a>
+      <a href="#como">Cómo funciona</a>
+      <a href="#seguridad">Seguridad</a>
+      <a href="#entidades">Entidades</a>
+      <a href="mapa.html">Recursos</a>
+    </nav>
+    <a class="lp-btn lp-btn--s" href="#demo">Ver la demo</a>
+    <a class="lp-btn lp-btn--s lp-btn--2 lp-btn--ico" href="tour/index.html" aria-label="Ver el recorrido guiado" title="Ver el recorrido guiado"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></a>
+  </div>
+</header>
+
+<main id="contenido">
+
+<!-- 1 · Inicio -->
+<section class="lp-hero" id="inicio">
+  <div class="lp-w">
+    <div>
+      <p class="lp-kick">Propuesta para tu ciudad</p>
+      <h1>Ayuda y actividades <span>cerca de cada persona</span></h1>
+      <p class="lp-lead">Brújula Ciudadana reunirá en un mapa los recursos de las entidades de cada barrio, siempre al día. La persona se registra una vez y alguien la acompaña.</p>
+      <div class="lp-cta">
+        <a class="lp-btn" href="mapa.html">Ver el mapa</a>
+      </div>
+      <ul class="lp-conf">
+        <li>Gratuito para la ciudadanía</li>
+        <li>Los datos, bajo control de cada persona</li>
+        <li>Con las entidades del barrio</li>
+      </ul>
+    </div>
+    <div class="lp-mos">
+      <img src="shared/img/landing/p33714873.jpg" alt="Vecinas conversando en un taller de barrio">
+      <img src="shared/img/landing/p6647016.jpg" alt="Un hombre entrega alimentos sonriendo">
+      <img src="shared/img/landing/p11674389.jpg" alt="Personas mayores en una clase de gimnasia">
+      <div class="lp-flot lp-flot--1"><i></i><span><b data-cifra="semana">–</b><br>actividades esta semana</span></div>
+      <div class="lp-flot lp-flot--2"><span><b data-cifra="entidades">–</b><br>entidades cerca</span></div>
+    </div>
+  </div>
+  <div class="lp-franja lp-franja--f">
+    <div class="lp-w" aria-label="Lo que ofrece Brújula Ciudadana">
+      <div><i class="lp-fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg></i><b>Encuentra</b><span>Todo lo que ofrecen las entidades de tu barrio, en un solo mapa y siempre al día.</span></div>
+      <div><i class="lp-fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></i><b>Recursos con fecha</b><span>Cada recurso es una actividad: cuándo es, cuántas plazas hay y quién va.</span></div>
+      <div><i class="lp-fi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 5a3.5 3.5 0 0 1 0 6.5M18 14c2.5.5 3.5 2.5 3.5 6"/></svg></i><b>Para cada persona</b><span>Se registra una sola vez, se apunta con su familia y un conector la acompaña.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Mapa y tarjetas -->
+<section class="lp-sec lp-sec--b" id="mapa">
+  <div class="lp-w">
+    <div class="lp-mapa-h">
+      <div>
+        <p class="lp-kick">Mapa de recursos</p>
+        <h2>Lo que hay cerca, y cuándo</h2>
+        <p class="lp-sub">Mapa de un distrito: talleres, comedores, asesorías, grupos de apoyo.</p>
+      </div>
+      <a class="lp-btn lp-btn--s lp-ampliar" href="mapa.html" title="Abrir el mapa completo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Ver más detalles</a>
+    </div>
+    <div class="lp-chips-wrap">
+      <div class="lp-chips" id="mapa-chips" role="group" aria-label="Filtrar por necesidad"></div>
+    <div class="lp-conm" role="group" aria-label="Cómo verlo">
+      <button type="button" data-vista="mapa" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Mapa</button>
+      <button type="button" data-vista="tarjetas" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tarjetas</button>
+    </div>
+    </div>
+
+    <div id="vista-mapa">
+      <div class="lp-mapa">
+        <div class="lp-lienzo">
+          <div id="mapa-lienzo" role="region" aria-label="Mapa de recursos del sur de Madrid. La vista de tarjetas muestra la misma información."></div>
+          <div class="lp-zona">Sur de Madrid <button type="button" id="mapa-todo">Ver toda la zona</button></div>
+          <p class="lp-aviso" id="mapa-aviso" hidden>Sin conexión no se ve el fondo del mapa. Los puntos y las tarjetas siguen disponibles.</p>
+        </div>
+        <aside class="lp-lista" id="mapa-lista" aria-label="Recursos por barrio"></aside>
+      </div>
+    </div>
+
+    <div id="vista-tarjetas" hidden>
+      <div class="lp-tarjetas" id="tarjetas"></div>
+      <div class="lp-vermas"><a class="lp-btn" href="mapa.html?vista=tarjetas">Ver más</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Cómo funciona -->
+<section class="lp-sec" id="como">
+  <div class="lp-w">
+    <p class="lp-kick">Cómo funciona</p>
+    <h2>Tres pasos, sin papeleo repetido</h2>
+    <p class="lp-sub">Así será el camino de una persona. Cada paso se puede probar en la demostración.</p>
+    <div class="lp-grid lp-g3">
+      <div class="lp-paso"><div class="lp-paso__f"><div class="lp-paso__i"><img src="shared/img/landing/p7821682.jpg" alt="" loading="lazy"></div><span>1</span></div><div class="lp-paso__b"><h3>Cuenta su situación</h3><p>Se registra una sola vez, desde el teléfono, con pocas preguntas.</p><small>Unos 5 minutos</small></div></div>
+      <div class="lp-paso"><div class="lp-paso__f"><div class="lp-paso__i"><img src="shared/img/landing/p18429308.jpg" alt="" loading="lazy"></div><span>2</span></div><div class="lp-paso__b"><h3>Alguien la acompaña</h3><p>Un conector cercano la llama, la orienta y le propone recursos.</p><small>Entre 24 horas y 5 días hábiles</small></div></div>
+      <div class="lp-paso"><div class="lp-paso__f"><div class="lp-paso__i"><img src="shared/img/landing/p12085633.jpg" alt="" loading="lazy"></div><span>3</span></div><div class="lp-paso__b"><h3>Participa, con su agenda</h3><p>Sabe a qué está apuntada, cuándo le toca y puede ir con su familia.</p><small>Todo en un mismo lugar</small></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3b · Cómo funciona un recurso -->
+<section class="lp-sec lr" id="recursos">
+  <div class="lp-w">
+    <p class="lp-kick">Cómo funciona un recurso</p>
+    <h2>Cada recurso es una actividad con fecha</h2>
+    <p class="lp-sub">Un taller, un comedor o una asesoría funcionan igual: tienen cuándo, cuántas plazas y quién va. Así lo vería una persona en su teléfono.</p>
+    <div class="lr-grid">
+      <div>
+        <ol class="lr-pasos">
+          <li><button type="button" class="lr-paso" data-bl="cuando" aria-pressed="true"><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><h3>Ocurre en el tiempo</h3><p>Cada recurso dice cuándo pasa, de una de cuatro formas:</p><span class="lr-formas"><span>Un día <small>feria</small></span><span>Cada semana <small>comedor</small></span><span>Por sesiones <small>taller</small></span><span>Estancia <small>albergue</small></span></span></button></li>
+          <li><button type="button" class="lr-paso" data-bl="plazas" aria-pressed="false"><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 5a3.5 3.5 0 0 1 0 6.5M18 14c2.5.5 3.5 2.5 3.5 6"/></svg></span><h3>Plazas, también para la familia</h3><p>La persona puede ir con su familia. Cada acompañante ocupa su plaza y su ficha la verifica la entidad que la atiende.</p></button></li>
+          <li><button type="button" class="lr-paso" data-bl="voy" aria-pressed="false"><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3>Confirma que va, con tiempo</h3><p>Antes de cada fecha dice «Voy» o «No voy». Si no confirma a tiempo, su plaza de ese día pasa a quien espera.</p></button></li>
+          <li><button type="button" class="lr-paso" data-bl="uso" aria-pressed="false"><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15v-3M12 15V8M16 15v-5"/></svg></span><h3>Se ve el uso real</h3><p>La entidad pasa lista y cada persona ve cuánto lleva: «usó 3 de 12».</p></button></li>
+        </ol>
+      </div>
+      <div>
+        <div class="lr-tel" aria-label="Ejemplo de un recurso en el teléfono de una persona" role="img">
+          <div class="lr-tel__top"><i></i></div>
+          <div class="lr-pant" tabindex="0">
+            <div class="lr-foto"><img src="shared/img/landing/p33714886.jpg" alt=""><span>Formación</span></div>
+            <div class="lr-cab"><b>Taller de cocina intercultural</b><small>Asociación Puentes · Usera</small></div>
+            <div class="lr-bl" data-bl="cuando"><h4>Cuándo</h4><div class="lr-fil"><span>Sábados · 11:00 · 4 sesiones</span></div><div class="lr-chips"><em class="on">Sáb 21 nov</em><em>Sáb 28</em><em>Sáb 5 dic</em><em>Sáb 12</em></div></div>
+            <div class="lr-bl" data-bl="plazas"><h4>Plazas</h4><div class="lr-fil"><span><b>9 de 12</b> ocupadas</span><div class="lr-av"><span style="background:#D74009">YH</span><span style="background:#0E7C7B">AH</span></div></div><div class="lr-barra"><i style="width:75%"></i></div><small class="lr-plazo">Vas con Amira (hija): ocupan 2 plazas</small></div>
+            <div class="lr-bl" data-bl="voy"><h4>Próxima fecha · Sáb 21 nov</h4><div class="lr-voy"><b>✓ Voy</b><span>No voy</span></div><small class="lr-plazo">Confirma antes del viernes a las 11:00</small></div>
+            <div class="lr-bl" data-bl="uso"><h4>Tu uso</h4><div class="lr-fil"><span><b>Usó 3 de 12</b></span><small>Último: Sáb 14 nov</small></div><div class="lr-barra lr-barra--v"><i style="width:25%"></i></div></div>
+          </div>
+        </div>
+        <p class="lr-nota">Ejemplo con datos ficticios</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3b · Comunicados -->
+<section class="lp-sec lc" id="comunicados">
+  <div class="lp-w lc-grid">
+    <div>
+      <p class="lp-kick">Comunicados</p>
+      <h2>La entidad avisa, y todo queda registrado</h2>
+      <p class="lp-sub">Un cambio de hora o una cancelación llega como aviso a quienes van, por la aplicación y por correo.</p>
+      <ul class="lc-lista">
+        <li><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></span><div><h3>Aviso de una fecha</h3><p>Sale directo a quienes están apuntados a ese recurso.</p></div></li>
+        <li><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></span><div><h3>Comunicado de la entidad</h3><p>Los del conector los aprueba la coordinación antes de salir.</p></div></li>
+      </ul>
+    </div>
+    <div class="lc-escena" role="img" aria-label="Ejemplo de un aviso principal y dos mensajes más llegando al teléfono de una persona">
+      <div class="lc-msg lc-msg--p">
+        <div class="lc-msg__h"><i>!</i><span>Aviso · Taller de cocina</span><em>ahora</em></div>
+        <b>Cambio de hora · Sáb 21</b>
+        <p>Empieza a las 12:00. Asociación Puentes.</p>
+        <div class="lc-canales"><span>App</span><span>Correo</span></div>
+      </div>
+      <div class="lc-msg lc-msg--f lc-msg--a">
+        <div class="lc-msg__h"><i>i</i><span>Comunicado</span></div>
+        <b>Trae delantal a la primera sesión</b>
+      </div>
+      <div class="lc-msg lc-msg--f lc-msg--b">
+        <div class="lc-msg__h"><i class="ok">✓</i><span>Entregado</span></div>
+        <b>9 personas lo recibieron</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Seguridad -->
+<section class="lp-sec lp-sec--b" id="seguridad">
+  <div class="lp-w lp-seg">
+    <div class="lp-tel"><img src="shared/img/landing/priv.png" alt="Pantalla de Privacidad de la aplicación: el interruptor para compartir el itinerario y la lista de quién vio tus datos" loading="lazy"></div>
+    <div>
+      <p class="lp-kick">Seguridad y datos</p>
+      <h2>Los datos son de cada persona</h2>
+      <p class="lp-sub">La persona elige qué permite y ve quién consultó sus datos.</p>
+      <div class="lp-gar">
+        <div><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg></span><h3>Decide qué se comparte</h3><p>Compartir con otras entidades es opcional y se puede retirar.</p></div>
+        <div><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span><h3>Ve quién miró sus datos</h3><p>Cada consulta queda registrada con nombre, fecha y motivo.</p></div>
+        <div><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><h3>Cada entidad ve lo justo</h3><p>Solo lo necesario para decidir una solicitud, nunca todo el expediente.</p></div>
+        <div><span class="lp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span><h3>Protección reforzada</h3><p>Quien está en riesgo no recibe envíos masivos ni aparece en listas.</p></div>
+      </div>
+      <p class="lp-dni"><b>¿Y el documento de identidad?</b> Servirá para comprobar la identidad y no abrir dos expedientes a la misma persona. Quien lo tenga en trámite o no lo tenga podrá empezar igual.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Participación -->
+<section class="lp-sec" id="participacion">
+  <div class="lp-w">
+    <p class="lp-kick">Participación</p>
+    <h2>Una ciudad donde hay sitio para todos</h2>
+    <p class="lp-sub">No es solo recibir ayuda: es encontrar dónde participar. Toca una línea para ver los recursos de ejemplo.</p>
+    <div class="lp-grid lp-g3" id="lineas"></div>
+  </div>
+</section>
+
+<!-- 6 · Entidades -->
+<section class="lp-sec lp-sec--b" id="entidades">
+  <div class="lp-w lp-ent">
+    <div class="lp-ent__f">
+      <img src="shared/img/landing/p6995213.jpg" alt="Una persona prepara donaciones en el local de una entidad" loading="lazy">
+      <div class="lp-flot"><span><b data-cifra="entidades">–</b><br>entidades en el ejemplo</span></div>
+    </div>
+    <div>
+      <p class="lp-kick">Para entidades</p>
+      <h2>Cada entidad suma al mapa</h2>
+      <p class="lp-sub">Asociaciones, fundaciones y servicios municipales publicarán lo que ofrecen en un mismo lugar, y la información dejará de estar repartida en fuentes incompletas.</p>
+      <ul class="lp-lista-ok">
+        <li><span><b>Publica una vez.</b> Cada recurso con su fecha, sus plazas y cómo se accede.</span></li>
+        <li><span><b>Llega a quien lo necesita.</b> La encuentran por necesidad y por barrio.</span></li>
+        <li><span><b>Ve el uso real.</b> Quién se apuntó, quién vino y cuántas plazas quedan.</span></li>
+        <li><span><b>Avisa sin esfuerzo.</b> Cambios de hora y comunicados, por correo y en la aplicación.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · Visión -->
+<section class="lp-vision" id="vision">
+  <div class="lp-w">
+    <p class="lp-kick">La idea de fondo</p>
+    <h2>Ciudadanía, entidades y ayuntamiento, conectados</h2>
+    <p>Una red local donde cada parte aporta lo suyo: la ciudadanía participa, las entidades publican lo que hacen y el ayuntamiento ve, en conjunto y sin datos personales, cómo se usa lo que la ciudad ofrece.</p>
+  </div>
+</section>
+
+<!-- 8 · Prueba la demo -->
+<section class="lp-sec" id="demo">
+  <div class="lp-w">
+    <p class="lp-kick">Demostración</p>
+    <h2>Lo que ya se puede probar</h2>
+    <p class="lp-sub">La demostración es la parte que hoy funciona. Cada rol abre la suya, con datos de ejemplo. Lo que registras como Ciudadano o Conector aparece después en la Entidad.</p>
+    <div class="lp-roles">
+      <a class="lp-rol" href="demo/?app=ciudadano" id="rol-ciudadano">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+        <h3>Ciudadano</h3>
+        <p>Regístrate, sigue tu agenda y mira quién ve tus datos.</p>
+        <span class="tag w">Flujo autónomo</span>
+      </a>
+      <a class="lp-rol" href="demo/?app=conector&sup=movil" id="rol-conector">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a3 3 0 0 0-4.2 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5 5 0 0 1 6 0l.8.6"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></svg>
+        <h3>Conector</h3>
+        <p>Acompaña a las personas, completa su Mapa de Vida y derívalas a recursos.</p>
+        <span class="tag">Flujo asistido</span>
+      </a>
+      <a class="lp-rol" href="demo/?app=entidad" id="rol-entidad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>
+        <h3>Entidad</h3>
+        <p>Gestiona tus recursos, recibe personas y responde sus solicitudes.</p>
+        <span class="tag">Solo la entidad lo ve</span>
+      </a>
+      <a class="lp-rol" href="demo/?app=alta-entidad" id="rol-alta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15h6"/></svg>
+        <h3>Registro de entidad</h3>
+        <p>Da de alta una entidad en la red con los recursos que ofrece.</p>
+        <span class="tag w">Solo administración</span>
+      </a>
+      <a class="lp-rol" href="demo/?app=red" id="rol-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M10.8 7.2 6.3 15.8M13.2 7.2l4.5 8.6M7.5 18h9"/></svg>
+        <h3>Red de entidades</h3>
+        <p>Ve cómo trabajan las entidades de la red y comunica a nombre de la red o de una entidad.</p>
+        <span class="tag">Solo agregados</span>
+      </a>
+    </div>
+    <a class="lp-tour" id="recorrido" href="tour/index.html">
+      <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></span>
+      <span><h3>Ver el recorrido</h3><p>Menos de tres minutos para entender cómo se conectan las personas, los conectores y las entidades.</p></span>
     </a>
   </div>
-  <a class="tour" id="recorrido" href="tour/index.html">
-    <span class="play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg></span>
-    <span class="txt"><span class="kick">Recorrido guiado</span><h2>Ver el recorrido</h2><p>Dos minutos para entender cómo se conectan las personas, los conectores y las entidades</p></span>
-  </a>
-  <p class="pie">Para ver cómo se conectan: registra a alguien como Ciudadano o Conector y después entra como Entidad, sin restablecer los datos.</p>
+</section>
+
 </main>
+
+<footer class="lp-pie">
+  <div class="lp-w">
+    <span>Brújula Ciudadana · Concepto de demostración con datos de ejemplo. Fotografías: Pexels.</span>
+    <img src="shared/logos/naowee.svg" alt="Naowee">
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="app/brujula/datos.js"></script>
+<script src="shared/mapa-ejemplo.js"></script>
+<script src="shared/landing.js"></script>
+<script src="shared/landing-recurso.js"></script>
+<script src="shared/landing-anim.js"></script>
 </body>
 </html>

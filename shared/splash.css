@@ -1,0 +1,52 @@
+/* Splash de entrada de la landing: se muestra siempre al cargar y se va solo (o con un toque).
+   html.sp-on lo pone splash.js desde el <head> para que la página no asome antes. */
+html.sp-on{overflow:hidden}
+html.sp-on::before{content:"";position:fixed;inset:0;z-index:9998;background:#16172B}
+.sp{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 46%,#2A2350 0,#16172B 62%);color:#F4F4F9;cursor:pointer;overflow:hidden;font-family:"Google Sans",system-ui,sans-serif}
+.sp-in{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;padding:24px}
+
+/* Ondas que salen de la brújula */
+.sp-ondas{position:absolute;left:50%;top:50%;width:0;height:0}
+.sp-ondas i{position:absolute;left:-90px;top:-150px;width:180px;height:180px;border-radius:50%;border:2px solid #F49A2D;opacity:0;animation:sp-onda 2.4s ease-out infinite}
+.sp-ondas i:nth-child(2){animation-delay:.8s}.sp-ondas i:nth-child(3){animation-delay:1.6s}
+
+/* Brújula: los arcos se dibujan y la aguja gira hasta su norte */
+.sp-marca{width:150px;height:150px;overflow:visible}
+.sp-arco{stroke-dasharray:240;stroke-dashoffset:240;animation:sp-traza .9s cubic-bezier(.6,.1,.2,1) forwards}
+.sp-arco--2{animation-delay:.18s}
+.sp-aguja{transform-origin:100px 100px;transform:rotate(-320deg) scale(.4);opacity:0;animation:sp-aguja 1.3s cubic-bezier(.2,.9,.3,1.25) .45s forwards}
+.sp-palabra{width:min(300px,64vw);height:auto;opacity:0;transform:translateY(16px);animation:sp-sube .7s cubic-bezier(.2,.7,.2,1) 1.05s forwards}
+.sp-lema{margin:0;font-size:clamp(17px,2.2vw,22px);color:#D5D6E4;opacity:0;transform:translateY(12px);animation:sp-sube .7s cubic-bezier(.2,.7,.2,1) 1.35s forwards}
+.sp-lema b{color:#FF9A5C;font-weight:600}
+.sp-pres{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FF9A5C;border:1px solid #FF9A5C55;border-radius:999px;padding:5px 12px;opacity:0;animation:sp-fade .6s ease 1.6s forwards}
+.sp-barra{position:absolute;left:50%;bottom:48px;width:140px;height:3px;margin-left:-70px;border-radius:3px;background:#ffffff1f;overflow:hidden}
+.sp-barra i{display:block;height:100%;width:0;background:#FF9A5C;animation:sp-llena var(--sp-dur,3s) linear forwards}
+.sp-saltar{position:absolute;right:20px;top:18px;background:none;border:1px solid #ffffff33;border-radius:999px;color:#F4F4F9;font:inherit;font-size:14px;padding:8px 14px;cursor:pointer;opacity:.75}
+.sp-saltar:hover,.sp-saltar:focus-visible{opacity:1;border-color:#FF9A5C;outline:none}
+
+/* Salida: la brújula se acerca y todo se desvanece hacia la página */
+.sp.sp-fuera{animation:sp-sale .7s cubic-bezier(.6,0,.3,1) forwards;pointer-events:none}
+.sp.sp-fuera .sp-in{animation:sp-zoom .7s cubic-bezier(.6,0,.3,1) forwards}
+
+@keyframes sp-traza{to{stroke-dashoffset:0}}
+@keyframes sp-aguja{0%{opacity:0;transform:rotate(-320deg) scale(.4)}35%{opacity:1}80%{transform:rotate(12deg) scale(1.04)}100%{opacity:1;transform:rotate(0) scale(1)}}
+@keyframes sp-sube{to{opacity:1;transform:none}}
+@keyframes sp-fade{to{opacity:1}}
+@keyframes sp-llena{to{width:100%}}
+@keyframes sp-onda{0%{opacity:0;transform:scale(.6)}20%{opacity:.5}100%{opacity:0;transform:scale(2.6)}}
+@keyframes sp-sale{to{opacity:0;visibility:hidden}}
+@keyframes sp-zoom{to{transform:scale(1.12);filter:blur(2px)}}
+
+@media(prefers-reduced-motion:reduce){
+  .sp *,.sp{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
+  .sp-ondas{display:none}
+}
+/* La entrada de la portada espera a que se vaya el splash. */
+html.sp-on .lp-hero *{animation-play-state:paused!important}
+/* Versión rápida (recorrido): la misma secuencia en la mitad de tiempo. */
+html.sp-rapido .sp-arco{animation-duration:.55s}
+html.sp-rapido .sp-arco--2{animation-delay:.1s}
+html.sp-rapido .sp-aguja{animation-duration:.8s;animation-delay:.2s}
+html.sp-rapido .sp-palabra{animation-delay:.5s}
+html.sp-rapido .sp-lema{animation-delay:.65s}
+html.sp-rapido .sp-pres{animation-delay:.8s}
